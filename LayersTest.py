@@ -17,7 +17,7 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
 
 tf.random.set_seed(1234)
 
-clouds = tf.random.normal([5000,3,32])
+clouds = tf.random.normal([32,5000,3])
 
 inputs = keras.Input(shape=(5000, 3))
 x = layers.Dense(64)(inputs)
@@ -54,7 +54,7 @@ x = layers.Reshape((3, 3))(x)
 x = layers.Dot(axes=(2, 1))([inputs, x])
 print(x)
 outputs = layers.Dense(25, activation="softmax")(x)
-model = keras.Model(inputs=inputs,outputs=outputs)
+model = keras.Model(inputs=inputs,outputs=x)
 model.summary()
 model.predict(clouds)
 
