@@ -9,16 +9,54 @@ cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basi
 #print(cloud_path_header)
 """
 
-#datafile = tf.keras.utils.get_file("AFBMData_NoChairs.csv")
+# Import the csv and convert to strings
 df = pd.read_csv("AFBMData_NoChairs.csv")
-df.head()
+df = df.astype('str')
 
-# Try this but with our csv file
-#x = dict(df)
-afbm_slice = tf.data.Dataset.from_tensor_slices(dict(df))
+# Seperates cloud paths to pandas series 
+file_paths = df.pop('cloudpath')
+
+# Removes non-necessary dataframe columns to leave just FBM labels
+df.pop('SysetID')
+df.pop('Name')
+df.pop('.obj paths')
+df.pop('fileid')
+df.pop('status')
+
+# Insert Sparse Matrix Encoding Function
+def Sparse_Matrix_Encoding(df):
+  # Get list/array/whatever of unique labels
+  # uniquelabels = pd.unique(df) # doesn't quite work. pd.concat() might work
+
+
+  # Encode all of the labels to the point cloud index as a length(dataframe) by length(uniquelabels) sparse matrix (1 or 0 only)
+  # Probably be a nested for loop
+
+  # Placeholder! Remove later
+  sparse_matrix = df
+  return sparse_matrix
+
+BATCH_SIZE = 64
+# Slice file paths and labels to tf.data.Dataset
+file_slices = tf.data.Dataset.from_tensor_slices(file_paths).batch(BATCH_SIZE)
+label_slices = tf.data.Dataset.from_tensor_slices(dict(df)).batch(BATCH_SIZE)
+
+# How do we get the point clouds into tf.data.Dataset without overflowing memory? 
+# Check tf / Keras docs
 
 """
 for feature_batch in data_slice.take(1):
   for key, value in feature_batch.items():
     print("  {!r:20s}: {}".format(key, value))
 """
+
+"""inputs = {}
+
+for name, column in titanic_features.items():
+  dtype = column.dtype
+  if dtype == object:
+    dtype = tf.string
+  else:
+    dtype = tf.float32
+
+  inputs[name] = tf.keras.Input(shape=(1,), name=name, dtype=dtype)"""
