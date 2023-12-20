@@ -31,6 +31,22 @@ def Sparse_Matrix_Encoding(df):
 
   # Encode all of the labels to the point cloud index as a length(dataframe) by length(uniquelabels) sparse matrix (1 or 0 only)
   # Probably be a nested for loop
+  # Matlab method 
+  """
+      encodedLabel = zeros(numClouds,numLabels);
+      i=1; j=1; q=1;
+      for i = 1:numClouds
+          for j = 1:size(labels,2)
+              req_index = find(strcmp(string(all_labels), labels{i,j}));
+              if req_index
+                  if labels{i,j} == "na"
+                      encodedLabel(i, req_index) = 0;
+                  else
+                      encodedLabel(i, req_index) = 1;
+                  end
+              end
+          end
+      end"""
 
   # Placeholder! Remove later
   sparse_matrix = df
