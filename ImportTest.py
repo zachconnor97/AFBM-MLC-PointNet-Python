@@ -3,13 +3,7 @@ import pandas as pd
 import numpy as np
 import open3d
  
-"""
-data_file_path = 'test.csv'
-
-cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
-#print(cloud_path_header)
-"""
-username = 'Zachariah Connor'
+username = 'Zachariah'
 cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
 # Import the csv and convert to strings
 df = pd.read_csv("AFBMData_NoChairs.csv")
@@ -35,13 +29,11 @@ def pc_read(path):
 def Sparse_Matrix_Encoding(df):
  
   # Get list/array/whatever of unique labels
-  # uniquelabels = pd.unique(df) # doesn't quite work. pd.concat() might work
   uniquelabels = df.stack().unique()
   uniquelabels.sort()
   uniquelabels = np.delete(uniquelabels,len(uniquelabels)-1,0)
-  #print(uniquelabels)
+  
   # Encode all of the labels to the point cloud index as a length(dataframe) by length(uniquelabels) sparse matrix (1 or 0 only)
-
   encodedLabel = np.zeros((len(df), len(uniquelabels)), dtype=int)
   # Loop through clouds and labels
   for i in range(len(df)):
@@ -73,34 +65,5 @@ train_data = tf.data.Dataset.from_tensor_slices(zata).batch(BATCH_SIZE)
 #for element in train_data:
 #    print(element)
 
-#file_slices = tf.data.Dataset.from_tensor_slices(file_paths).batch(BATCH_SIZE)
-#label_slices = tf.data.Dataset.from_tensor_slices(dict(sparse_matrix)).batch(BATCH_SIZE)
-
-# 
-#cloud1 = pc_read(file_paths.iloc[0])
-
+#cloud1 = pc_read(file_paths(0))
 #open3d.visualization.draw_geometries([cloud1])
-
-
-#np.savetxt('SpareTest.csv',sparse_matrix,delimiter=",",fmt="%1.0i")
-#print(sparse_matrix)
-# How do we get the point clouds into tf.data.Dataset without overflowing memory? 
-# Check tf / Keras docs
- 
-"""
-for feature_batch in data_slice.take(1):
-  for key, value in feature_batch.items():
-    print("  {!r:20s}: {}".format(key, value))
-"""
- 
-"""inputs = {}
- 
-for name, column in titanic_features.items():
-  dtype = column.dtype
-  if dtype == object:
-    dtype = tf.string
-  else:
-    dtype = tf.float32
- 
-  inputs[name] = tf.keras.Input(shape=(1,), name=name, dtype=dtype)"""
-
