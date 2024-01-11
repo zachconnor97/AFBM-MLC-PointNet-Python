@@ -1,6 +1,7 @@
 import tensorflow as tf
 import pandas as pd
 import numpy as np
+import open3d
  
 """
 data_file_path = 'test.csv'
@@ -15,7 +16,7 @@ df = df.astype('str')
  
 # Seperates cloud paths to pandas series 
 file_paths = df.pop('cloudpath')
- 
+print(file_paths)
 # Removes non-necessary dataframe columns to leave just FBM labels
 df.pop('SysetID')
 df.pop('Name')
@@ -23,8 +24,13 @@ df.pop('.obj paths')
 df.pop('fileid')
 df.pop('status')
  
-# Insert Sparse Matrix Encoding Function
- 
+# Point Cloud Read Function
+def pc_read(path):
+    path = '' + path
+    cloud = open3d.io.read_point_cloud(path)
+    return cloud
+
+# ISparse Matrix Encoding Function
 def Sparse_Matrix_Encoding(df):
  
   # Get list/array/whatever of unique labels
@@ -32,7 +38,7 @@ def Sparse_Matrix_Encoding(df):
   uniquelabels = df.stack().unique()
   uniquelabels.sort()
   uniquelabels = np.delete(uniquelabels,len(uniquelabels)-1,0)
-  print(uniquelabels)
+  #print(uniquelabels)
   # Encode all of the labels to the point cloud index as a length(dataframe) by length(uniquelabels) sparse matrix (1 or 0 only)
 
   encodedLabel = np.zeros((len(df), len(uniquelabels)), dtype=int)
@@ -51,11 +57,17 @@ def Sparse_Matrix_Encoding(df):
  
 BATCH_SIZE = 64
 # Slice file paths and labels to tf.data.Dataset
-file_slices = tf.data.Dataset.from_tensor_slices(file_paths).batch(BATCH_SIZE)
-label_slices = tf.data.Dataset.from_tensor_slices(dict(df)).batch(BATCH_SIZE)
-sparse_matrix = Sparse_Matrix_Encoding(df)
-np.savetxt('SpareTest.csv',sparse_matrix,delimiter=",",fmt="%1.0i")
-print(sparse_matrix)
+print(type(file_paths))
+#dataset = tf.data.TextLineDataset(file_paths.to_list())
+cloud1 = pc_read(file_paths.iloc[0])
+open3d.visualization.draw_geometries([cloud1])
+
+#print(dataset)
+#file_slices = tf.data.Dataset.from_tensor_slices(file_paths).batch(BATCH_SIZE)
+#label_slices = tf.data.Dataset.from_tensor_slices(dict(df)).batch(BATCH_SIZE)
+#sparse_matrix = Sparse_Matrix_Encoding(df)
+#np.savetxt('SpareTest.csv',sparse_matrix,delimiter=",",fmt="%1.0i")
+#print(sparse_matrix)
 # How do we get the point clouds into tf.data.Dataset without overflowing memory? 
 # Check tf / Keras docs
  
@@ -75,3 +87,4 @@ for name, column in titanic_features.items():
     dtype = tf.float32
  
   inputs[name] = tf.keras.Input(shape=(1,), name=name, dtype=dtype)"""
+
