@@ -5,11 +5,12 @@ import open3d
  
 """
 data_file_path = 'test.csv'
-username = 'connorz'
+
 cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
 #print(cloud_path_header)
 """
- 
+username = 'Zachariah Connor'
+cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
 # Import the csv and convert to strings
 df = pd.read_csv("AFBMData_NoChairs.csv")
 df = df.astype('str')
@@ -26,7 +27,7 @@ df.pop('status')
  
 # Point Cloud Read Function
 def pc_read(path):
-    path = '' + path
+    path = cloud_path_header + path
     cloud = open3d.io.read_point_cloud(path)
     return cloud
 
