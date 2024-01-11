@@ -17,7 +17,7 @@ df = df.astype('str')
  
 # Seperates cloud paths to pandas series 
 file_paths = df.pop('cloudpath')
-print(file_paths)
+#print(file_paths)
 # Removes non-necessary dataframe columns to leave just FBM labels
 df.pop('SysetID')
 df.pop('Name')
@@ -55,18 +55,26 @@ def Sparse_Matrix_Encoding(df):
                   encodedLabel[i, req_index] = 1
   sparse_matrix = encodedLabel
   return sparse_matrix
- 
+
+sparse_matrix = Sparse_Matrix_Encoding(df) 
 BATCH_SIZE = 64
 # Slice file paths and labels to tf.data.Dataset
-print(type(file_paths))
-#dataset = tf.data.TextLineDataset(file_paths.to_list())
-cloud1 = pc_read(file_paths.iloc[0])
-open3d.visualization.draw_geometries([cloud1])
+#print(type(file_paths))
+# np.asarray(file_paths)
+file_paths = np.asmatrix(file_paths)
+nfile_paths = file_paths.reshape((np.size(file_paths),1)) #file_paths[:,None]
+zata = np.concatenate((nfile_paths,sparse_matrix.astype(float)),axis=1)
+dataset = tf.data.Dataset.from_tensor_slices(zata) #.batch(BATCH_SIZE)
 
-#print(dataset)
 #file_slices = tf.data.Dataset.from_tensor_slices(file_paths).batch(BATCH_SIZE)
-#label_slices = tf.data.Dataset.from_tensor_slices(dict(df)).batch(BATCH_SIZE)
-#sparse_matrix = Sparse_Matrix_Encoding(df)
+#label_slices = tf.data.Dataset.from_tensor_slices(dict(sparse_matrix)).batch(BATCH_SIZE)
+
+# 
+#cloud1 = pc_read(file_paths.iloc[0])
+
+#open3d.visualization.draw_geometries([cloud1])
+
+
 #np.savetxt('SpareTest.csv',sparse_matrix,delimiter=",",fmt="%1.0i")
 #print(sparse_matrix)
 # How do we get the point clouds into tf.data.Dataset without overflowing memory? 
