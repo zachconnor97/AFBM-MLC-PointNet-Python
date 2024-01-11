@@ -62,9 +62,12 @@ BATCH_SIZE = 64
 #print(type(file_paths))
 # np.asarray(file_paths)
 file_paths = np.asmatrix(file_paths)
-nfile_paths = file_paths.reshape((np.size(file_paths),1)) #file_paths[:,None]
+nfile_paths = file_paths.reshape((np.size(file_paths),1)) 
 zata = np.concatenate((nfile_paths,sparse_matrix.astype(float)),axis=1)
-dataset = tf.data.Dataset.from_tensor_slices(zata) #.batch(BATCH_SIZE)
+train_data = tf.data.Dataset.from_tensor_slices(nfile_paths).batch(BATCH_SIZE)
+train_data.from_tensor_slices(sparse_matrix).batch(BATCH_SIZE)
+
+
 
 #file_slices = tf.data.Dataset.from_tensor_slices(file_paths).batch(BATCH_SIZE)
 #label_slices = tf.data.Dataset.from_tensor_slices(dict(sparse_matrix)).batch(BATCH_SIZE)
