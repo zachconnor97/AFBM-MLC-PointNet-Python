@@ -52,6 +52,7 @@ x = layers.Dense(
     )(x)
 
 x = layers.Reshape((3, 3))(x)
+
 x = layers.Dot(axes=(2, 1))([inputs, x])
 
 # MLP 1
@@ -95,8 +96,7 @@ x2 = layers.Dense(
     )(x2)
 
 x2 = layers.Reshape((64, 64))(x2)
-print(x)
-print(x2)
+
 x = layers.Dot(axes=(2, 1))([x, x2])
 
 # MLP 2
@@ -126,7 +126,8 @@ x = layers.Activation("relu")(x)
 
 x = layers.Dropout(0.3)(x)
 
-outputs = layers.Dense(25, activation="softmax")(x)
+outputs = layers.Dense(25, activation="sigmoid")(x)
+
 model = keras.Model(inputs=inputs,outputs=x)
 model.summary()
 model.predict(clouds)
