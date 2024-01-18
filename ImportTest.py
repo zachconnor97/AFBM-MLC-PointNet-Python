@@ -66,11 +66,17 @@ print(zata)
 #train_data = tf.data.Dataset.from_tensor_slices(nfile_paths).batch(BATCH_SIZE)
 train_data = tf.data.Dataset.from_tensor_slices(zata).batch(BATCH_SIZE)
 train_data.map(lambda name: tf.py_function(pc_read, [name], tf.int32))
- 
- 
+
+#split to training and validation sets
+val_data = train_data.map()
+train_data = train_data.map()
+
+#test that the read function is working as intended
+# Visualize ONE point cloud to verify this is working
+# Be careful with this forloop
 for element in train_data:
     print(element)
-    
+
 
 #cloud1 = pc_read(file_paths(0))
 #open3d.visualization.draw_geometries([cloud1])
