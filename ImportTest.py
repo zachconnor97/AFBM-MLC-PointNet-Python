@@ -68,7 +68,7 @@ train_data = tf.data.Dataset.from_tensor_slices(zata).batch(BATCH_SIZE)
 train_data.map(lambda name: tf.py_func(pc_read, [name], tf.int32))
 
 #for element in train_data:
-#    print(element)
+#    print(element)bjjl
 
 #cloud1 = pc_read(file_paths(0))
 #open3d.visualization.draw_geometries([cloud1])
