@@ -70,6 +70,7 @@ train_data.map(lambda name: tf.py_function(pc_read, [name], tf.int32))
  
 for element in train_data:
     print(element)
+    
 
 #cloud1 = pc_read(file_paths(0))
 #open3d.visualization.draw_geometries([cloud1])
