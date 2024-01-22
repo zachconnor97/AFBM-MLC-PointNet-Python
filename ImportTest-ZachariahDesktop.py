@@ -23,6 +23,7 @@ df.pop('status')
 def pc_read(path):
     path = cloud_path_header + path
     cloud = open3d.io.read_point_cloud(path)
+    cloud = np.asarray(cloud.points)
     return cloud
 
 # ISparse Matrix Encoding Function

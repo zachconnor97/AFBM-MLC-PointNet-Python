@@ -23,11 +23,16 @@ df.pop('status')
 def pc_read(path):
     path = path #cloud_path_header + 
     cloud = open3d.io.read_point_cloud(path)
+    """
+    open3d.visualization.draw_geometries([cloud])
+    cloud = cloud.voxel_down_sample(voxel_size=0.05)
+    open3d.visualization.draw_geometries([cloud])
+    """
+    cloud = np.asarray(cloud.points)
     return cloud
 
 cloud1 = pc_read("10155655850468db78d106ce0a280f871.ply")
 print(type(cloud1))
-open3d.visualization.draw_geometries([cloud1])
 
 # ISparse Matrix Encoding Function
 def Sparse_Matrix_Encoding(df):
@@ -59,14 +64,10 @@ BATCH_SIZE = 64
 # np.asarray(file_paths)
 file_paths = np.asmatrix(file_paths)
 nfile_paths = file_paths.reshape((np.size(file_paths),1)) 
-<<<<<<< Updated upstream
 nfile_paths = np.asarray(nfile_paths)
 sparse_matrix = np.asarray(sparse_matrix.astype('str'))
 zata = np.concatenate((nfile_paths,sparse_matrix),axis=1)
 print(zata)
-=======
-zata = np.concatenate((np.asarray(nfile_paths),np.asarray(sparse_matrix)),axis=1)
->>>>>>> Stashed changes
 
 # NUMPY list not good for tensorflow 
 # https://stackoverflow.com/questions/58636087/tensorflow-valueerror-failed-to-convert-a-numpy-array-to-a-tensor-unsupporte
