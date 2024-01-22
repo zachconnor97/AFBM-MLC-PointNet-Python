@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import open3d
  
-username = 'Zachariah'
+username = 'Zachariah Connor'
 cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
 # Import the csv and convert to strings
 df = pd.read_csv("AFBMData_NoChairs.csv")
@@ -21,7 +21,9 @@ df.pop('status')
  
 # Point Cloud Read Function
 def pc_read(path):
-    path = path #cloud_path_header + 
+    
+    path = path.numpy().astype('str')
+    path = cloud_path_header + path 
     cloud = open3d.io.read_point_cloud(path)
     """
     open3d.visualization.draw_geometries([cloud])
@@ -31,8 +33,8 @@ def pc_read(path):
     cloud = np.asarray(cloud.points)
     return cloud
 
-cloud1 = pc_read("10155655850468db78d106ce0a280f871.ply")
-print(type(cloud1))
+#cloud1 = pc_read("10155655850468db78d106ce0a280f871.ply")
+#print(type(cloud1))
 
 # ISparse Matrix Encoding Function
 def Sparse_Matrix_Encoding(df):
@@ -59,22 +61,19 @@ def Sparse_Matrix_Encoding(df):
 
 sparse_matrix = Sparse_Matrix_Encoding(df) 
 BATCH_SIZE = 64
+
 # Slice file paths and labels to tf.data.Dataset
-#print(type(file_paths))
-# np.asarray(file_paths)
 file_paths = np.asmatrix(file_paths)
 nfile_paths = file_paths.reshape((np.size(file_paths),1)) 
 nfile_paths = np.asarray(nfile_paths)
 sparse_matrix = np.asarray(sparse_matrix.astype('str'))
 zata = np.concatenate((nfile_paths,sparse_matrix),axis=1)
-print(zata)
 
 # NUMPY list not good for tensorflow 
 # https://stackoverflow.com/questions/58636087/tensorflow-valueerror-failed-to-convert-a-numpy-array-to-a-tensor-unsupporte
+train_data = tf.data.Dataset.from_tensor_slices(zata)
+train_data.map(pc_read)
 
-#train_data = tf.data.Dataset.from_tensor_slices(nfile_paths).batch(BATCH_SIZE)
-train_data = tf.data.Dataset.from_tensor_slices(zata).batch(BATCH_SIZE)
-train_data.map(lambda name: tf.py_function(pc_read, [name], tf.int32))
 
 #split to training and validation sets
 #val_data = train_data.map()
