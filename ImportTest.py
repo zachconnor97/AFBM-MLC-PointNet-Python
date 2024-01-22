@@ -59,10 +59,14 @@ BATCH_SIZE = 64
 # np.asarray(file_paths)
 file_paths = np.asmatrix(file_paths)
 nfile_paths = file_paths.reshape((np.size(file_paths),1)) 
+<<<<<<< Updated upstream
 nfile_paths = np.asarray(nfile_paths)
 sparse_matrix = np.asarray(sparse_matrix.astype('str'))
 zata = np.concatenate((nfile_paths,sparse_matrix),axis=1)
 print(zata)
+=======
+zata = np.concatenate((np.asarray(nfile_paths),np.asarray(sparse_matrix)),axis=1)
+>>>>>>> Stashed changes
 
 # NUMPY list not good for tensorflow 
 # https://stackoverflow.com/questions/58636087/tensorflow-valueerror-failed-to-convert-a-numpy-array-to-a-tensor-unsupporte
