@@ -23,6 +23,9 @@ df.pop('status')
 def pc_read(path):
     #input is a tensor object, needs to become a standard string
     #path = path.numpy().astype('str') #doesn't work
+    #path = path.numpy
+    print(type(path))
+    print(path)
     path = cloud_path_header + path 
     cloud = open3d.io.read_point_cloud(path)
     """
