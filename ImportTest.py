@@ -77,21 +77,26 @@ BATCH_SIZE = 64
 file_paths = np.asmatrix(file_paths)
 nfile_paths = file_paths.reshape((np.size(file_paths),1)) 
 nfile_paths = np.asarray(nfile_paths)
-print(type(nfile_paths.tolist()))
-print(type(sparse_matrix.tolist()))
 tfile_paths = tf.constant(nfile_paths.tolist())
 tsparse = tf.constant(sparse_matrix.tolist())
-print(type(tfile_paths))
-print(type(tsparse))
 fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
-fileset_new.map(lambda x: tf.py_function(pc_read, [x], [tf.float32]))
+fileset_new.map(lambda x: tf.py_function(func=pc_read, inp=[x], Tout=tf.float32))
 
 labelset = tf.data.Dataset.from_tensor_slices((tsparse))
 afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
 
-for element in afbm_dataset.as_numpy_iterator():
-    print(element[0])
-# dataset_new.zip(dataset_new, tsparse)
+data = afbm_dataset.take(1)
+points, labels = list(data)[0]
+print(points)
+print(labels)
+
+#points = points[:8, ...]
+#labels = labels[:8, ...]
+
+#for element in afbm_dataset.as_numpy_iterator():
+#    print(element[0])
+
+
 """
 sparse_matrix = np.asarray(sparse_matrix.astype('str'))
 zata = np.concatenate((nfile_paths,sparse_matrix),axis=1)
