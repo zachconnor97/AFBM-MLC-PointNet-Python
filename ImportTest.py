@@ -3,8 +3,9 @@ import pandas as pd
 import numpy as np
 import open3d
  
-username = 'Zachariah Connor'
+username = 'Zachariah'
 cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
+
 # Import the csv and convert to strings
 df = pd.read_csv("AFBMData_NoChairs.csv")
 df = df.astype('str')
@@ -20,7 +21,7 @@ df.pop('fileid')
 df.pop('status')
  
 # Point Cloud Read Function
-def pc_read(path,label):
+def pc_read(path):
     #input is a tensor object, needs to become a standard string
     #path = path.numpy().astype('str') #doesn't work
     #path = path.numpy
@@ -30,12 +31,12 @@ def pc_read(path,label):
     try:
         path.numpy()
     except:
-        path = 'Ruh Roh Raggy'
+        path = 'Ruh Roh Raggy.ply'
     finally:
         print(path)
         print(type(path))
-    path = cloud_path_header + path 
-    cloud = open3d.io.read_point_cloud(path)
+        path = cloud_path_header + path 
+        cloud = open3d.io.read_point_cloud(path)
     """
     open3d.visualization.draw_geometries([cloud])
     cloud = cloud.voxel_down_sample(voxel_size=0.05)
@@ -43,9 +44,6 @@ def pc_read(path,label):
     """
     cloud = np.asarray(cloud.points)
     return cloud
-
-#cloud1 = pc_read("10155655850468db78d106ce0a280f871.ply")
-#print(type(cloud1))
 
 # ISparse Matrix Encoding Function
 def Sparse_Matrix_Encoding(df):
@@ -80,7 +78,7 @@ nfile_paths = np.asarray(nfile_paths)
 tfile_paths = tf.constant(nfile_paths.tolist())
 tsparse = tf.constant(sparse_matrix.tolist())
 fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
-fileset_new.map(lambda x: tf.py_function(func=pc_read, inp=[x], Tout=tf.float32))
+fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float32)) # map(pc_read)
 
 labelset = tf.data.Dataset.from_tensor_slices((tsparse))
 afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
@@ -90,11 +88,13 @@ points, labels = list(data)[0]
 print(points)
 print(labels)
 
+
+
 #points = points[:8, ...]
 #labels = labels[:8, ...]
 
 #for element in afbm_dataset.as_numpy_iterator():
-#    print(element[0])
+#    print(element)
 
 
 """
