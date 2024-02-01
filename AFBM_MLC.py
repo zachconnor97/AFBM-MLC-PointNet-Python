@@ -7,9 +7,10 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from matplotlib import pyplot as plt
 import open3d
+import pandas as pd
 
 tf.random.set_seed(1234)
-
+NUM_POINTS = 2000
 username = 'Zachariah'
 cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
 
@@ -89,6 +90,7 @@ fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float32)) # map(pc_rea
 
 labelset = tf.data.Dataset.from_tensor_slices((tsparse))
 afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
+afbm_dataset.batch(BATCH_SIZE)
 
 data = afbm_dataset.take(1)
 points, labels = list(data)[0]
