@@ -30,7 +30,7 @@ def pc_read(path):
     try:
         path.numpy()
     except:
-        path = 'Ruh Roh Raggy'
+        path = 'Ruh Roh Raggy.txt'
     finally:
         print(path)
         print(type(path))
@@ -43,9 +43,6 @@ def pc_read(path):
     """
     cloud = np.asarray(cloud.points)
     return cloud
-
-#cloud1 = pc_read("10155655850468db78d106ce0a280f871.ply")
-#print(type(cloud1))
 
 # ISparse Matrix Encoding Function
 def Sparse_Matrix_Encoding(df):

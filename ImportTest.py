@@ -78,15 +78,17 @@ nfile_paths = np.asarray(nfile_paths)
 tfile_paths = tf.constant(nfile_paths.tolist())
 tsparse = tf.constant(sparse_matrix.tolist())
 fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
-fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float32)) # map(pc_read)
+
+
+fileset_new = fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float32))
 
 labelset = tf.data.Dataset.from_tensor_slices((tsparse))
 afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
 
 data = afbm_dataset.take(1)
 points, labels = list(data)[0]
-#print(points)
-#print(labels)
+print(points)
+print(labels)
 
 
 
