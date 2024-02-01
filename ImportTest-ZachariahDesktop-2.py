@@ -95,7 +95,7 @@ print(points.numpy())
 print(type(points.numpy()))
 pcd = open3d.geometry.PointCloud()
 pcd.points = open3d.utility.Vector3dVector(points.numpy())
-open3d.visualization.draw_geometries([pcd])
+open3d.visualization.draw_geometries(points)
 
 #points = points[:8, ...]
 #labels = labels[:8, ...]
