@@ -12,6 +12,7 @@ import pandas as pd
 tf.random.set_seed(1234)
 NUM_POINTS = 2000
 BATCH_SIZE = 32
+NUM_CLASSES = 25
 username = 'Zachariah'
 
 def pc_read(path):
@@ -108,6 +109,7 @@ def augment(points, label):
 
 database = "AFBMData_NoChairs.csv"
 afbm_dataset = generate_dataset(filename=database)
+afbm_dataset.batch(BATCH_SIZE)
 #Seperate into training and validation here:
 # train_data = 
 # val_data =
@@ -170,9 +172,6 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
         xxt = tf.reshape(xxt, (-1, self.num_features, self.num_features))
         return tf.reduce_sum(self.l2reg * tf.square(xxt - self.eye))
 
-""" We can then define a general function to build T-net layers.
-
-"""
 
 def tnet(inputs, num_features):
 
@@ -217,7 +216,6 @@ x = dense_bn(x, 512)
 x = layers.Dropout(0.3)(x)
 x = dense_bn(x, 256)
 x = layers.Dropout(0.3)(x)
-NUM_CLASSES = 25
 outputs = layers.Dense(NUM_CLASSES, activation="sigmoid")(x)
 
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
