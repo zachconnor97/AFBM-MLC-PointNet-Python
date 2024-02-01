@@ -4,24 +4,9 @@ import numpy as np
 import open3d
  
 username = 'Zachariah'
-cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
-
-# Import the csv and convert to strings
-df = pd.read_csv("AFBMData_NoChairs.csv")
-df = df.astype('str')
- 
-# Seperates cloud paths to pandas series 
-file_paths = df.pop('cloudpath')
-#print(file_paths)
-# Removes non-necessary dataframe columns to leave just FBM labels
-df.pop('SysetID')
-df.pop('Name')
-df.pop('.obj paths')
-df.pop('fileid')
-df.pop('status')
 
 def pc_read(path):
-    
+    cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
     try:
         path = path.numpy()
         path = np.array2string(path)
@@ -61,77 +46,50 @@ def Sparse_Matrix_Encoding(df):
   sparse_matrix = encodedLabel
   return sparse_matrix
 
-sparse_matrix = Sparse_Matrix_Encoding(df) 
-BATCH_SIZE = 64
+def generate_dataset(username, batch_size):
 
-# Slice file paths and labels to tf.data.Dataset
-file_paths = np.asmatrix(file_paths)
-nfile_paths = file_paths.reshape((np.size(file_paths),1)) 
-nfile_paths = np.asarray(nfile_paths)
-tfile_paths = tf.constant(nfile_paths.tolist())
-tsparse = tf.constant(sparse_matrix.tolist())
-fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
-
-
-fileset_new = fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
-
-labelset = tf.data.Dataset.from_tensor_slices((tsparse))
-afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
-
-data = afbm_dataset.take(1)
-points, labels = list(data)[0]
-#print(labels)
-print(points.numpy())
-print(type(points.numpy()))
-pcd = open3d.geometry.PointCloud()
-pcd.points = open3d.utility.Vector3dVector(points.numpy())
-open3d.visualization.draw_geometries([pcd])
-
-#points = points[:8, ...]
-#labels = labels[:8, ...]
-
-#for element in afbm_dataset.as_numpy_iterator():
-#    print(element)
-
-
-"""
-sparse_matrix = np.asarray(sparse_matrix.astype('str'))
-zata = np.concatenate((nfile_paths,sparse_matrix),axis=1)
-
-ten_size = zata.shape
-print(ten_size[0])
-
-# NUMPY list not good for tensorflow 
-# https://stackoverflow.com/questions/58636087/tensorflow-valueerror-failed-to-convert-a-numpy-array-to-a-tensor-unsupporte
-
-#train_data = tf.data.Dataset.from_tensor_slices(zata)
-#train_data.map(pc_read)
-tdata = tf.TensorArray(dtype=tf.string, size=ten_size[0], dynamic_size=True, clear_after_read=False)
-zata = tf.constant(zata, dtype=tf.string)
-
-for i in range(ten_size[0]):
-    tdata = tdata.write(i,zata[i])
-
-train_data = tf.data.Dataset.from_tensor_slices(tdata)
-train_data.map(pc_read)
-
-#for i in range(10):
-#    print(tdata.read(i).numpy())
-"""
-"""
-for element in tdata:
-    print(element)
-"""
-#split to training and validation sets
-#val_data = train_data.map()
-#train_data = train_data.map()
-
-# Test that the read function is working as intended
-# Visualize ONE point cloud to verify this is working
-# Be careful with this forloop
-#for element in train_data:
-#    print(element)
-
-#open3d.visualization.draw_geometries([cloud1])
+    # Import the csv and convert to strings
+    df = pd.read_csv("AFBMData_NoChairs.csv")
+    df = df.astype('str')
     
-#cloud1 = pc_read(file_paths(0))
+    # Seperates cloud paths to pandas series 
+    file_paths = df.pop('cloudpath')
+    #print(file_paths)
+    # Removes non-necessary dataframe columns to leave just FBM labels
+    df.pop('SysetID')
+    df.pop('Name')
+    df.pop('.obj paths')
+    df.pop('fileid')
+    df.pop('status')
+
+    sparse_matrix = Sparse_Matrix_Encoding(df) 
+    BATCH_SIZE = 64
+
+    # Slice file paths and labels to tf.data.Dataset
+    file_paths = np.asmatrix(file_paths)
+    nfile_paths = file_paths.reshape((np.size(file_paths),1)) 
+    nfile_paths = np.asarray(nfile_paths)
+    tfile_paths = tf.constant(nfile_paths.tolist())
+    tsparse = tf.constant(sparse_matrix.tolist())
+    fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
+
+    fileset_new = fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+
+    labelset = tf.data.Dataset.from_tensor_slices((tsparse))
+    afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
+
+    #Testing stuff
+    """
+    data = afbm_dataset.take(1)
+    points, labels = list(data)[0]
+    #print(labels)
+    print(points.numpy())
+    print(type(points.numpy()))
+    pcd = open3d.geometry.PointCloud()
+    pcd.points = open3d.utility.Vector3dVector(points.numpy())
+    open3d.visualization.draw_geometries([pcd])
+    """
+    return afbm_dataset
+
+if __name__=="__main__":
+    afbm_dataset = generate_dataset(username=username,batch_size=64)
