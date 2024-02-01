@@ -20,7 +20,7 @@ df.pop('.obj paths')
 df.pop('fileid')
 df.pop('status')
  
-# Point Cloud Read Function
+# Point Cloud Read Function 1/25 Go over the function and each component to check and see if it is doing what we want it to do
 def pc_read(path):
     #input is a tensor object, needs to become a standard string
     #path = path.numpy().astype('str') #doesn't work
@@ -31,7 +31,7 @@ def pc_read(path):
     try:
         path.numpy()
     except:
-        path = 'Ruh Roh Raggy.ply'
+        path = 'Ruh Roh Raggy.txt'
     finally:
         print(path)
         print(type(path))
@@ -85,8 +85,8 @@ afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
 
 data = afbm_dataset.take(1)
 points, labels = list(data)[0]
-print(points)
-print(labels)
+#print(points)
+#print(labels)
 
 
 
