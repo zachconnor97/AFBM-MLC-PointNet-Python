@@ -19,7 +19,7 @@ df.pop('.obj paths')
 df.pop('fileid')
 df.pop('status')
  
-# Point Cloud Read Function
+# Point Cloud Read Function 1/25 Go over the function and each component to check and see if it is doing what we want it to do
 def pc_read(path):
     #input is a tensor object, needs to become a standard string
     #path = path.numpy().astype('str') #doesn't work
