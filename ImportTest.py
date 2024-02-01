@@ -20,7 +20,7 @@ df.pop('.obj paths')
 df.pop('fileid')
 df.pop('status')
  
-# Point Cloud Read Function
+# Point Cloud Read Function 1/25 Go over the function and each component to check and see if it is doing what we want it to do
 def pc_read(path):
     #input is a tensor object, needs to become a standard string
     #path = path.numpy().astype('str') #doesn't work
@@ -29,7 +29,10 @@ def pc_read(path):
     print(type(path))
     print(path)
     try:
-        path.numpy()
+        path = path.numpy()
+        path = np.array2string(path)
+        for character in "[]]b'":
+            path = path.replace(character, '')
     except:
         path = 'Ruh Roh Raggy.txt'
     finally:
@@ -78,15 +81,17 @@ nfile_paths = np.asarray(nfile_paths)
 tfile_paths = tf.constant(nfile_paths.tolist())
 tsparse = tf.constant(sparse_matrix.tolist())
 fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
-fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float32)) # map(pc_read)
+
+
+fileset_new = fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float32))
 
 labelset = tf.data.Dataset.from_tensor_slices((tsparse))
 afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
 
 data = afbm_dataset.take(1)
 points, labels = list(data)[0]
-#print(points)
-#print(labels)
+print(points)
+print(labels)
 
 
 
