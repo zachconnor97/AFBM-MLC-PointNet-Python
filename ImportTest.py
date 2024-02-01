@@ -31,7 +31,7 @@ def pc_read(path):
     try:
         path.numpy()
     except:
-        path = 'Ruh Roh Raggy.ply'
+        path = 'Ruh Roh Raggy.txt'
     finally:
         print(path)
         print(type(path))
@@ -85,8 +85,8 @@ afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
 
 data = afbm_dataset.take(1)
 points, labels = list(data)[0]
-print(points)
-print(labels)
+#print(points)
+#print(labels)
 
 
 
