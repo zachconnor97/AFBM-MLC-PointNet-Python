@@ -19,32 +19,22 @@ df.pop('Name')
 df.pop('.obj paths')
 df.pop('fileid')
 df.pop('status')
- 
-# Point Cloud Read Function 1/25 Go over the function and each component to check and see if it is doing what we want it to do
+
 def pc_read(path):
-    #input is a tensor object, needs to become a standard string
-    #path = path.numpy().astype('str') #doesn't work
-    #path = path.numpy
     
-    print(type(path))
-    print(path)
     try:
         path = path.numpy()
         path = np.array2string(path)
         for character in "[]]b'":
             path = path.replace(character, '')
     except:
-        path = 'Ruh Roh Raggy.txt'
+        path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
+        print(path)
     finally:
         print(path)
         print(type(path))
         path = cloud_path_header + path 
         cloud = open3d.io.read_point_cloud(path)
-    """
-    open3d.visualization.draw_geometries([cloud])
-    cloud = cloud.voxel_down_sample(voxel_size=0.05)
-    open3d.visualization.draw_geometries([cloud])
-    """
     cloud = np.asarray(cloud.points)
     return cloud
 
