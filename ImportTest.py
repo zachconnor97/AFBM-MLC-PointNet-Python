@@ -10,7 +10,7 @@ def pc_read(path):
     try:
         path = path.numpy()
         path = np.array2string(path)
-        for character in "[]]'":
+        for character in "[]'":
             path = path.replace(character, '')
         path = path[1:]
     except:
