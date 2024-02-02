@@ -25,5 +25,4 @@ dataset = tf.data.Dataset.zip((fileset, labelset))
 
 data = dataset.take(1)
 points, labels = list(data)[0]
-#print(labels)
 print(points.numpy())
