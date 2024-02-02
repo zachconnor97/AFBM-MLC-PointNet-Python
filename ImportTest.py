@@ -80,9 +80,8 @@ def generate_dataset(username, batch_size):
 
     #Testing stuff
     
-    data = afbm_dataset.take(1)
+    data = afbm_dataset.take(299)
     points, labels = list(data)[0]
-    #print(labels)
     print(points.numpy())
     print(type(points.numpy()))
     pcd = open3d.geometry.PointCloud()

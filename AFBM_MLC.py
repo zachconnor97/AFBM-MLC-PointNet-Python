@@ -234,7 +234,7 @@ model.compile(
     metrics=["sparse_categorical_accuracy"],
 )
 
-model.fit(afbm_dataset, epochs=5)
+model.fit(x=afbm_dataset, epochs=5,validation_split=0.3)
 
 """## Visualize predictions
 
