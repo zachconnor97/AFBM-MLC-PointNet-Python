@@ -79,7 +79,7 @@ def generate_dataset(username, batch_size):
     afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
 
     #Testing stuff
-    """
+    
     data = afbm_dataset.take(1)
     points, labels = list(data)[0]
     #print(labels)
@@ -88,7 +88,7 @@ def generate_dataset(username, batch_size):
     pcd = open3d.geometry.PointCloud()
     pcd.points = open3d.utility.Vector3dVector(points.numpy())
     open3d.visualization.draw_geometries([pcd])
-    """
+    
     return afbm_dataset
 
 if __name__=="__main__":
