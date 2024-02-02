@@ -7,19 +7,16 @@ def read_function(filepath):
     data = np.array((filepath, np.random.rand(), 5))
     return data
 
-file_paths = np.random.rand(3000,1)
-#print(file_paths)
-label_array = np.random.rand(3000,5)
+file_paths = np.random.rand(3000,1) #Dummy Data
+label_array = np.random.rand(3000,5) #Dummy Data
 
-file_paths = np.asarray(file_paths)
 file_paths = tf.constant(file_paths.tolist())
+label_array = tf.constant(label_array.tolist())
 
 fileset = tf.data.Dataset.from_tensor_slices((file_paths))
+labelset = tf.data.Dataset.from_tensor_slices((label_array))
 
 fileset = fileset.map(lambda x: tf.py_function(read_function, [x], tf.float32))
-
-label_array = tf.constant(label_array.tolist())
-labelset = tf.data.Dataset.from_tensor_slices((label_array))
 
 dataset = tf.data.Dataset.zip((fileset, labelset))
 
