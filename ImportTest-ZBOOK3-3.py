@@ -10,9 +10,8 @@ def pc_read(path):
     try:
         path = path.numpy()
         path = np.array2string(path)
-        for character in "[]'":
+        for character in "[]]b'":
             path = path.replace(character, '')
-        path = path[1:]
     except:
         path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
         print(path)
@@ -81,9 +80,8 @@ def generate_dataset(username, batch_size):
 
     #Testing stuff
     
-    data = afbm_dataset.take(20)
-    points, labels = list(data)[17]
-    print(labels.numpy())
+    data = afbm_dataset.take(299)
+    points, labels = list(data)[0]
     print(points.numpy())
     print(type(points.numpy()))
     pcd = open3d.geometry.PointCloud()
