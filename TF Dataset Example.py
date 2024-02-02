@@ -2,14 +2,13 @@ import tensorflow as tf
 import numpy as np
 
 def read_function(filepath):
-    
-    print(filepath)
-    
+    filepath = filepath.numpy()
+    filepath = filepath[0]
     data = np.array((filepath, np.random.rand(), 5))
     return data
 
 file_paths = np.random.rand(3000,1)
-print(file_paths)
+#print(file_paths)
 label_array = np.random.rand(3000,5)
 
 file_paths = np.asarray(file_paths)
