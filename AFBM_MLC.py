@@ -20,8 +20,9 @@ def pc_read(path):
     try:
         path = path.numpy()
         path = np.array2string(path)
-        for character in "[]]b'":
+        for character in "[]]'":
             path = path.replace(character, '')
+        path = path[1:]
     except:
         path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
         print(path)
