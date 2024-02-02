@@ -10,18 +10,19 @@ import open3d
 import pandas as pd
 
 tf.random.set_seed(1234)
-NUM_POINTS = 2000
+NUM_POINTS = 10000
 BATCH_SIZE = 32
 NUM_CLASSES = 25
 username = 'Zachariah'
 
 def pc_read(path):
-    cloud_path_header = str('C:/Users/' + username + '/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
+    cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     try:
         path = path.numpy()
         path = np.array2string(path)
-        for character in "[]]b'":
+        for character in "[]]'":
             path = path.replace(character, '')
+        path = path[1:]
     except:
         path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
         print(path)
@@ -232,6 +233,7 @@ model.compile(
     loss="sparse_categorical_crossentropy",
     optimizer=keras.optimizers.Adam(learning_rate=0.001),
     metrics=["sparse_categorical_accuracy"],
+    run_eagerly=True,
 )
 
 model.fit(x=afbm_dataset, epochs=5)
