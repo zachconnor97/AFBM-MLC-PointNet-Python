@@ -30,11 +30,12 @@ def pc_read(path):
         path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
         print(path)
     finally:
-        print(path)
-        print(type(path))
+        #print(path)
+        #print(type(path))
         path = cloud_path_header + path 
         cloud = open3d.io.read_point_cloud(path)
     cloud = np.asarray(cloud.points)
+    
     return cloud
 
 # ISparse Matrix Encoding Function
@@ -113,10 +114,21 @@ def augment(points, label):
 
 database = "AFBMData_NoChairs.csv"
 afbm_dataset = generate_dataset(filename=database)
-afbm_dataset.batch(BATCH_SIZE)
+
+#afbm_dataset.batch(BATCH_SIZE)
+
 #Seperate into training and validation here:
-# train_data = 
-# val_data =
+train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.8)
+
+train_test = train_ds.take(1)
+points, labels = list(train_test)[0]
+print("Train Test")
+print(points)
+
+val_test = val_ds.take(1)
+points, labels = list(val_test)[0]
+print("Val Test")
+print(points)
 
 # Sample points down to NUM_POINTS
 # Use trimesh probably? 
@@ -239,7 +251,7 @@ model.compile(
     run_eagerly=True,
 )
 
-model.fit(x=afbm_dataset, epochs=5)
+model.fit(x=train_ds, epochs=5, validation_data=val_ds)
 
 """## Visualize predictions
 
