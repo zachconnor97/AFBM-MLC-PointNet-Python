@@ -15,7 +15,7 @@ BATCH_SIZE = 32
 NUM_CLASSES = 25
 username = 'Zachariah'
 
-def pc_read(path, labels):
+def pc_read(path):
     
     #cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     # Use second one for WSL
@@ -36,7 +36,7 @@ def pc_read(path, labels):
         cloud = open3d.io.read_point_cloud(path)
     cloud = np.asarray(cloud.points)
     
-    return cloud, labels
+    return cloud
 
 # ISparse Matrix Encoding Function
 def Sparse_Matrix_Encoding(df):
@@ -92,17 +92,29 @@ def generate_dataset(filename):
     nfile_paths = np.asarray(nfile_paths)
     tfile_paths = tf.constant(nfile_paths.tolist())
     tsparse = tf.constant(sparse_matrix.tolist())
-    fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
+    fileset = tf.data.Dataset.from_tensor_slices((tfile_paths))
     labelset = tf.data.Dataset.from_tensor_slices((tsparse))
+    
+    train_points = fileset.skip(int(0.3*len(fileset)))
+    train_label = labelset.skip(int(.3*len(labelset)))
+    
+    val_points = fileset.take(int(0.3*len(fileset)))
+    val_label = labelset.take(int(.3*len(labelset)))
+    
+    val_points = val_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+    train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+    
+    val_ds = tf.data.Dataset.zip((val_points, val_label))
+    train_ds = tf.data.Dataset.zip((train_points, train_label))
 
-    afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
+    #afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
 
-    train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.7)
+    #train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.7)
     #val_ds = afbm_dataset.take(int(.3*len(afbm_dataset)))
     #train_ds = afbm_dataset.skip(int(0.3*len(afbm_dataset)))
 
-    val_ds = val_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
-    train_ds = train_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
+    #val_ds = val_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
+    #train_ds = train_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
 
     #val_ds = val_ds.batch(BATCH_SIZE)
     #train_ds = train_ds.batch(BATCH_SIZE)
