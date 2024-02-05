@@ -29,17 +29,16 @@ def pc_read(path):
         path = path[1:]
         path = cloud_path_header + path 
         cloud = open3d.io.read_point_cloud(path)
-        cloud = cloud.uniform_down_sample(cloud, 2)
-        #cloud = trimesh.load(path)
-        #cloud = cloud.sample(NUM_POINTS) # that don't work
-        #cloud = pymeshlab.load_new_mesh(path)
+        cloud = cloud.uniform_down_sample(every_k_points=2)
+    
     except:
         cloud = np.random.rand((NUM_POINTS,3))
         path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
         print(path)
     finally:
-        cloud = np.asarray(cloud.points())
-    
+        #cloud = cloud #np.asarray(cloud) #.points()
+        cloud = cloud.points
+        cloud = np.asarray([cloud])
     return cloud
 
 # ISparse Matrix Encoding Function
@@ -141,8 +140,9 @@ def generate_dataset(filename):
 
 
 database = "AFBMData_NoChairs.csv"
-train_ds, val_ds = generate_dataset(filename=database)
-
-test = train_ds.take(1)
-points, labels = list(test)[0]
-print(points)
+#train_ds, val_ds = generate_dataset(filename=database)
+cloud = pc_read('testcloud.ply')
+print(cloud)
+#test = train_ds.take(1)
+#points, labels = list(test)[0]
+#print(points)
