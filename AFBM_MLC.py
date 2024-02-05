@@ -10,7 +10,7 @@ import open3d
 import pandas as pd
 
 tf.random.set_seed(1234)
-NUM_POINTS = 10000
+NUM_POINTS = 3000
 BATCH_SIZE = 32
 NUM_CLASSES = 25
 username = 'Zachariah'
@@ -26,15 +26,15 @@ def pc_read(path):
         for character in "[]]'":
             path = path.replace(character, '')
         path = path[1:]
+        path = cloud_path_header + path 
+        cloud = open3d.io.read_point_cloud(path)
+
     except:
+        cloud = np.random.rand((NUM_POINTS,3))
         path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
         print(path)
     finally:
-        #print(path)
-        #print(type(path))
-        path = cloud_path_header + path 
-        cloud = open3d.io.read_point_cloud(path)
-    cloud = np.asarray(cloud.points)
+        cloud = np.asarray(cloud.points)
     
     return cloud
 
@@ -116,8 +116,8 @@ def generate_dataset(filename):
     #val_ds = val_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
     #train_ds = train_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
 
-    #val_ds = val_ds.batch(BATCH_SIZE)
-    #train_ds = train_ds.batch(BATCH_SIZE)
+    val_ds = val_ds.batch(BATCH_SIZE)
+    train_ds = train_ds.batch(BATCH_SIZE)
     #.map(lambda x, y: tf.py_function(augment, [x, y], tf.float64))
 
     #Testing stuff
