@@ -15,7 +15,7 @@ BATCH_SIZE = 32
 NUM_CLASSES = 25
 username = 'Zachariah'
 
-def pc_read(path):
+def pc_read(path, labels):
     
     #cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     # Use second one for WSL
@@ -36,7 +36,7 @@ def pc_read(path):
         cloud = open3d.io.read_point_cloud(path)
     cloud = np.asarray(cloud.points)
     
-    return cloud
+    return cloud, labels
 
 # ISparse Matrix Encoding Function
 def Sparse_Matrix_Encoding(df):
@@ -86,11 +86,16 @@ def generate_dataset(filename):
     tfile_paths = tf.constant(nfile_paths.tolist())
     tsparse = tf.constant(sparse_matrix.tolist())
     fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
-
-    fileset_new = fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
-
     labelset = tf.data.Dataset.from_tensor_slices((tsparse))
     afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
+    val_ds = afbm_dataset.take(int(.3*len(afbm_dataset)))
+    train_ds = afbm_dataset.skip(int(0.3*len(afbm_dataset)))
+    
+    
+    
+    fileset_new = fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+
+
 
     #Testing stuff
     """
