@@ -10,17 +10,18 @@ import open3d
 import pandas as pd
 
 tf.random.set_seed(1234)
-NUM_POINTS = 3000
+NUM_POINTS = 2000
 SAMPLE_RATIO = 10000 / NUM_POINTS
+print(SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
 username = 'Zachariah'
 
 def pc_read(path):
     
-    #cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
+    cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     # Use second one for WSL
-    cloud_path_header = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
+    #cloud_path_header = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     try:
         path = path.numpy()
         path = np.array2string(path)
@@ -146,6 +147,9 @@ train_ds, val_ds = generate_dataset(filename=database)
 #Seperate into training and validation here:
 #train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.8)
 
+train_data = train_ds.take(1)
+points, labels = list(train_data)[0]
+print(points)
 
 # Sample points down to NUM_POINTS
 # Use trimesh probably? 
