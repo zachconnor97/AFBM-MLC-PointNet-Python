@@ -61,6 +61,13 @@ def Sparse_Matrix_Encoding(df):
   sparse_matrix = encodedLabel
   return sparse_matrix
 
+def augment(points, label):
+    # jitter points
+    points += tf.random.uniform(points.shape, -0.005, 0.005, dtype=tf.float64)
+    # shuffle points
+    points = tf.random.shuffle(points)
+    return points, label
+
 def generate_dataset(filename):
 
     # Import the csv and convert to strings
@@ -87,15 +94,18 @@ def generate_dataset(filename):
     tsparse = tf.constant(sparse_matrix.tolist())
     fileset_new = tf.data.Dataset.from_tensor_slices((tfile_paths))
     labelset = tf.data.Dataset.from_tensor_slices((tsparse))
+
     afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
-    val_ds = afbm_dataset.take(int(.3*len(afbm_dataset)))
-    train_ds = afbm_dataset.skip(int(0.3*len(afbm_dataset)))
-    
-    
-    
-    fileset_new = fileset_new.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
 
+    train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.7)
+    #val_ds = afbm_dataset.take(int(.3*len(afbm_dataset)))
+    #train_ds = afbm_dataset.skip(int(0.3*len(afbm_dataset)))
 
+    val_ds = val_ds.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+    train_ds = train_ds.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+
+    val_ds = val_ds.batch(BATCH_SIZE)
+    train_ds = train_ds.map(augment).batch(BATCH_SIZE)
 
     #Testing stuff
     """
@@ -108,26 +118,17 @@ def generate_dataset(filename):
     pcd.points = open3d.utility.Vector3dVector(points.numpy())
     open3d.visualization.draw_geometries([pcd])
     """
-    return afbm_dataset
+    return train_ds, val_ds
 
-def augment(points, label):
-    # jitter points
-    points += tf.random.uniform(points.shape, -0.005, 0.005, dtype=tf.float64)
-    # shuffle points
-    points = tf.random.shuffle(points)
-    return points, label
+
 
 database = "AFBMData_NoChairs.csv"
-afbm_dataset = generate_dataset(filename=database)
+train_ds, val_ds = generate_dataset(filename=database)
 
 #afbm_dataset.batch(BATCH_SIZE)
 
 #Seperate into training and validation here:
 #train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.8)
-
-val_ds = afbm_dataset.take(int(.3*len(afbm_dataset)))
-train_ds = afbm_dataset.skip(int(0.3*len(afbm_dataset)))
-
 
 train_test = train_ds.take(1)
 points, labels = list(train_test)[0]
