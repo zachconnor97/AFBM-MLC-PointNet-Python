@@ -101,11 +101,12 @@ def generate_dataset(filename):
     #val_ds = afbm_dataset.take(int(.3*len(afbm_dataset)))
     #train_ds = afbm_dataset.skip(int(0.3*len(afbm_dataset)))
 
-    val_ds = val_ds.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
-    train_ds = train_ds.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+    val_ds = val_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
+    train_ds = train_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
 
-    val_ds = val_ds.batch(BATCH_SIZE)
-    train_ds = train_ds.map(augment).batch(BATCH_SIZE)
+    #val_ds = val_ds.batch(BATCH_SIZE)
+    #train_ds = train_ds.batch(BATCH_SIZE)
+    #.map(lambda x, y: tf.py_function(augment, [x, y], tf.float64))
 
     #Testing stuff
     """
@@ -131,6 +132,8 @@ train_ds, val_ds = generate_dataset(filename=database)
 #train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.8)
 
 train_test = train_ds.take(1)
+print(len(train_test))
+print(train_test)
 points, labels = list(train_test)[0]
 print("Train Test")
 print(points)
