@@ -145,17 +145,6 @@ train_ds, val_ds = generate_dataset(filename=database)
 #Seperate into training and validation here:
 #train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.8)
 
-train_test = train_ds.take(1)
-print(len(train_test))
-print(train_test)
-points, labels = list(train_test)[0]
-print("Train Test")
-print(points)
-
-val_test = val_ds.take(1)
-points, labels = list(val_test)[0]
-print("Val Test")
-print(points)
 
 # Sample points down to NUM_POINTS
 # Use trimesh probably? 
