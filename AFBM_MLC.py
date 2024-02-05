@@ -28,13 +28,14 @@ def pc_read(path):
         path = path[1:]
         path = cloud_path_header + path 
         cloud = open3d.io.read_point_cloud(path)
-
+        #cloud = trimesh.load(path)
+        #cloud = cloud.sample(NUM_POINTS) # that don't work
     except:
         cloud = np.random.rand((NUM_POINTS,3))
         path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
         print(path)
     finally:
-        cloud = np.asarray(cloud.points)
+        cloud = np.asarray(cloud.points())
     
     return cloud
 
@@ -103,6 +104,7 @@ def generate_dataset(filename):
     
     val_points = val_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+
     
     val_ds = tf.data.Dataset.zip((val_points, val_label))
     train_ds = tf.data.Dataset.zip((train_points, train_label))
@@ -116,8 +118,8 @@ def generate_dataset(filename):
     #val_ds = val_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
     #train_ds = train_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
 
-    val_ds = val_ds.batch(BATCH_SIZE)
-    train_ds = train_ds.batch(BATCH_SIZE)
+    #val_ds = val_ds.batch(BATCH_SIZE)
+    #train_ds = train_ds.batch(BATCH_SIZE)
     #.map(lambda x, y: tf.py_function(augment, [x, y], tf.float64))
 
     #Testing stuff
