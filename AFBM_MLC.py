@@ -11,6 +11,7 @@ import pandas as pd
 
 tf.random.set_seed(1234)
 NUM_POINTS = 3000
+SAMPLE_RATIO = 10000 / NUM_POINTS
 BATCH_SIZE = 32
 NUM_CLASSES = 25
 username = 'Zachariah'
@@ -28,14 +29,14 @@ def pc_read(path):
         path = path[1:]
         path = cloud_path_header + path 
         cloud = open3d.io.read_point_cloud(path)
-        #cloud = trimesh.load(path)
-        #cloud = cloud.sample(NUM_POINTS) # that don't work
+        cloud = cloud.uniform_down_sample(every_k_points=int(SAMPLE_RATIO))
     except:
         cloud = np.random.rand((NUM_POINTS,3))
         path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
         print(path)
     finally:
-        cloud = np.asarray(cloud.points())
+        cloud = cloud.points
+        cloud = np.asarray([cloud])
     
     return cloud
 
