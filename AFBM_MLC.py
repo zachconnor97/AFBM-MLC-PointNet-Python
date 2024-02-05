@@ -120,8 +120,8 @@ afbm_dataset = generate_dataset(filename=database)
 #Seperate into training and validation here:
 #train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.8)
 
-val_ds = afbm_dataset.take(.3*len(afbm_dataset))
-train_ds = afbm_dataset.skip(0.3*len(afbm_dataset))
+val_ds = afbm_dataset.take(int(.3*len(afbm_dataset)))
+train_ds = afbm_dataset.skip(int(0.3*len(afbm_dataset)))
 
 
 train_test = train_ds.take(1)
