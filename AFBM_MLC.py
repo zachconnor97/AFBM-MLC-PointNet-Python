@@ -142,6 +142,11 @@ def generate_dataset(filename):
 database = "AFBMData_NoChairs.csv"
 train_ds, val_ds = generate_dataset(filename=database)
 
+#save datasets
+#path = 
+#train_ds.save()
+#val_ds.save()
+
 #afbm_dataset.batch(BATCH_SIZE)
 
 #Seperate into training and validation here:
