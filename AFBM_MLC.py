@@ -8,6 +8,7 @@ from keras import layers
 from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
+from datetime import date
 
 tf.random.set_seed(1234)
 NUM_POINTS = 2000
@@ -143,9 +144,9 @@ database = "AFBMData_NoChairs.csv"
 train_ds, val_ds = generate_dataset(filename=database)
 
 #save datasets
-#path = 
-#train_ds.save()
-#val_ds.save()
+save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/' + date.today() + BATCH_SIZE + NUM_POINTS)
+train_ds.save(str(save_path + "train_ds"))
+val_ds.save(str(save_path + "val_ds"))
 
 #afbm_dataset.batch(BATCH_SIZE)
 

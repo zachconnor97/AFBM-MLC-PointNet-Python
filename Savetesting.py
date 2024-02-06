@@ -8,6 +8,9 @@ from keras import layers
 from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
+from datetime import date
+
+print("Today is: ",date.today())
 
 #Creating a test Tensor dataset
 dataset1 = tf.data.Dataset.range(0, 3)
