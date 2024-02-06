@@ -13,6 +13,7 @@ from datetime import date
 tf.random.set_seed(1234)
 NUM_POINTS = 2000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
+print("Sample Ratio:")
 print(SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
@@ -65,12 +66,12 @@ def Sparse_Matrix_Encoding(df):
   sparse_matrix = encodedLabel
   return sparse_matrix
 
-def augment(points, label):
+def augment(points):
     # jitter points
     points += tf.random.uniform(points.shape, -0.005, 0.005, dtype=tf.float64)
     # shuffle points
     points = tf.random.shuffle(points)
-    return points, label
+    return points
 
 def generate_dataset(filename):
 
@@ -107,23 +108,13 @@ def generate_dataset(filename):
     
     val_points = val_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+    #train_points = train_points.map(lambda x: tf.py_function(augment, [x], tf.float64))
 
     
     val_ds = tf.data.Dataset.zip((val_points, val_label))
     train_ds = tf.data.Dataset.zip((train_points, train_label))
-
-    #afbm_dataset = tf.data.Dataset.zip((fileset_new, labelset))
-
-    #train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.7)
-    #val_ds = afbm_dataset.take(int(.3*len(afbm_dataset)))
-    #train_ds = afbm_dataset.skip(int(0.3*len(afbm_dataset)))
-
-    #val_ds = val_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
-    #train_ds = train_ds.map(lambda x, y: tf.py_function(pc_read, [x, y], tf.float64))
-
-    #val_ds = val_ds.batch(BATCH_SIZE)
-    #train_ds = train_ds.batch(BATCH_SIZE)
-    #.map(lambda x, y: tf.py_function(augment, [x, y], tf.float64))
+    val_ds = val_ds.batch(BATCH_SIZE)
+    train_ds = train_ds.batch(BATCH_SIZE)
 
     #Testing stuff
     """
@@ -142,14 +133,16 @@ def generate_dataset(filename):
 
 database = "AFBMData_NoChairs.csv"
 train_ds, val_ds = generate_dataset(filename=database)
-
+"""
 #save datasets
-save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/' + date.today() + BATCH_SIZE + NUM_POINTS)
+save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM-MLC-PointNet-Python/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
 train_path = str(save_path + "train_ds")
 train_ds.save(train_path)
 val_path = str(save_path + "val_ds")
 val_ds.save(val_path)
-
+"""
+#train_ds = tf.data.Dataset.load("File path")
+#val_ds = tf.data.Dataset.load("File path")
 #afbm_dataset.batch(BATCH_SIZE)
 
 #Seperate into training and validation here:
