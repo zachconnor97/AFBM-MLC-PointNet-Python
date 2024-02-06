@@ -145,8 +145,10 @@ train_ds, val_ds = generate_dataset(filename=database)
 
 #save datasets
 save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/' + date.today() + BATCH_SIZE + NUM_POINTS)
-train_ds.save(str(save_path + "train_ds"))
-val_ds.save(str(save_path + "val_ds"))
+train_path = str(save_path + "train_ds")
+train_ds.save(train_path)
+val_path = str(save_path + "val_ds")
+val_ds.save(val_path)
 
 #afbm_dataset.batch(BATCH_SIZE)
 
