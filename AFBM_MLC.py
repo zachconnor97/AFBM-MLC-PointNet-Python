@@ -11,7 +11,7 @@ import pandas as pd
 
 tf.random.set_seed(1234)
 NUM_POINTS = 2000
-SAMPLE_RATIO = 10000 / NUM_POINTS
+SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print(SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
