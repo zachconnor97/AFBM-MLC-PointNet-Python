@@ -90,6 +90,11 @@ def generate_dataset(filename):
     df.pop('status')
 
     sparse_matrix = Sparse_Matrix_Encoding(df) 
+    label_weights = sparse_matrix.sum(axis=0)
+    label_weights = 15. / label_weights
+    label_weights = {k: v for k, v in enumerate(label_weights)}
+    #print(type(label_weights))
+    #print(label_weights)
 
     # Slice file paths and labels to tf.data.Dataset
     file_paths = np.asmatrix(file_paths)
@@ -110,7 +115,8 @@ def generate_dataset(filename):
     train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     #train_points = train_points.map(lambda x: tf.py_function(augment, [x], tf.float64))
 
-    
+    #val_ds = tf.data.Dataset.zip((val_points, val_label))
+    #train_ds = tf.data.Dataset.zip((train_points, train_label))
     val_ds = tf.data.Dataset.zip((val_points, val_label))
     train_ds = tf.data.Dataset.zip((train_points, train_label))
     val_ds = val_ds.batch(BATCH_SIZE)
@@ -127,50 +133,27 @@ def generate_dataset(filename):
     pcd.points = open3d.utility.Vector3dVector(points.numpy())
     open3d.visualization.draw_geometries([pcd])
     """
-    return train_ds, val_ds
+    return train_ds, val_ds, label_weights
 
 
 
 database = "AFBMData_NoChairs.csv"
-train_ds, val_ds = generate_dataset(filename=database)
-"""
+train_ds, val_ds, label_weights = generate_dataset(filename=database)
+
+
 #save datasets
 save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM-MLC-PointNet-Python/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
 train_path = str(save_path + "train_ds")
-train_ds.save(train_path)
 val_path = str(save_path + "val_ds")
-val_ds.save(val_path)
-"""
-#train_ds = tf.data.Dataset.load("File path")
-#val_ds = tf.data.Dataset.load("File path")
-#afbm_dataset.batch(BATCH_SIZE)
+#train_ds.save(train_path)
+#val_ds.save(val_path)
 
-#Seperate into training and validation here:
-#train_ds, val_ds = tf.keras.utils.split_dataset(afbm_dataset, left_size=0.8)
+#train_ds = tf.data.Dataset.load(train_path)
+#val_ds = tf.data.Dataset.load(val_path)
 
 train_data = train_ds.take(1)
 points, labels = list(train_data)[0]
-print(points)
-
-# Sample points down to NUM_POINTS
-# Use trimesh probably? 
-# Write new function
-
-# Batch data and augment train data. Also Shuffle
-#train_data.batch(BATCH_SIZE).map(augment)
-#val_data.batch(BATCH_SIZE)
-
-#Also shuffle points
-# dataset.shuffle(len(train_points))
-
-
-"""
-train_dataset = tf.data.Dataset.from_tensor_slices((train_points, train_labels))
-test_dataset = tf.data.Dataset.from_tensor_slices((test_points, test_labels))
-
-train_dataset = train_dataset.shuffle(len(train_points)).map(augment).batch(BATCH_SIZE)
-test_dataset = test_dataset.shuffle(len(test_points)).batch(BATCH_SIZE)
-"""
+#print(points)
 
 ### Build a model
 
@@ -273,7 +256,7 @@ model.compile(
     run_eagerly=True,
 )
 
-model.fit(x=train_ds, epochs=5, validation_data=val_ds)
+model.fit(x=train_ds, epochs=5, validation_data=val_ds, class_weight=label_weights)
 
 """## Visualize predictions
 
