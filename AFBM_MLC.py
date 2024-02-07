@@ -142,7 +142,7 @@ train_ds, val_ds, label_weights = generate_dataset(filename=database)
 
 
 #save datasets
-save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM-MLC-PointNet-Python/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
+save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
 train_path = str(save_path + "train_ds")
 val_path = str(save_path + "val_ds")
 #train_ds.save(train_path)
