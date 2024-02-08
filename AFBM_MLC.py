@@ -251,9 +251,10 @@ model.summary()
 #using `.compile()` and `.fit()`.
 
 model.compile(
-    loss="sparse_categorical_crossentropy",
+    loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=0.001),
-    metrics=["sparse_categorical_accuracy"],
+    metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
+        tf.keras.metrics.F1Score(threshold=0.5)],
     run_eagerly=True,
 )
 
