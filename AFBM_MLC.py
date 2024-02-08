@@ -227,7 +227,6 @@ def tnet(inputs, num_features):
 #are using the smaller 10 class ModelNet dataset.
 
 inputs = keras.Input(shape=(NUM_POINTS, 3))
-
 x = tnet(inputs, 3)
 x = conv_bn(x, 64)
 x = conv_bn(x, 64)
@@ -236,12 +235,11 @@ x = conv_bn(x, 64)
 x = conv_bn(x, 128)
 x = conv_bn(x, 1024)
 x = layers.GlobalMaxPooling1D()(x)
-x = dense_bn(x, 512)
-#x = layers.Flatten()
-x = layers.Dropout(0.3)(x)
 x = dense_bn(x, 256)
-#x = layers.Flatten()
 x = layers.Dropout(0.3)(x)
+x = dense_bn(x, 128)
+x = layers.Dropout(0.3)(x)
+
 outputs = layers.Dense(NUM_CLASSES, activation="sigmoid")(x)
 
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
@@ -259,7 +257,12 @@ model.compile(
         tf.keras.metrics.F1Score(threshold=0.5)],
     run_eagerly=True,
 )
-
+"""
+train_data = train_ds.take(1)
+points, labels = list(train_data)[0]
+predc = model.predict(points)
+print(predc)
+"""
 model.fit(x=train_ds, epochs=5, validation_data=val_ds, class_weight=label_weights)
 
 # Visualize predictions
