@@ -21,9 +21,9 @@ username = 'Zachariah'
 
 def pc_read(path):
     
-    cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
+    #cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     # Use second one for WSL
-    #cloud_path_header = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
+    cloud_path_header = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     try:
         path = path.numpy()
         path = np.array2string(path)
@@ -52,7 +52,7 @@ def Sparse_Matrix_Encoding(df):
   uniquelabels = np.delete(uniquelabels,len(uniquelabels)-1,0)
   
   # Encode all of the labels to the point cloud index as a length(dataframe) by length(uniquelabels) sparse matrix (1 or 0 only)
-  encodedLabel = np.zeros((len(df), len(uniquelabels)), dtype=int)
+  encodedLabel = np.zeros((len(df), len(uniquelabels)), dtype=float)
   # Loop through clouds and labels
   for i in range(len(df)):
       for j, label in enumerate(df.columns):
@@ -154,15 +154,15 @@ load_path = "C:/Users/" + username + "/OneDrive - Oregon State University/Resear
 #train_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000train_ds')
 #val_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000val_ds')
 
-"""
+
 train_data = train_ds.take(2)
 for batch in range(len(train_data)):
     points, labels = list(train_data)[batch]
+    print(labels.numpy())
+    print(labels)
+    #print(points.numpy().max())
     #print(points.numpy())
-    #print(points)
-    print(points.numpy().max())
-    #print(points.numpy())
-"""
+
 
 
 ### PointNet Model
@@ -237,8 +237,10 @@ x = conv_bn(x, 128)
 x = conv_bn(x, 1024)
 x = layers.GlobalMaxPooling1D()(x)
 x = dense_bn(x, 512)
+#x = layers.Flatten()
 x = layers.Dropout(0.3)(x)
 x = dense_bn(x, 256)
+#x = layers.Flatten()
 x = layers.Dropout(0.3)(x)
 outputs = layers.Dense(NUM_CLASSES, activation="sigmoid")(x)
 
