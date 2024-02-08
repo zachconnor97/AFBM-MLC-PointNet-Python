@@ -21,9 +21,9 @@ username = 'Zachariah'
 
 def pc_read(path):
     
-    #cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
+    cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     # Use second one for WSL
-    cloud_path_header = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
+    #cloud_path_header = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     try:
         path = path.numpy()
         path = np.array2string(path)
@@ -154,12 +154,16 @@ load_path = "C:/Users/" + username + "/OneDrive - Oregon State University/Resear
 #train_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000train_ds')
 #val_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000val_ds')
 
-train_data = train_ds.take(1)
-points, labels = list(train_data)[0]
-#print(points.numpy())
-#print(points)
-print(labels)
-print(labels.numpy())
+"""
+train_data = train_ds.take(2)
+for batch in range(len(train_data)):
+    points, labels = list(train_data)[batch]
+    #print(points.numpy())
+    #print(points)
+    print(points.numpy().max())
+    #print(points.numpy())
+"""
+
 
 ### PointNet Model
 #Each convolution and fully-connected layer (with exception for end layers) consits of
