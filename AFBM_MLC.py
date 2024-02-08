@@ -119,8 +119,8 @@ def generate_dataset(filename):
     #train_ds = tf.data.Dataset.zip((train_points, train_label))
     val_ds = tf.data.Dataset.zip((val_points, val_label))
     train_ds = tf.data.Dataset.zip((train_points, train_label))
-    #val_ds = val_ds.batch(BATCH_SIZE)
-    #train_ds = train_ds.batch(BATCH_SIZE)
+    val_ds = val_ds.batch(BATCH_SIZE)
+    train_ds = train_ds.batch(BATCH_SIZE)
 
     #Testing stuff
     """
@@ -158,15 +158,12 @@ train_data = train_ds.take(1)
 points, labels = list(train_data)[0]
 #print(points.numpy())
 #print(points)
-#print(labels.numpy())
+print(labels)
+print(labels.numpy())
 
-
-"""
-### Build a model
-
+### PointNet Model
 #Each convolution and fully-connected layer (with exception for end layers) consits of
 #Convolution / Dense -> Batch Normalization -> ReLU Activation.
-
 
 def conv_bn(x, filters):
     x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
@@ -186,8 +183,6 @@ def dense_bn(x, filters):
 #feature space (n, 3). As per the original paper we constrain the transformation to be
 #close to an orthogonal matrix (i.e. ||X*X^T - I|| = 0).
 
-
-
 class OrthogonalRegularizer(keras.regularizers.Regularizer):
     def __init__(self, num_features, l2reg=0.001):
         self.num_features = num_features
@@ -202,7 +197,6 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
 
 
 def tnet(inputs, num_features):
-
     # Initalise bias as the indentity matrix
     bias = keras.initializers.Constant(np.eye(num_features).flatten())
     reg = OrthogonalRegularizer(num_features)
@@ -228,8 +222,6 @@ def tnet(inputs, num_features):
 #published in the original paper but with half the number of weights at each layer as we
 #are using the smaller 10 class ModelNet dataset.
 
-
-
 inputs = keras.Input(shape=(NUM_POINTS, 3))
 
 x = tnet(inputs, 3)
@@ -254,8 +246,6 @@ model.summary()
 #Once the model is defined it can be trained like any other standard classification model
 #using `.compile()` and `.fit()`.
 
-
-
 model.compile(
     loss="sparse_categorical_crossentropy",
     optimizer=keras.optimizers.Adam(learning_rate=0.001),
@@ -263,16 +253,12 @@ model.compile(
     run_eagerly=True,
 )
 
-#model.fit(x=train_ds, epochs=5, validation_data=val_ds, class_weight=label_weights)
+model.fit(x=train_ds, epochs=5, validation_data=val_ds, class_weight=label_weights)
 
 # Visualize predictions
 
 #We can use matplotlib to visualize our trained model performance.
-
-
-
 #data = test_dataset.take(1)
-
 #points, labels = list(data)[0]
 #points = points[:8, ...]
 #labels = labels[:8, ...]
@@ -295,4 +281,3 @@ model.compile(
 #    )
 #    ax.set_axis_off()
 #plt.show()
-"""
