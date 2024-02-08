@@ -39,7 +39,7 @@ def pc_read(path):
         print(path)
     finally:
         cloud = cloud.points
-        cloud = np.asarray([cloud])
+        cloud = np.asarray([cloud])[0]
     
     return cloud
 
@@ -113,14 +113,14 @@ def generate_dataset(filename):
     
     val_points = val_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
-    #train_points = train_points.map(lambda x: tf.py_function(augment, [x], tf.float64))
+    train_points = train_points.map(lambda x: tf.py_function(augment, [x], tf.float64))
 
     #val_ds = tf.data.Dataset.zip((val_points, val_label))
     #train_ds = tf.data.Dataset.zip((train_points, train_label))
     val_ds = tf.data.Dataset.zip((val_points, val_label))
     train_ds = tf.data.Dataset.zip((train_points, train_label))
-    val_ds = val_ds.batch(BATCH_SIZE)
-    train_ds = train_ds.batch(BATCH_SIZE)
+    #val_ds = val_ds.batch(BATCH_SIZE)
+    #train_ds = train_ds.batch(BATCH_SIZE)
 
     #Testing stuff
     """
@@ -148,13 +148,20 @@ val_path = str(save_path + "val_ds")
 #train_ds.save(train_path)
 #val_ds.save(val_path)
 
-#train_ds = tf.data.Dataset.load(train_path)
-#val_ds = tf.data.Dataset.load(val_path)
+
+load_path = "C:/Users/" + username + "/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/"
+#load_path = "/mnt/c/Users/" + username + "/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/"
+#train_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000train_ds')
+#val_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000val_ds')
 
 train_data = train_ds.take(1)
 points, labels = list(train_data)[0]
+#print(points.numpy())
 #print(points)
+#print(labels.numpy())
 
+
+"""
 ### Build a model
 
 #Each convolution and fully-connected layer (with exception for end layers) consits of
@@ -172,14 +179,14 @@ def dense_bn(x, filters):
     x = layers.BatchNormalization(momentum=0.0)(x)
     return layers.Activation("relu")(x)
 
-"""PointNet consists of two core components. The primary MLP network, and the transformer
-net (T-net). The T-net aims to learn an affine transformation matrix by its own mini
-network. The T-net is used twice. The first time to transform the input features (n, 3)
-into a canonical representation. The second is an affine transformation for alignment in
-feature space (n, 3). As per the original paper we constrain the transformation to be
-close to an orthogonal matrix (i.e. ||X*X^T - I|| = 0).
+#PointNet consists of two core components. The primary MLP network, and the transformer
+#net (T-net). The T-net aims to learn an affine transformation matrix by its own mini
+#network. The T-net is used twice. The first time to transform the input features (n, 3)
+#into a canonical representation. The second is an affine transformation for alignment in
+#feature space (n, 3). As per the original paper we constrain the transformation to be
+#close to an orthogonal matrix (i.e. ||X*X^T - I|| = 0).
 
-"""
+
 
 class OrthogonalRegularizer(keras.regularizers.Regularizer):
     def __init__(self, num_features, l2reg=0.001):
@@ -216,12 +223,12 @@ def tnet(inputs, num_features):
     # Apply affine transformation to input features
     return layers.Dot(axes=(2, 1))([inputs, feat_T])
 
-"""The main network can be then implemented in the same manner where the t-net mini models
-can be dropped in a layers in the graph. Here we replicate the network architecture
-published in the original paper but with half the number of weights at each layer as we
-are using the smaller 10 class ModelNet dataset.
+#The main network can be then implemented in the same manner where the t-net mini models
+#can be dropped in a layers in the graph. Here we replicate the network architecture
+#published in the original paper but with half the number of weights at each layer as we
+#are using the smaller 10 class ModelNet dataset.
 
-"""
+
 
 inputs = keras.Input(shape=(NUM_POINTS, 3))
 
@@ -242,12 +249,12 @@ outputs = layers.Dense(NUM_CLASSES, activation="sigmoid")(x)
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 model.summary()
 
-"""### Train model
+### Train model
 
-Once the model is defined it can be trained like any other standard classification model
-using `.compile()` and `.fit()`.
+#Once the model is defined it can be trained like any other standard classification model
+#using `.compile()` and `.fit()`.
 
-"""
+
 
 model.compile(
     loss="sparse_categorical_crossentropy",
@@ -256,13 +263,13 @@ model.compile(
     run_eagerly=True,
 )
 
-model.fit(x=train_ds, epochs=5, validation_data=val_ds, class_weight=label_weights)
+#model.fit(x=train_ds, epochs=5, validation_data=val_ds, class_weight=label_weights)
 
-"""## Visualize predictions
+# Visualize predictions
 
-We can use matplotlib to visualize our trained model performance.
+#We can use matplotlib to visualize our trained model performance.
 
-"""
+
 
 #data = test_dataset.take(1)
 
@@ -288,3 +295,4 @@ We can use matplotlib to visualize our trained model performance.
 #    )
 #    ax.set_axis_off()
 #plt.show()
+"""
