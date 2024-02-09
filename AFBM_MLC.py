@@ -1,4 +1,5 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import glob
 import trimesh
 import numpy as np
@@ -139,7 +140,7 @@ def generate_dataset(filename):
 
 database = "AFBMData_NoChairs.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-print(label_weights)
+#print(label_weights)
 
 #save datasets
 save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
