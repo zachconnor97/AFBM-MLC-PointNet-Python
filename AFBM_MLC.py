@@ -91,7 +91,7 @@ def generate_dataset(filename):
 
     sparse_matrix = Sparse_Matrix_Encoding(df) 
     label_weights = sparse_matrix.sum(axis=0)
-    label_weights = 15. / label_weights
+    label_weights = 13584. / (25 * label_weights)
     label_weights = {k: v for k, v in enumerate(label_weights)}
     #print(type(label_weights))
     #print(label_weights)
@@ -139,7 +139,7 @@ def generate_dataset(filename):
 
 database = "AFBMData_NoChairs.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-
+print(label_weights)
 
 #save datasets
 save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
