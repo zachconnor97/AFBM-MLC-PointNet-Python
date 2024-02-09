@@ -319,31 +319,7 @@ model.compile(
              tf.keras.metrics.Recall(class_id=23),
              tf.keras.metrics.Recall(class_id=24),
              tf.keras.metrics.F1Score(threshold=0.5),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=0),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=1),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=2),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=3),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=4),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=5),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=6),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=7),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=8),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=9),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=10),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=11),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=12),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=13),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=14),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=15),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=16),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=17),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=18),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=19),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=20),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=21),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=22),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=23),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=24),],      
+             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
 """
@@ -353,15 +329,15 @@ predc = model.predict(points)
 print(predc)
 """
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
-
+## Save Model here
+model.save(save_path + '_AFBM Model')
 #Save history file
 histdf = pd.DataFrame(train_hist.history)
 histfile = save_path + '_history.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
-## Save Model here
-model.save(save_path + '_AFBM Model')
+
 
 ## Load Model here
 #model = tf.keras.models.load_model(save_path)
