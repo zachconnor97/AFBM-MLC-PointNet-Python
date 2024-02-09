@@ -269,10 +269,14 @@ points, labels = list(train_data)[0]
 predc = model.predict(points)
 print(predc)
 """
-train_stuff = model.fit(x=train_ds, epochs=10, validation_data=val_ds, class_weight=label_weights)
-#model.evaluate()
-print(train_stuff)
+AFBM_MLC_Model = model.fit(x=train_ds, epochs=10, class_weight=label_weights, validation_data=val_ds)
+#save model here
 
+#add option to load model here
+
+
+# Validation / Evaluation
+model.evaluate(x=val_ds)
 
 
 """
