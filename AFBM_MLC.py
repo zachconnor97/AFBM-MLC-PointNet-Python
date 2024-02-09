@@ -27,6 +27,7 @@ username = 'Zachariah'
 class GarbageMan(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         gc.collect()
+        tf.keras.backend.clear_session()
 
 def pc_read(path):
     
