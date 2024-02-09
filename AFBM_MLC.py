@@ -280,10 +280,11 @@ print(predc)
 """
 AFBM_MLC_Model = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 #save model here
-
+AFBM_MLC_Model.save(save_path)
 #add option to load model here
-
-
+AFBM_MLC_Loaded = tf.keras.models.load_model(save_path)
+#Test if the loaded model is the same
+AFBM_MLC_Loaded.summary()
 # Validation / Evaluation
 model.evaluate(x=val_ds)
 
