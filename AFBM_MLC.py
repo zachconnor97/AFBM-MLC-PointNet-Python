@@ -1,7 +1,5 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import glob
-import trimesh
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -10,7 +8,8 @@ from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
 from datetime import date
-import sys
+import gc
+
 physical_devices = tf.config.list_physical_devices('GPU')
 print(physical_devices)
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
@@ -24,6 +23,10 @@ BATCH_SIZE = 32
 NUM_CLASSES = 25
 NUM_EPOCHS = 20
 username = 'Zachariah'
+
+class GarbageMan(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        gc.collect()
 
 def pc_read(path):
     
@@ -274,7 +277,7 @@ points, labels = list(train_data)[0]
 predc = model.predict(points)
 print(predc)
 """
-AFBM_MLC_Model = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds)
+AFBM_MLC_Model = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 #save model here
 
 #add option to load model here
