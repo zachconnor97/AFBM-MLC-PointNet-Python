@@ -11,11 +11,11 @@ import pandas as pd
 from datetime import date
 
 tf.random.set_seed(1234)
-NUM_POINTS = 2000
+NUM_POINTS = 5000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(SAMPLE_RATIO)
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 NUM_CLASSES = 25
 username = 'Zachariah'
 
