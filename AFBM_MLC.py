@@ -12,11 +12,11 @@ import pandas as pd
 from datetime import date
 
 tf.random.set_seed(1234)
-NUM_POINTS = 5000
+NUM_POINTS = 2000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(SAMPLE_RATIO)
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 NUM_CLASSES = 25
 username = 'Zachariah'
 
@@ -91,6 +91,7 @@ def generate_dataset(filename):
     df.pop('status')
 
     sparse_matrix = Sparse_Matrix_Encoding(df) 
+    df = []
     label_weights = sparse_matrix.sum(axis=0)
     label_weights = 13584. / (25 * label_weights)
     label_weights = {k: v for k, v in enumerate(label_weights)}
@@ -256,7 +257,10 @@ model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=0.002),
     metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-        tf.keras.metrics.F1Score(threshold=0.5)],
+             tf.keras.metrics.Precision(),
+             tf.keras.metrics.Recall(),
+             tf.keras.metrics.F1Score(threshold=0.5),
+             tf.keras.metrics.IoU(num_classes=NUM_CLASSES,target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
 """
@@ -265,9 +269,9 @@ points, labels = list(train_data)[0]
 predc = model.predict(points)
 print(predc)
 """
-model.fit(x=train_ds, epochs=10, validation_data=val_ds, class_weight=label_weights)
+train_stuff = model.fit(x=train_ds, epochs=10, validation_data=val_ds, class_weight=label_weights)
 #model.evaluate()
-
+print(train_stuff)
 # Visualize predictions
 
 #We can use matplotlib to visualize our trained model performance.
