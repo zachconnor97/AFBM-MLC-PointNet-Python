@@ -1,6 +1,5 @@
 import os
-import glob
-import trimesh
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -9,15 +8,26 @@ from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
 from datetime import date
+import gc
+
+physical_devices = tf.config.list_physical_devices('GPU')
+print(physical_devices)
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 2000
+NUM_POINTS = 200
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
+NUM_EPOCHS = 1
 username = 'Zachariah'
+
+class GarbageMan(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        gc.collect()
+        tf.keras.backend.clear_session()
 
 def pc_read(path):
     
@@ -90,8 +100,9 @@ def generate_dataset(filename):
     df.pop('status')
 
     sparse_matrix = Sparse_Matrix_Encoding(df) 
+    df = []
     label_weights = sparse_matrix.sum(axis=0)
-    label_weights = 15. / label_weights
+    label_weights = 13584. / (25 * label_weights)
     label_weights = {k: v for k, v in enumerate(label_weights)}
     #print(type(label_weights))
     #print(label_weights)
@@ -139,10 +150,12 @@ def generate_dataset(filename):
 
 database = "AFBMData_NoChairs.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-
+#print(label_weights)
 
 #save datasets
-save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
+#save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
+save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
+
 train_path = str(save_path + "train_ds")
 val_path = str(save_path + "val_ds")
 #train_ds.save(train_path)
@@ -172,13 +185,13 @@ for batch in range(len(train_data)):
 def conv_bn(x, filters):
     x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
     x = layers.BatchNormalization(momentum=0.0)(x)
-    return layers.Activation("relu")(x)
+    return layers.Activation('LeakyReLU')(x)
 
 
 def dense_bn(x, filters):
     x = layers.Dense(filters)(x)
     x = layers.BatchNormalization(momentum=0.0)(x)
-    return layers.Activation("relu")(x)
+    return layers.Activation('LeakyReLU')(x)
 
 #PointNet consists of two core components. The primary MLP network, and the transformer
 #net (T-net). The T-net aims to learn an affine transformation matrix by its own mini
@@ -236,11 +249,11 @@ x = conv_bn(x, 128)
 x = conv_bn(x, 1024)
 x = layers.GlobalMaxPooling1D()(x)
 x = dense_bn(x, 512)
+#x = layers.Flatten()(x)
 #x = layers.Dropout(0.3)(x)
-x = layers.Flatten()(x)
 x = dense_bn(x, 256)
+#x = layers.Flatten()(x)
 #x = layers.Dropout(0.3)(x)
-x = layers.Flatten()(x)
 outputs = layers.Dense(NUM_CLASSES, activation="sigmoid")(x)
 
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
@@ -255,7 +268,58 @@ model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=0.002),
     metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-        tf.keras.metrics.F1Score(threshold=0.5)],
+             tf.keras.metrics.Precision(class_id=0),
+             tf.keras.metrics.Precision(class_id=1),
+             tf.keras.metrics.Precision(class_id=2),
+             tf.keras.metrics.Precision(class_id=3),
+             tf.keras.metrics.Precision(class_id=4),
+             tf.keras.metrics.Precision(class_id=5),
+             tf.keras.metrics.Precision(class_id=6),
+             tf.keras.metrics.Precision(class_id=7),
+             tf.keras.metrics.Precision(class_id=8),
+             tf.keras.metrics.Precision(class_id=9),
+             tf.keras.metrics.Precision(class_id=10),
+             tf.keras.metrics.Precision(class_id=11),
+             tf.keras.metrics.Precision(class_id=12),
+             tf.keras.metrics.Precision(class_id=13),
+             tf.keras.metrics.Precision(class_id=14),
+             tf.keras.metrics.Precision(class_id=15),
+             tf.keras.metrics.Precision(class_id=16),
+             tf.keras.metrics.Precision(class_id=17),
+             tf.keras.metrics.Precision(class_id=18),
+             tf.keras.metrics.Precision(class_id=19),
+             tf.keras.metrics.Precision(class_id=20),
+             tf.keras.metrics.Precision(class_id=21),
+             tf.keras.metrics.Precision(class_id=22),
+             tf.keras.metrics.Precision(class_id=23),
+             tf.keras.metrics.Precision(class_id=24),
+             tf.keras.metrics.Recall(class_id=0),
+             tf.keras.metrics.Recall(class_id=1),
+             tf.keras.metrics.Recall(class_id=2),
+             tf.keras.metrics.Recall(class_id=3),
+             tf.keras.metrics.Recall(class_id=4),
+             tf.keras.metrics.Recall(class_id=5),
+             tf.keras.metrics.Recall(class_id=6),
+             tf.keras.metrics.Recall(class_id=7),
+             tf.keras.metrics.Recall(class_id=8),
+             tf.keras.metrics.Recall(class_id=9),
+             tf.keras.metrics.Recall(class_id=10),
+             tf.keras.metrics.Recall(class_id=11),
+             tf.keras.metrics.Recall(class_id=12),
+             tf.keras.metrics.Recall(class_id=13),
+             tf.keras.metrics.Recall(class_id=14),
+             tf.keras.metrics.Recall(class_id=15),
+             tf.keras.metrics.Recall(class_id=16),
+             tf.keras.metrics.Recall(class_id=17),
+             tf.keras.metrics.Recall(class_id=18),
+             tf.keras.metrics.Recall(class_id=19),
+             tf.keras.metrics.Recall(class_id=20),
+             tf.keras.metrics.Recall(class_id=21),
+             tf.keras.metrics.Recall(class_id=22),
+             tf.keras.metrics.Recall(class_id=23),
+             tf.keras.metrics.Recall(class_id=24),
+             tf.keras.metrics.F1Score(threshold=0.5),
+             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
 """
@@ -264,31 +328,72 @@ points, labels = list(train_data)[0]
 predc = model.predict(points)
 print(predc)
 """
-model.fit(x=train_ds, epochs=20, validation_data=val_ds, class_weight=label_weights)
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+## Save Model here
+#model.save(save_path + '_AFBM Model')
 
+#Save history file
+histdf = pd.DataFrame(train_hist.history)
+histfile = save_path + '_history.csv'
+with open(histfile, mode='w') as f:
+    histdf.to_csv(f)
+
+
+
+## Load Model here
+#model = tf.keras.models.load_model(save_path)
+
+## Test if the loaded model is the same
+#model.summary()
+
+
+# Validation / Evaluation
+ 
+for i in range(0,NUM_CLASSES-1):
+    model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(),
+        optimizer=keras.optimizers.Adam(learning_rate=0.002),
+        metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
+                tf.keras.metrics.Precision(class_id=i),
+                tf.keras.metrics.Recall(class_id=i),
+                tf.keras.metrics.F1Score(threshold=0.5),
+                tf.keras.metrics.IoU(num_classes=1,target_class_ids=i)],      
+        run_eagerly=True,
+    )
+    data = model.evaluate(x=val_ds, callbacks=[GarbageMan])
+    histdf = pd.DataFrame(data.history)
+    histfile = save_path + '_Label' + str(i+1) + '_evaluatation.csv'
+    with open(histfile, mode='w') as f:
+        histdf.to_csv(f)
+
+#model.evaluate(x=val_ds)
+
+
+"""
 # Visualize predictions
 
 #We can use matplotlib to visualize our trained model performance.
-#data = test_dataset.take(1)
-#points, labels = list(data)[0]
+data = train_ds.take(1)
+points, labels = list(data)[0]
 #points = points[:8, ...]
 #labels = labels[:8, ...]
 
 # run test data through model
-#preds = model.predict(points)
-#preds = tf.math.argmax(preds, -1)
+preds = model.predict(points)
+preds = tf.math.argmax(preds, -1)
 
-#points = points.numpy()
+points = points.numpy()
 
 # plot points with predicted class and label
-#fig = plt.figure(figsize=(15, 10))
-#for i in range(8):
-#    ax = fig.add_subplot(2, 4, i + 1, projection="3d")
-#    ax.scatter(points[i, :, 0], points[i, :, 1], points[i, :, 2])
-#    ax.set_title(
-#        "pred: {:}, label: {:}".format(
-#            CLASS_MAP[preds[i].numpy()], CLASS_MAP[labels.numpy()[i]]
-#        )
-#    )
-#    ax.set_axis_off()
-#plt.show()
+fig = plt.figure(figsize=(15, 10))
+for i in range(8):
+    ax = fig.add_subplot(2, 4, i + 1, projection="3d")
+    ax.scatter(points[i, :, 0], points[i, :, 1], points[i, :, 2])
+    ax.set_title(
+        "pred: {:}, label: {:}".format(
+            CLASS_MAP[preds[i].numpy()], CLASS_MAP[labels.numpy()[i]]
+        )
+    )
+    ax.set_axis_off()
+plt.show()
+"""
