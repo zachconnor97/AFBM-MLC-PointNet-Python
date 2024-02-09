@@ -265,6 +265,7 @@ predc = model.predict(points)
 print(predc)
 """
 model.fit(x=train_ds, epochs=10, validation_data=val_ds, class_weight=label_weights)
+#model.evaluate()
 
 # Visualize predictions
 
