@@ -10,6 +10,9 @@ from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
 from datetime import date
+import sys
+physical_devices = tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
 NUM_POINTS = 2000
@@ -18,6 +21,7 @@ print("Sample Ratio:")
 print(SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
+NUM_EPOCHS = 20
 username = 'Zachariah'
 
 def pc_read(path):
@@ -269,7 +273,7 @@ points, labels = list(train_data)[0]
 predc = model.predict(points)
 print(predc)
 """
-AFBM_MLC_Model = model.fit(x=train_ds, epochs=10, class_weight=label_weights, validation_data=val_ds)
+AFBM_MLC_Model = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds)
 #save model here
 
 #add option to load model here
