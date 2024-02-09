@@ -362,7 +362,7 @@ for i in range(0,NUM_CLASSES-1):
     )
     data = model.evaluate(x=val_ds, callbacks=[GarbageMan])
     histdf = pd.DataFrame(data.history)
-    histfile = save_path + '_history.csv'
+    histfile = save_path + '_Label' + str(i+1) + '_evaluatation.csv'
     with open(histfile, mode='w') as f:
         histdf.to_csv(f)
 
