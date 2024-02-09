@@ -368,8 +368,6 @@ for i in range(0,NUM_CLASSES-1):
     with open(histfile, mode='w') as f:
         histdf.to_csv(f)
 
-#model.evaluate(x=val_ds)
-
 
 """
 # Visualize predictions
