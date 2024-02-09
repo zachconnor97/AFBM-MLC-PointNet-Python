@@ -353,15 +353,17 @@ for i in range(0,NUM_CLASSES-1):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=0.002),
-        metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-                tf.keras.metrics.Precision(class_id=i),
-                tf.keras.metrics.Recall(class_id=i),
-                tf.keras.metrics.F1Score(threshold=0.5),
-                tf.keras.metrics.IoU(num_classes=1,target_class_ids=i)],      
+        metrics=[
+            tf.keras.metrics.BinaryAccuracy(threshold=0.5),
+            tf.keras.metrics.Precision(class_id=i),
+            tf.keras.metrics.Recall(class_id=i),
+            tf.keras.metrics.F1Score(threshold=0.5),
+            #tf.keras.metrics.IoU(num_classes=1,target_class_ids=[i]),      
+        ],
         run_eagerly=True,
     )
-    data = model.evaluate(x=val_ds, callbacks=[GarbageMan])
-    histdf = pd.DataFrame(data.history)
+    data = model.predict(x=val_ds)
+    histdf = pd.DataFrame(data)
     histfile = save_path + '_Label' + str(i+1) + '_evaluatation.csv'
     with open(histfile, mode='w') as f:
         histdf.to_csv(f)
