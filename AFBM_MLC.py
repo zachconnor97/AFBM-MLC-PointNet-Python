@@ -105,11 +105,11 @@ def generate_dataset(filename):
     fileset = tf.data.Dataset.from_tensor_slices((tfile_paths))
     labelset = tf.data.Dataset.from_tensor_slices((tsparse))
     
-    train_points = fileset.skip(int(0.3*len(fileset)))
-    train_label = labelset.skip(int(.3*len(labelset)))
+    train_points = fileset.skip(int(0.2*len(fileset)))
+    train_label = labelset.skip(int(0.2*len(labelset)))
     
-    val_points = fileset.take(int(0.3*len(fileset)))
-    val_label = labelset.take(int(.3*len(labelset)))
+    val_points = fileset.take(int(0.2*len(fileset)))
+    val_label = labelset.take(int(0.2*len(labelset)))
     
     val_points = val_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
@@ -154,7 +154,7 @@ load_path = "C:/Users/" + username + "/OneDrive - Oregon State University/Resear
 #train_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000train_ds')
 #val_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000val_ds')
 
-
+"""
 train_data = train_ds.take(2)
 for batch in range(len(train_data)):
     points, labels = list(train_data)[batch]
@@ -162,7 +162,7 @@ for batch in range(len(train_data)):
     print(labels)
     #print(points.numpy().max())
     #print(points.numpy())
-
+"""
 
 
 ### PointNet Model
@@ -235,11 +235,12 @@ x = conv_bn(x, 64)
 x = conv_bn(x, 128)
 x = conv_bn(x, 1024)
 x = layers.GlobalMaxPooling1D()(x)
+x = dense_bn(x, 512)
+#x = layers.Dropout(0.3)(x)
+x = layers.Flatten()(x)
 x = dense_bn(x, 256)
-x = layers.Dropout(0.3)(x)
-x = dense_bn(x, 128)
-x = layers.Dropout(0.3)(x)
-
+#x = layers.Dropout(0.3)(x)
+x = layers.Flatten()(x)
 outputs = layers.Dense(NUM_CLASSES, activation="sigmoid")(x)
 
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
@@ -252,7 +253,7 @@ model.summary()
 
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
-    optimizer=keras.optimizers.Adam(learning_rate=0.001),
+    optimizer=keras.optimizers.Adam(learning_rate=0.002),
     metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
         tf.keras.metrics.F1Score(threshold=0.5)],
     run_eagerly=True,
@@ -263,7 +264,7 @@ points, labels = list(train_data)[0]
 predc = model.predict(points)
 print(predc)
 """
-model.fit(x=train_ds, epochs=5, validation_data=val_ds, class_weight=label_weights)
+model.fit(x=train_ds, epochs=20, validation_data=val_ds, class_weight=label_weights)
 
 # Visualize predictions
 
