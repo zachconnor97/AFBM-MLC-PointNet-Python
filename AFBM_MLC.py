@@ -15,13 +15,13 @@ print(physical_devices)
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 2000
+NUM_POINTS = 200
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
-NUM_EPOCHS = 20
+NUM_EPOCHS = 1
 username = 'Zachariah'
 
 class GarbageMan(tf.keras.callbacks.Callback):
@@ -153,7 +153,9 @@ train_ds, val_ds, label_weights = generate_dataset(filename=database)
 #print(label_weights)
 
 #save datasets
-save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
+#save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
+save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
+
 train_path = str(save_path + "train_ds")
 val_path = str(save_path + "val_ds")
 #train_ds.save(train_path)
@@ -266,10 +268,10 @@ model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=0.002),
     metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-             tf.keras.metrics.Precision(),
-             tf.keras.metrics.Recall(),
+             tf.keras.metrics.Precision(class_id=list(range(0,24))),
+             tf.keras.metrics.Recall(class_id=list(range(0,24))),
              tf.keras.metrics.F1Score(threshold=0.5),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES,target_class_ids=list(range(0,25)))],      
+             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,24)))],      
     run_eagerly=True,
 )
 """
@@ -278,14 +280,40 @@ points, labels = list(train_data)[0]
 predc = model.predict(points)
 print(predc)
 """
-AFBM_MLC_Model = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
-#save model here
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
-#add option to load model here
+#Save history file
+histdf = pd.DataFrame(train_hist.history)
+histfile = save_path + '_history.csv'
+with open(histfile, mode='w') as f:
+    histdf.to_csv(f)
+
+## Save Model here
+model.save(save_path + '_AFBM Model')
+
+## Load Model here
+#model = tf.keras.models.load_model(save_path)
+
+## Test if the loaded model is the same
+#model.summary()
 
 
 # Validation / Evaluation
-model.evaluate(x=val_ds)
+"""    
+for i in range(0,NUM_CLASSES-1):
+    model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(),
+        optimizer=keras.optimizers.Adam(learning_rate=0.002),
+        metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
+                tf.keras.metrics.Precision(),
+                tf.keras.metrics.Recall(),
+                tf.keras.metrics.F1Score(threshold=0.5),
+                tf.keras.metrics.IoU(num_classes=NUM_CLASSES,target_class_ids=i)],      
+        run_eagerly=True,
+    )
+    model.evaluate(x=val_ds, )
+"""
+#model.evaluate(x=val_ds)
 
 
 """
