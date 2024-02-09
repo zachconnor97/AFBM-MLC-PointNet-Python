@@ -174,13 +174,13 @@ for batch in range(len(train_data)):
 def conv_bn(x, filters):
     x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
     x = layers.BatchNormalization(momentum=0.0)(x)
-    return layers.Activation("relu")(x)
+    return layers.Activation('LeakyReLU')(x)
 
 
 def dense_bn(x, filters):
     x = layers.Dense(filters)(x)
     x = layers.BatchNormalization(momentum=0.0)(x)
-    return layers.Activation("relu")(x)
+    return layers.Activation('LeakyReLU')(x)
 
 #PointNet consists of two core components. The primary MLP network, and the transformer
 #net (T-net). The T-net aims to learn an affine transformation matrix by its own mini
