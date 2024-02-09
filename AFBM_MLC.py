@@ -330,7 +330,8 @@ print(predc)
 """
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 ## Save Model here
-model.save(save_path + '_AFBM Model')
+#model.save(save_path + '_AFBM Model')
+
 #Save history file
 histdf = pd.DataFrame(train_hist.history)
 histfile = save_path + '_history.csv'
@@ -347,20 +348,24 @@ with open(histfile, mode='w') as f:
 
 
 # Validation / Evaluation
-"""    
+ 
 for i in range(0,NUM_CLASSES-1):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=0.002),
         metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-                tf.keras.metrics.Precision(),
-                tf.keras.metrics.Recall(),
+                tf.keras.metrics.Precision(class_id=i),
+                tf.keras.metrics.Recall(class_id=i),
                 tf.keras.metrics.F1Score(threshold=0.5),
-                tf.keras.metrics.IoU(num_classes=NUM_CLASSES,target_class_ids=i)],      
+                tf.keras.metrics.IoU(num_classes=1,target_class_ids=i)],      
         run_eagerly=True,
     )
-    model.evaluate(x=val_ds, )
-"""
+    data = model.evaluate(x=val_ds, callbacks=[GarbageMan])
+    histdf = pd.DataFrame(data.history)
+    histfile = save_path + '_history.csv'
+    with open(histfile, mode='w') as f:
+        histdf.to_csv(f)
+
 #model.evaluate(x=val_ds)
 
 
