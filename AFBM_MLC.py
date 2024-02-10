@@ -328,6 +328,7 @@ points, labels = list(train_data)[0]
 predc = model.predict(points)
 print(predc)
 """
+"""
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 ## Save Model here
 #model.save(save_path + '_AFBM Model')
@@ -337,7 +338,7 @@ histdf = pd.DataFrame(train_hist.history)
 histfile = save_path + '_history.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
-
+"""
 
 
 ## Load Model here
@@ -362,7 +363,9 @@ for i in range(0,NUM_CLASSES-1):
         ],
         run_eagerly=True,
     )
-    data = model.predict(x=val_ds)
+    data = model.evaluate(x=val_ds)
+    print(type(data))
+    print(data)
     histdf = pd.DataFrame(data)
     histfile = save_path + '_Label' + str(i+1) + '_evaluatation.csv'
     with open(histfile, mode='w') as f:
