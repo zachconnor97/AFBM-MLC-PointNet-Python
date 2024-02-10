@@ -316,16 +316,8 @@ for i in range(0,NUM_CLASSES-1):
             tf.keras.metrics.F1Score(threshold=0.5),
             tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
         ],
-        metrics=[
-            tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
-            tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
-            tf.keras.metrics.F1Score(threshold=0.5),
-            tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
-        ],
         run_eagerly=True,
     )
-    data = model.evaluate(x=val_ds)
-    histdf = pd.DataFrame(data)
     data = model.evaluate(x=val_ds)
     histdf = pd.DataFrame(data)
     histfile = save_path + '_Label' + str(i+1) + '_evaluatation.csv'
