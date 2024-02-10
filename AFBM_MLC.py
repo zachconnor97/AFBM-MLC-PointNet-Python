@@ -22,6 +22,7 @@ print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
 NUM_EPOCHS = 15
+NUM_EPOCHS = 15
 username = 'Zachariah'
 
 class GarbageMan(tf.keras.callbacks.Callback):
@@ -270,6 +271,8 @@ model.compile(
     metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
              tf.keras.metrics.Precision(thresholds=[0.5,1]),
              tf.keras.metrics.Recall(thresholds=[0.5,1]),
+             tf.keras.metrics.Precision(thresholds=[0.5,1]),
+             tf.keras.metrics.Recall(thresholds=[0.5,1]),
              tf.keras.metrics.F1Score(threshold=0.5),
              tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
@@ -281,6 +284,7 @@ predc = model.predict(points)
 print(predc)
 """
 
+
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 #Save history file
@@ -289,6 +293,8 @@ histfile = save_path + '_history.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
+## Save Model here
+#model.save(save_path + '_AFBM Model')
 ## Save Model here
 #model.save(save_path + '_AFBM Model')
 
@@ -300,6 +306,7 @@ with open(histfile, mode='w') as f:
 
 
 # Validation / Evaluation per Label
+# Validation / Evaluation per Label
 for i in range(0,NUM_CLASSES-1):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
@@ -310,8 +317,16 @@ for i in range(0,NUM_CLASSES-1):
             tf.keras.metrics.F1Score(threshold=0.5),
             tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
         ],
+        metrics=[
+            tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
+            tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
+            tf.keras.metrics.F1Score(threshold=0.5),
+            tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
+        ],
         run_eagerly=True,
     )
+    data = model.evaluate(x=val_ds)
+    histdf = pd.DataFrame(data)
     data = model.evaluate(x=val_ds)
     histdf = pd.DataFrame(data)
     histfile = save_path + '_Label' + str(i+1) + '_evaluatation.csv'
