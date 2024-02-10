@@ -131,7 +131,7 @@ def generate_dataset(filename):
     val_ds = tf.data.Dataset.zip((val_points, val_label))
     train_ds = tf.data.Dataset.zip((train_points, train_label))
     val_ds = val_ds.batch(BATCH_SIZE)
-    train_ds = train_ds.batch(BATCH_SIZE) # ADDS A lot of time .shuffle(buffer_size=20000,reshuffle_each_iteration=True)
+    train_ds = train_ds.batch(BATCH_SIZE).shuffle()
 
     #Testing stuff
     """

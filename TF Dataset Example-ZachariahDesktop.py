@@ -10,12 +10,10 @@ def read_function(filepath):
 
 file_paths = np.random.rand(3000,1) #Dummy Data
 label_array = np.random.rand(3000,5) #Dummy Data
-print(file_paths)
-print(label_array)
+
 file_paths = tf.constant(file_paths.tolist())
 label_array = tf.constant(label_array.tolist())
-print(file_paths)
-print(file_paths.numpy())
+
 fileset = tf.data.Dataset.from_tensor_slices((file_paths))
 labelset = tf.data.Dataset.from_tensor_slices((label_array))
 
