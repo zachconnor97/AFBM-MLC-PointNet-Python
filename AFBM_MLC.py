@@ -21,7 +21,7 @@ print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
-NUM_EPOCHS = 15
+NUM_EPOCHS = 10
 username = 'Zachariah'
 
 class GarbageMan(tf.keras.callbacks.Callback):
