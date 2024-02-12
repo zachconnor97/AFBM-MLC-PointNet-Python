@@ -15,13 +15,13 @@ print(physical_devices)
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 2000
+NUM_POINTS = 200
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
-NUM_EPOCHS = 10
+NUM_EPOCHS = 2
 username = 'Zachariah'
 
 class GarbageMan(tf.keras.callbacks.Callback):
@@ -102,7 +102,7 @@ def generate_dataset(filename):
     sparse_matrix = Sparse_Matrix_Encoding(df) 
     df = []
     label_weights = sparse_matrix.sum(axis=0)
-    label_weights = 13584. / (25 * label_weights)
+    label_weights = (13584. / (25 * label_weights)) ^ 2
     label_weights = {k: v for k, v in enumerate(label_weights)}
     #print(type(label_weights))
     #print(label_weights)
@@ -284,30 +284,29 @@ print(predc)
 """
 
 
-#train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
-#Save history file
-#histdf = pd.DataFrame(train_hist.history)
-#histfile = save_path + '_history.csv'
-#with open(histfile, mode='w') as f:
-#    histdf.to_csv(f)
+## Save history file
+histdf = pd.DataFrame(train_hist.history)
+histfile = save_path + '_history.csv'
+with open(histfile, mode='w') as f:
+    histdf.to_csv(f)
+
 
 ## Save Model here
-#model.save(save_path + '_AFBM Model')
-## Save Model here
-#model.save(save_path + '_AFBM Model')
+model.save(save_path + '_AFBM Model')
 
 ## Load Model here
-#model = tf.keras.models.load_model(save_path)
+model = tf.keras.models.load_model(save_path + '_AFBM Model')
 
 ## Test if the loaded model is the same
-#model.summary()
+model.summary()
 
-
+"""
 # Validation / Evaluation per Label
 # Validation / Evaluation per Label
 data = []
-for i in range(0,NUM_CLASSES-1):
+for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=0.002),
@@ -325,6 +324,10 @@ histdf = pd.DataFrame(data)
 histfile = save_path + '_evaluatation.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
+
+"""
+
+
 
 """
 # Visualize predictions
