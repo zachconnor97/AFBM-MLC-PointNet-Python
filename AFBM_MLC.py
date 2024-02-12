@@ -217,8 +217,7 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
     
     @classmethod    
     def from_config(cls, config):    
-        config['num_features'] = keras.layers.deserialize(config['num_features'])     
-        return cls(**config)
+        return cls(num_features=config['num_features'], l2reg=config['l2reg'])
 
 def tnet(inputs, num_features):
     # Initalise bias as the indentity matrix
