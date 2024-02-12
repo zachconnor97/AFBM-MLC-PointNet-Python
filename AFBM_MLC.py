@@ -282,12 +282,7 @@ model.compile(
              tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
-model.save(save_path + '_AFBM Model')
-## Load Model here
-model = tf.keras.models.load_model(save_path + '_AFBM Model')
 
-## Test if the loaded model is the same
-model.summary()
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 ## Save history file
@@ -297,8 +292,12 @@ with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
 ## Save Model here
-#model.save(save_path + '_AFBM Model')
+model.save(save_path + '_AFBM Model')
+## Load Model here
+model = tf.keras.models.load_model(save_path + '_AFBM Model')
 
+## Test if the loaded model is the same
+model.summary()
 
 
 """
