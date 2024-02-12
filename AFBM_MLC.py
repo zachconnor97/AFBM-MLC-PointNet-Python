@@ -293,7 +293,7 @@ print(predc)
 #    histdf.to_csv(f)
 
 ## Save Model here
-#model.save(save_path + '_AFBM Model')
+#model.save(save_path + '_' + '_AFBM Model')
 ## Save Model here
 #model.save(save_path + '_AFBM Model')
 
