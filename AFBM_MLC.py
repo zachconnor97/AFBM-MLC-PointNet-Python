@@ -102,10 +102,10 @@ def generate_dataset(filename):
     sparse_matrix = Sparse_Matrix_Encoding(df) 
     df = []
     label_weights = sparse_matrix.sum(axis=0)
-    label_weights = (13584. / (25 * label_weights)) ** 2
+    label_weights = (13584. / (25 * label_weights))
     label_weights = {k: v for k, v in enumerate(label_weights)}
     #print(type(label_weights))
-    #print(label_weights)
+    print(label_weights)
 
     # Slice file paths and labels to tf.data.Dataset
     file_paths = np.asmatrix(file_paths)
