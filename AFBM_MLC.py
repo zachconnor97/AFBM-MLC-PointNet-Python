@@ -292,16 +292,15 @@ with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
 ## Save Model here
-model.save(save_path + '_AFBM Model')
+#model.save(save_path + '_AFBM Model')
 ## Load Model here
-model = tf.keras.models.load_model(save_path + '_AFBM Model')
+#model = tf.keras.models.load_model(save_path + '_AFBM Model')
 
 ## Test if the loaded model is the same
-model.summary()
+#model.summary()
 
 
-"""
-# Validation / Evaluation per Label
+
 # Validation / Evaluation per Label
 data = []
 for i in range(0,NUM_CLASSES):
@@ -323,7 +322,7 @@ histfile = save_path + '_evaluatation.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
-"""
+
 
 
 
