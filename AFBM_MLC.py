@@ -217,7 +217,9 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
     
     @classmethod    
     def from_config(cls, config):    
-        return cls(num_features=config['num_features'], l2reg=config['l2reg'])
+        config['num_features'] = int
+        config['l2reg'] = int
+        return cls(**config)
 
 def tnet(inputs, num_features):
     # Initalise bias as the indentity matrix
@@ -282,7 +284,10 @@ model.compile(
              tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
-
+model.save(save_path + '_AFBM Model')
+## Load Model here
+model = tf.keras.models.load_model(save_path + '_AFBM Model')
+model.summary()
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 ## Save history file
