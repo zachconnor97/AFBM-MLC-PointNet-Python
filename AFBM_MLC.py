@@ -15,13 +15,13 @@ print(physical_devices)
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 200
+NUM_POINTS = 2000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
-NUM_EPOCHS = 1
+NUM_EPOCHS = 12
 username = 'Zachariah'
 
 class GarbageMan(tf.keras.callbacks.Callback):
@@ -148,7 +148,7 @@ def generate_dataset(filename):
 
 
 
-database = "AFBMData_NoChairs_Short2.csv"
+database = "AFBMData_NoChairs.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
 #print(label_weights)
 
@@ -284,10 +284,10 @@ model.compile(
              tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
-model.save(save_path + '_AFBM Model')
+#model.save(save_path + '_AFBM Model')
 ## Load Model here
-model = tf.keras.models.load_model(save_path + '_AFBM Model')
-model.summary()
+#model = tf.keras.models.load_model(save_path + '_AFBM Model')
+#model.summary()
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 ## Save history file
