@@ -283,7 +283,6 @@ predc = model.predict(points)
 print(predc)
 """
 
-
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 ## Save history file
