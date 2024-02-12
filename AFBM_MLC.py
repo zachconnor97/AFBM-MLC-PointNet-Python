@@ -21,7 +21,7 @@ print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
-NUM_EPOCHS = 2
+NUM_EPOCHS = 1
 username = 'Zachariah'
 
 class GarbageMan(tf.keras.callbacks.Callback):
@@ -148,7 +148,7 @@ def generate_dataset(filename):
 
 
 
-database = "AFBMData_NoChairs.csv"
+database = "AFBMData_NoChairs_Short2.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
 #print(label_weights)
 
@@ -212,6 +212,13 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
         xxt = tf.reshape(xxt, (-1, self.num_features, self.num_features))
         return tf.reduce_sum(self.l2reg * tf.square(xxt - self.eye))
 
+    def get_config(self):
+        return{'num_features': self.num_features,'l2reg': self.l2reg}
+    
+    @classmethod    
+    def from_config(cls, config):    
+        config['num_features'] = keras.layers.deserialize(config['num_features'])     
+        return cls(**config)
 
 def tnet(inputs, num_features):
     # Initalise bias as the indentity matrix
@@ -276,13 +283,12 @@ model.compile(
              tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
-"""
-train_data = train_ds.take(1)
-points, labels = list(train_data)[0]
-predc = model.predict(points)
-print(predc)
-"""
+model.save(save_path + '_AFBM Model')
+## Load Model here
+model = tf.keras.models.load_model(save_path + '_AFBM Model')
 
+## Test if the loaded model is the same
+model.summary()
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 ## Save history file
@@ -291,15 +297,10 @@ histfile = save_path + '_history.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
-
 ## Save Model here
-model.save(save_path + '_AFBM Model')
+#model.save(save_path + '_AFBM Model')
 
-## Load Model here
-model = tf.keras.models.load_model(save_path + '_AFBM Model')
 
-## Test if the loaded model is the same
-model.summary()
 
 """
 # Validation / Evaluation per Label
