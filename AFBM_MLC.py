@@ -105,7 +105,7 @@ def generate_dataset(filename):
     label_weights = (13584. / (25 * label_weights))
     label_weights = {k: v for k, v in enumerate(label_weights)}
     #print(type(label_weights))
-    print(label_weights)
+    #print(label_weights)
 
     # Slice file paths and labels to tf.data.Dataset
     file_paths = np.asmatrix(file_paths)
@@ -322,7 +322,7 @@ histfile = save_path + '_label_validation.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
-    
+
 model.summary()
 ## Save Model
 model.save(save_path + '_AFBM Model')
