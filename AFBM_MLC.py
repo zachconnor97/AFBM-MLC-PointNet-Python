@@ -277,7 +277,7 @@ model.summary()
 
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
-    optimizer=keras.optimizers.Adam(learning_rate=0.0005),
+    optimizer=keras.optimizers.Adam(learning_rate=0.0003),
     metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
              tf.keras.metrics.Precision(thresholds=[0.5,1]),
              tf.keras.metrics.Recall(thresholds=[0.5,1]),
