@@ -307,7 +307,7 @@ data = []
 for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=keras.optimizers.Adam(learning_rate=0.002),
+        optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
         metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
             tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
