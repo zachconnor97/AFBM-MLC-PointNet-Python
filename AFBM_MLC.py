@@ -21,7 +21,7 @@ print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
 BATCH_SIZE = 16
 NUM_CLASSES = 25
-NUM_EPOCHS = 10
+NUM_EPOCHS = 1
 LEARN_RATE = 0.0003
 username = 'Zachariah'
 
@@ -294,11 +294,11 @@ model.compile(
 #model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
-train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, callbacks=[GarbageMan()]) #validation_data=val_ds, 
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 ## Save history file
 histdf = pd.DataFrame(train_hist.history)
-histfile = save_path + '_train.csv'
+histfile = save_path + '_train_test.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
@@ -308,25 +308,28 @@ for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-        metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-            tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
-            tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
-            tf.keras.metrics.F1Score(threshold=0.5),
-            tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
+        metrics=[tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
+                 tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
+                 tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
+                 tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
+                 tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
+                 tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
+                 tf.keras.metrics.F1Score(threshold=0.5),
+                 tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
         ],
         run_eagerly=True,
     )
     data.append(model.evaluate(x=val_ds))
     
 histdf = pd.DataFrame(data)
-histfile = save_path + '_label_validation.csv'
+histfile = save_path + '_label_validation_test.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
 
-model.summary()
+#model.summary()
 ## Save Model
-model.save(save_path + '_AFBM Model')
+#model.save(save_path + '_AFBM Model')
 ## Load Model here
 #keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
 #model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
