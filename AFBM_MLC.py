@@ -15,11 +15,11 @@ print(physical_devices)
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 2000
+NUM_POINTS = 5000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 NUM_CLASSES = 25
 NUM_EPOCHS = 12
 username = 'Zachariah'
@@ -116,11 +116,11 @@ def generate_dataset(filename):
     fileset = tf.data.Dataset.from_tensor_slices((tfile_paths))
     labelset = tf.data.Dataset.from_tensor_slices((tsparse))
     
-    train_points = fileset.skip(int(0.2*len(fileset)))
-    train_label = labelset.skip(int(0.2*len(labelset)))
+    train_points = fileset.skip(int(0.3*len(fileset)))
+    train_label = labelset.skip(int(0.3*len(labelset)))
     
-    val_points = fileset.take(int(0.2*len(fileset)))
-    val_label = labelset.take(int(0.2*len(labelset)))
+    val_points = fileset.take(int(0.3*len(fileset)))
+    val_label = labelset.take(int(0.3*len(labelset)))
     
     val_points = val_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
