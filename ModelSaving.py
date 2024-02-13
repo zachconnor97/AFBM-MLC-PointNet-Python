@@ -22,6 +22,7 @@ print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
 NUM_EPOCHS = 12
+LEARN_RATE = 0.0003
 username = 'Zachariah'
 
 class GarbageMan(tf.keras.callbacks.Callback):
@@ -277,7 +278,7 @@ model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
-    optimizer=keras.optimizers.Adam(learning_rate=0.002),
+    optimizer=keras.optimizers.Adam(learning_rate=0.003),
     metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
              tf.keras.metrics.Precision(thresholds=[0.5,1]),
              tf.keras.metrics.Recall(thresholds=[0.5,1]),
@@ -287,18 +288,18 @@ model.compile(
              tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
-model.save(save_path + '_AFBM Model')
+#model.save(save_path + '_AFBM Model')
 ## Load Model here
 keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
+model = tf.keras.models.load_model('D:\ZachResearch\AFBM-MLC-PointNet-Python\2024-02-13_16_5000_10_Learning Rate_0.0003_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model.summary()
-#train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 ## Save history file
-#histdf = pd.DataFrame(train_hist.history)
-#histfile = save_path + '_history.csv'
-#with open(histfile, mode='w') as f:
-#    histdf.to_csv(f)
+histdf = pd.DataFrame(train_hist.history)
+histfile = save_path + '_history.csv'
+with open(histfile, mode='w') as f:
+    histdf.to_csv(f)
 
 ## Save Model here
 #model.save(save_path + '_AFBM Model')
@@ -315,19 +316,22 @@ data = []
 for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=keras.optimizers.Adam(learning_rate=0.002),
-        metrics=[
-            tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
-            tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
-            tf.keras.metrics.F1Score(threshold=0.5),
-            tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
+        optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
+        metrics=[tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
+                 tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
+                 tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
+                 tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
+                 tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
+                 tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
+                 tf.keras.metrics.F1Score(threshold=0.5),
+                 tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
         ],
         run_eagerly=True,
     )
     data.append(model.evaluate(x=val_ds))
     
 histdf = pd.DataFrame(data)
-histfile = save_path + '_evaluatation.csv'
+histfile = save_path + '_label_validation_test.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
