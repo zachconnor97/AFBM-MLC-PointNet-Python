@@ -323,7 +323,7 @@ for i in range(0,NUM_CLASSES):
     data.append(model.evaluate(x=val_ds))
     
 histdf = pd.DataFrame(data)
-histfile = save_path + '_evaluatation.csv'
+histfile = save_path + '_label_validation.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
