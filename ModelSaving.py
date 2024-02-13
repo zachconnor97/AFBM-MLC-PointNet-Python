@@ -9,6 +9,7 @@ import open3d
 import pandas as pd
 from datetime import date
 import gc
+from sklearn.metrics import classification_report
 
 #physical_devices = tf.config.list_physical_devices('GPU')
 #print(physical_devices)
@@ -32,7 +33,7 @@ class GarbageMan(tf.keras.callbacks.Callback):
 
 def pc_read(path):
     
-    cloud_path_header = str('C:/Users/gabri/Box/Automated Functional Basis Modeling/ShapeNetCore.v2/AllClouds10k/')
+    cloud_path_header = str('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k')
     # Use second one for WSL
     #cloud_path_header = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
     try:
@@ -291,15 +292,15 @@ model.compile(
 #model.save(save_path + '_AFBM Model')
 ## Load Model here
 keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-model = tf.keras.models.load_model('D:\ZachResearch\AFBM-MLC-PointNet-Python\2024-02-13_16_5000_10_Learning Rate_0.0003_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
+model = tf.keras.models.load_model('D:/ZachResearch/ModelSavingTest/2024-02-13_16_5000_10_Learning Rate_0.0003_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model.summary()
-train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+#train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 ## Save history file
-histdf = pd.DataFrame(train_hist.history)
-histfile = save_path + '_history.csv'
-with open(histfile, mode='w') as f:
-    histdf.to_csv(f)
+#histdf = pd.DataFrame(train_hist.history)
+#histfile = save_path + '_history.csv'
+#with open(histfile, mode='w') as f:
+#    histdf.to_csv(f)
 
 ## Save Model here
 #model.save(save_path + '_AFBM Model')
@@ -309,7 +310,14 @@ with open(histfile, mode='w') as f:
 ## Test if the loaded model is the same
 #model.summary()
 
+y_true = []
+y_pred = []
 
+for x, y in val_ds:
+    y_true.extend(np.argmax(y.numpy(), axis=1))
+    y_pred.extend(np.argmax(model.predict(x.numpy()), axis=-1))
+
+print(classification_report(y_true, y_pred))
 
 # Validation / Evaluation per Label
 data = []
@@ -330,10 +338,10 @@ for i in range(0,NUM_CLASSES):
     )
     data.append(model.evaluate(x=val_ds))
     
-histdf = pd.DataFrame(data)
-histfile = save_path + '_label_validation_test.csv'
-with open(histfile, mode='w') as f:
-    histdf.to_csv(f)
+#histdf = pd.DataFrame(data)
+#histfile = save_path + '_label_validation_test.csv'
+#with open(histfile, mode='w') as f:
+#    histdf.to_csv(f)
 
 
 
