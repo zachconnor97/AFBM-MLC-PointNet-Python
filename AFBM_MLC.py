@@ -201,7 +201,8 @@ def dense_bn(x, filters):
 #close to an orthogonal matrix (i.e. ||X*X^T - I|| = 0).
 
 class OrthogonalRegularizer(keras.regularizers.Regularizer):
-    def __init__(self, num_features, l2reg=0.001):
+    def __init__(self, num_features=None, l2reg=0.001, **kwargs):
+        super(OrthogonalRegularizer, self).__init__(**kwargs)
         self.num_features = num_features
         self.l2reg = l2reg
         self.eye = tf.eye(num_features)
@@ -214,12 +215,14 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
 
     def get_config(self):
         return{'num_features': self.num_features,'l2reg': self.l2reg}
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(num_features=config.pop('num_features', None), **config)
     
-    @classmethod    
-    def from_config(cls, config):    
-        config['num_features'] = int
-        config['l2reg'] = int
-        return cls(**config)
+## Custom function to instantiate the regularizer during loading
+def orthogonal_regularizer_from_config(config):
+    return OrthogonalRegularizer(**config)
 
 def tnet(inputs, num_features):
     # Initalise bias as the indentity matrix
@@ -282,25 +285,31 @@ model.compile(
              tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
     run_eagerly=True,
 )
+
+## Save Model
 #model.save(save_path + '_AFBM Model')
 ## Load Model here
+#keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
+#model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
-train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, callbacks=[GarbageMan()]) #validation_data=val_ds, 
 
 ## Save history file
 histdf = pd.DataFrame(train_hist.history)
-histfile = save_path + '_history.csv'
+histfile = save_path + '_train.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
-## Save Model here
-#model.save(save_path + '_AFBM Model')
+model.summary()
+## Save Model
+model.save(save_path + '_AFBM Model')
 ## Load Model here
-#model = tf.keras.models.load_model(save_path + '_AFBM Model')
+keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
+model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 
 ## Test if the loaded model is the same
-#model.summary()
+model.summary()
 
 
 
