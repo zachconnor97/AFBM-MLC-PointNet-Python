@@ -301,18 +301,6 @@ histfile = save_path + '_train.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
-model.summary()
-## Save Model
-model.save(save_path + '_AFBM Model')
-## Load Model here
-keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
-
-## Test if the loaded model is the same
-model.summary()
-
-
-
 # Validation / Evaluation per Label
 data = []
 for i in range(0,NUM_CLASSES):
@@ -333,6 +321,21 @@ histdf = pd.DataFrame(data)
 histfile = save_path + '_label_validation.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
+
+    
+model.summary()
+## Save Model
+model.save(save_path + '_AFBM Model')
+## Load Model here
+keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
+model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
+
+## Test if the loaded model is the same
+model.summary()
+
+
+
+
 
 
 
