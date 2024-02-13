@@ -327,11 +327,11 @@ model.summary()
 ## Save Model
 model.save(save_path + '_AFBM Model')
 ## Load Model here
-keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
+#keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
+#model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 
 ## Test if the loaded model is the same
-model.summary()
+#model.summary()
 
 
 
