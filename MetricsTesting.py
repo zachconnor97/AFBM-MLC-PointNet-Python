@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
-from keras import Metric
+from tensorflow.keras.metrics import Metric
 from keras import backend as B
 from matplotlib import pyplot as plt
 import open3d

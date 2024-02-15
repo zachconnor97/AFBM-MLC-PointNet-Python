@@ -9,10 +9,12 @@ import open3d
 import pandas as pd
 from datetime import date
 import gc
+from tensorflow.keras.metrics import Metric
+from keras import backend as B
 
 physical_devices = tf.config.list_physical_devices('GPU')
 print(physical_devices)
-#tf.config.experimental.set_memory_growth(physical_devices[0], True)
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
 NUM_POINTS = 100
@@ -29,6 +31,45 @@ class GarbageMan(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         gc.collect()
         tf.keras.backend.clear_session()
+
+# Custom Label Metric
+class PerLabelMetric(Metric):
+    def __init__(self,name='per_label_metric', num_labels=1, **kwargs):
+        super(PerLabelMetric, self). __init__(name=name,**kwargs)
+        self.num_labels = num_labels
+        self.true_positives = self.add_weight(name='true_positives', initializer='zeros')
+        self.true_negatives = self.add_weight(name='true_negatives', initializer='zeros')
+        self.false_positives = self.add_weight(name='false_positives', initializer='zeros')
+        self.false_negatives = self.add_weight(name='false_negatives', initializer='zeros')
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        # Custom logic to compute the metric for each label
+        for i in range(self.num_labels):
+            y_true_label = y_true[:, i]
+            y_pred_label = y_pred[:, i]
+            
+            true_positives = B.sum(B.cast(y_true_label * B.round(y_pred_label), 'float32'))
+            false_positives = B.sum(B.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
+            true_negatives = B.sum(B.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
+            false_negatives = B.sum(B.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
+            
+            self.true_positives[i].assign_add(true_positives)
+            self.false_positives[i].assign_add(false_positives)
+            self.true_negatives[i].assign_add(true_negatives)
+            self.false_negatives[i].assign_add(false_negatives)
+
+    def result(self):
+        #precision = self.true_positives / (self.true_positives + self.false_positives + B.epsilon())
+        #recall = self.true_positives / (self.true_positives + self.false_negatives + B.epsilon())
+        tp = self.true_positives
+        tn = self.true_negatives
+        fp = self.false_positives
+        fn = self.false_negatives
+        return tp, tn, fp, fn
+
+    def reset_states(self):
+        # Reset the state of the metric
+        B.batch_set_value([(v, 0) for v in self.variables])
+
 """
 class BinaryTruePositives(keras.metrics.Metric):
 
@@ -302,7 +343,7 @@ model.summary()
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-    metrics=[#BinaryTruePositives(),
+    metrics=[PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.BinaryAccuracy(threshold=0.5),
              tf.keras.metrics.Precision(thresholds=[0.5,1]),
              tf.keras.metrics.Recall(thresholds=[0.5,1]),
@@ -332,7 +373,7 @@ for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-        metrics=[
+        metrics=[PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
             tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
             tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
