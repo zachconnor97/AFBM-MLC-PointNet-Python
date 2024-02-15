@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
+from keras import ops
 from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
