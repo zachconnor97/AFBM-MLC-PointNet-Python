@@ -34,7 +34,7 @@ class GarbageMan(tf.keras.callbacks.Callback):
 
 # Custom Label Metric
 class PerLabelMetric(Metric):
-    def __init__(self,name='per_label_metric', num_labels=1, **kwargs):
+    def __init__(self,name='per_label_metric', num_labels=NUM_CLASSES, **kwargs):
         super(PerLabelMetric, self). __init__(name=name,**kwargs)
         self.num_labels = num_labels
         self.true_positives = self.add_weight(name='true_positives', shape=(self.num_labels), initializer='zeros')
