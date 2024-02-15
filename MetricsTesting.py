@@ -250,9 +250,13 @@ class PerLabelMetric(Metric):
             self.false_negatives[i].assign_add(false_negatives)
 
     def result(self):
-        precision = self.true_positives / (self.true_positives + self.false_positives + B.epsilon())
-        recall = self.true_positives / (self.true_positives + self.false_negatives + B.epsilon())
-        return tf.reduce_mean(precision), tf.reduce_mean(recall)
+        #precision = self.true_positives / (self.true_positives + self.false_positives + B.epsilon())
+        #recall = self.true_positives / (self.true_positives + self.false_negatives + B.epsilon())
+        tp = self.true_positives
+        tn = self.true_negatives
+        fp = self.false_positives
+        fn = self.false_negatives
+        return tp, tn, fp, fn
 
     def reset_states(self):
         # Reset the state of the metric
