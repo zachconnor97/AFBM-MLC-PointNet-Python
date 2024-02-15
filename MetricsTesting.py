@@ -4,12 +4,14 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
+from keras import Metric
+from keras import backend as B
 from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
 from datetime import date
 import gc
-from sklearn.metrics import classification_report
+
 
 #physical_devices = tf.config.list_physical_devices('GPU')
 #print(physical_devices)
@@ -222,6 +224,41 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
     def from_config(cls, config):
         return cls(num_features=config.pop('num_features', None), **config)
 
+# Custom Label Metric
+class PerLabelMetric(Metric):
+    def __init__(self,name='per_label_metric', num_labels=10, **kwargs):
+        super(PerLabelMetric, self). __init__(name=name,**kwargs)
+        self.num_labels = num_labels
+        self.true_positives = self.add_weight(name='true_positives', initializer='zeros')
+        self.true_negatives = self.add_weight(name='true_negatives', initializer='zeros')
+        self.false_positives = self.add_weight(name='false_positives', initializer='zeros')
+        self.false_negatives = self.add_weight(name='false_negatives', initializer='zeros')
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        # Custom logic to compute the metric for each label
+        for i in range(self.num_labels):
+            y_true_label = y_true[:, i]
+            y_pred_label = y_pred[:, i]
+            
+            true_positives = B.sum(keras.cast(y_true_label * B.round(y_pred_label), 'float32'))
+            false_positives = B.sum(keras.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
+            true_negatives = B.sum(keras.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
+            false_negatives = B.sum(keras.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
+            
+            self.true_positives[i].assign_add(true_positives)
+            self.false_positives[i].assign_add(false_positives)
+            self.true_negatives[i].assign_add(true_negatives)
+            self.false_negatives[i].assign_add(false_negatives)
+
+    def result(self):
+        precision = self.true_positives / (self.true_positives + self.false_positives + B.epsilon())
+        recall = self.true_positives / (self.true_positives + self.false_negatives + B.epsilon())
+        return tf.reduce_mean(precision), tf.reduce_mean(recall)
+
+    def reset_states(self):
+        # Reset the state of the metric
+        B.batch_set_value([(v, 0) for v in self.variables])
+
+
 # Custom function to instantiate the regularizer during loading
 def orthogonal_regularizer_from_config(config):
     return OrthogonalRegularizer(**config)
@@ -310,14 +347,6 @@ model = tf.keras.models.load_model('D:/ZachResearch/ModelSavingTest/2024-02-13_1
 ## Test if the loaded model is the same
 #model.summary()
 
-y_true = []
-y_pred = []
-
-for x, y in val_ds:
-    y_true.extend(np.argmax(y.numpy(), axis=1))
-    y_pred.extend(np.argmax(model.predict(x.numpy()), axis=-1))
-
-print(classification_report(y_true, y_pred))
 
 # Validation / Evaluation per Label
 data = []
