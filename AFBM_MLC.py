@@ -4,7 +4,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
-from keras import ops
 from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
@@ -30,7 +29,7 @@ class GarbageMan(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         gc.collect()
         tf.keras.backend.clear_session()
-
+"""
 class BinaryTruePositives(keras.metrics.Metric):
 
   def __init__(self, name='binary_true_positives', **kwargs):
@@ -38,13 +37,13 @@ class BinaryTruePositives(keras.metrics.Metric):
     self.true_positives = self.add_weight(name='tp', initializer='zeros')
 
   def update_state(self, y_true, y_pred, sample_weight=None):
-    y_true = ops.cast(y_true, "bool")
-    y_pred = ops.cast(y_pred, "bool")
+    y_true = keras.ops.cast(y_true, "bool")
+    y_pred = keras.ops.cast(y_pred, "bool")
 
-    values = ops.logical_and(ops.equal(y_true, True), ops.equal(y_pred, True))
-    values = ops.cast(values, self.dtype)
+    values = keras.ops.logical_and(keras.ops.equal(y_true, True), keras.ops.equal(y_pred, True))
+    values = keras.ops.cast(values, self.dtype)
     if sample_weight is not None:
-      sample_weight = ops.cast(sample_weight, self.dtype)
+      sample_weight = keras.ops.cast(sample_weight, self.dtype)
       values = values * sample_weight
     self.true_positives.assign_add(ops.sum(values))
 
@@ -53,7 +52,7 @@ class BinaryTruePositives(keras.metrics.Metric):
 
   def reset_states(self):
     self.true_positives.assign(0)
-
+"""
 def pc_read(path):
     
     #cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
@@ -303,7 +302,7 @@ model.summary()
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-    metrics=[BinaryTruePositives(),
+    metrics=[#BinaryTruePositives(),
             tf.keras.metrics.BinaryAccuracy(threshold=0.5),
              tf.keras.metrics.Precision(thresholds=[0.5,1]),
              tf.keras.metrics.Recall(thresholds=[0.5,1]),
