@@ -229,20 +229,23 @@ class PerLabelMetric(Metric):
     def __init__(self,name='per_label_metric', num_labels=10, **kwargs):
         super(PerLabelMetric, self). __init__(name=name,**kwargs)
         self.num_labels = num_labels
-        self.true_positives = self.add_weight(name='true_positives', initializer='zeros')
-        self.true_negatives = self.add_weight(name='true_negatives', initializer='zeros')
-        self.false_positives = self.add_weight(name='false_positives', initializer='zeros')
-        self.false_negatives = self.add_weight(name='false_negatives', initializer='zeros')
+
+        # Assuming self.num_labels is the number of labels
+        self.true_positives = self.add_weight(name='true_positives',shape=(self.num_labels,),  initializer='zeros',)
+        self.true_negatives = self.add_weight(name='true_negatives',shape=(self.num_labels,), initializer='zeros')
+        self.false_positives = self.add_weight(name='false_positives',shape=(self.num_labels,), initializer='zeros')
+        self.false_negatives = self.add_weight(name='false_negatives',shape=(self.num_labels,), initializer='zeros')
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         # Custom logic to compute the metric for each label
         for i in range(self.num_labels):
             y_true_label = y_true[:, i]
             y_pred_label = y_pred[:, i]
             
-            true_positives = B.sum(keras.cast(y_true_label * B.round(y_pred_label), 'float32'))
-            false_positives = B.sum(keras.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
-            true_negatives = B.sum(keras.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
-            false_negatives = B.sum(keras.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
+            true_positives = B.sum(B.cast(y_true_label * B.round(y_pred_label), 'float32'))
+            false_positives = B.sum(B.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
+            true_negatives = B.sum(B.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
+            false_negatives = B.sum(B.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
             
             self.true_positives[i].assign_add(true_positives)
             self.false_positives[i].assign_add(false_positives)
@@ -318,18 +321,7 @@ model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 #Once the model is defined it can be trained like any other standard classification model
 #using `.compile()` and `.fit()`.
 
-model.compile(
-    loss=tf.keras.losses.BinaryCrossentropy(),
-    optimizer=keras.optimizers.Adam(learning_rate=0.003),
-    metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-             tf.keras.metrics.Precision(thresholds=[0.5,1]),
-             tf.keras.metrics.Recall(thresholds=[0.5,1]),
-             tf.keras.metrics.Precision(thresholds=[0.5,1]),
-             tf.keras.metrics.Recall(thresholds=[0.5,1]),
-             tf.keras.metrics.F1Score(threshold=0.5),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
-    run_eagerly=True,
-)
+
 #model.save(save_path + '_AFBM Model')
 ## Load Model here
 keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
@@ -351,26 +343,30 @@ model = tf.keras.models.load_model('D:/ZachResearch/ModelSavingTest/2024-02-13_1
 ## Test if the loaded model is the same
 #model.summary()
 
+model.compile(
+    loss=tf.keras.losses.BinaryCrossentropy(),
+    optimizer=keras.optimizers.Adam(learning_rate=0.003),
+    metrics=[PerLabelMetric(num_labels=NUM_CLASSES),  # Add the custom metric here
+        tf.keras.metrics.BinaryAccuracy(threshold=0.5),
+             tf.keras.metrics.Precision(thresholds=[0.5,1]),
+             tf.keras.metrics.Recall(thresholds=[0.5,1]),
+             tf.keras.metrics.Precision(thresholds=[0.5,1]),
+             tf.keras.metrics.Recall(thresholds=[0.5,1]),
+             tf.keras.metrics.F1Score(threshold=0.5),
+             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
+    run_eagerly=True,
+)
 
-# Validation / Evaluation per Label
-data = []
-for i in range(0,NUM_CLASSES):
-    model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(),
-        optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-        metrics=[tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
-                 tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
-                 tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
-                 tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
-                 tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
-                 tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
-                 tf.keras.metrics.F1Score(threshold=0.5),
-                 tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
-        ],
-        run_eagerly=True,
-    )
-    data.append(model.evaluate(x=val_ds))
-    
+
+per_label_metric_instance = PerLabelMetric()
+# Assuming you have an instance of PerLabelMetric named per_label_metric
+print("True Positives:", per_label_metric_instance.true_positives.numpy())
+print("True Negatives:", per_label_metric_instance.true_negatives.numpy())
+print("False Positives:", per_label_metric_instance.false_positives.numpy())
+print("False Negatives:", per_label_metric_instance.false_negatives.numpy())
+
+
+
 #histdf = pd.DataFrame(data)
 #histfile = save_path + '_label_validation_test.csv'
 #with open(histfile, mode='w') as f:
