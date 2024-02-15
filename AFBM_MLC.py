@@ -30,6 +30,29 @@ class GarbageMan(tf.keras.callbacks.Callback):
         gc.collect()
         tf.keras.backend.clear_session()
 
+class BinaryTruePositives(keras.metrics.Metric):
+
+  def __init__(self, name='binary_true_positives', **kwargs):
+    super().__init__(name=name, **kwargs)
+    self.true_positives = self.add_weight(name='tp', initializer='zeros')
+
+  def update_state(self, y_true, y_pred, sample_weight=None):
+    y_true = ops.cast(y_true, "bool")
+    y_pred = ops.cast(y_pred, "bool")
+
+    values = ops.logical_and(ops.equal(y_true, True), ops.equal(y_pred, True))
+    values = ops.cast(values, self.dtype)
+    if sample_weight is not None:
+      sample_weight = ops.cast(sample_weight, self.dtype)
+      values = values * sample_weight
+    self.true_positives.assign_add(ops.sum(values))
+
+  def result(self):
+    return self.true_positives
+
+  def reset_states(self):
+    self.true_positives.assign(0)
+
 def pc_read(path):
     
     #cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
@@ -308,14 +331,15 @@ for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-        metrics=[tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
-                 tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
-                 tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
-                 tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
-                 tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
-                 tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
-                 tf.keras.metrics.F1Score(threshold=0.5),
-                 tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
+        metrics=[
+            tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
+            tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
+            tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
+            tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
+            tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
+            tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
+            tf.keras.metrics.F1Score(threshold=0.5),
+            tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
         ],
         run_eagerly=True,
     )
