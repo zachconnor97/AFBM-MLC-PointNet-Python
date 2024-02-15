@@ -226,15 +226,15 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
 
 # Custom Label Metric
 class PerLabelMetric(Metric):
-    def __init__(self,name='per_label_metric', num_labels=10, **kwargs):
+    def __init__(self,name='per_label_metric', num_labels=1, **kwargs):
         super(PerLabelMetric, self). __init__(name=name,**kwargs)
         self.num_labels = num_labels
 
         # Assuming self.num_labels is the number of labels
-        self.true_positives = self.add_weight(name='true_positives',shape=(self.num_labels,),  initializer='zeros',)
-        self.true_negatives = self.add_weight(name='true_negatives',shape=(self.num_labels,), initializer='zeros')
-        self.false_positives = self.add_weight(name='false_positives',shape=(self.num_labels,), initializer='zeros')
-        self.false_negatives = self.add_weight(name='false_negatives',shape=(self.num_labels,), initializer='zeros')
+        self.true_positives = self.add_weight(name='true_positives', shape=(self.num_labels),  initializer='zeros',)
+        self.true_negatives = self.add_weight(name='true_negatives', shape=(self.num_labels), initializer='zeros')
+        self.false_positives = self.add_weight(name='false_positives', shape=(self.num_labels), initializer='zeros')
+        self.false_negatives = self.add_weight(name='false_negatives', shape=(self.num_labels), initializer='zeros')
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         # Custom logic to compute the metric for each label
