@@ -16,7 +16,7 @@ print(physical_devices)
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 5000
+NUM_POINTS = 100
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
@@ -173,7 +173,7 @@ def generate_dataset(filename):
 
 
 
-database = "AFBMData_NoChairs.csv"
+database = "AFBMData_NoChairs_Short2.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
 #print(label_weights)
 
@@ -303,7 +303,8 @@ model.summary()
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-    metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.5),
+    metrics=[BinaryTruePositives(),
+            tf.keras.metrics.BinaryAccuracy(threshold=0.5),
              tf.keras.metrics.Precision(thresholds=[0.5,1]),
              tf.keras.metrics.Recall(thresholds=[0.5,1]),
              tf.keras.metrics.F1Score(threshold=0.5),
