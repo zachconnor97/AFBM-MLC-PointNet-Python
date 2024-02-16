@@ -397,11 +397,12 @@ for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-        metrics=[#PerLabelMetric(num_labels=NUM_CLASSES),
-            tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
-            tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
-            tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
-            tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
+        metrics=[
+            #PerLabelMetric(num_labels=NUM_CLASSES),
+            #tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
+            #tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
+            #tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
+            #tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
             tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.F1Score(threshold=0.5),      
