@@ -78,12 +78,9 @@ class PerLabelMetricCallBack(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, batch, epoch, logs=None):
         data = self.test_data
-        
         x_data, y_data = data
-        
         correct = 0
         incorrect = 0
-
         x_result = self.model.predict(x_data, verbose=0)
 
         x_numpy = []
@@ -196,11 +193,11 @@ def generate_dataset(filename):
 
     sparse_matrix = Sparse_Matrix_Encoding(df) 
     df = []
-    label_weights = sparse_matrix.sum(axis=0)
-    label_weights = (13584. / (25 * label_weights))
+    label_counts = sparse_matrix.sum(axis=0)
+    label_weights = (13586. / (25 * label_counts))
     label_weights = {k: v for k, v in enumerate(label_weights)}
     #print(type(label_weights))
-    #print(label_weights)
+    print(label_weights)
 
     # Slice file paths and labels to tf.data.Dataset
     file_paths = np.asmatrix(file_paths)
@@ -369,12 +366,13 @@ acc_per_label = PerLabelMetricCallBack(val_ds)
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-    metrics=[#PerLabelMetric(num_labels=NUM_CLASSES),
+    metrics=[
+            #PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-             tf.keras.metrics.Precision(thresholds=[0.5,1]),
-             tf.keras.metrics.Recall(thresholds=[0.5,1]),
-             tf.keras.metrics.F1Score(threshold=0.5),
-             tf.keras.metrics.IoU(num_classes=NUM_CLASSES, target_class_ids=list(range(0,25)))],      
+            tf.keras.metrics.Precision(thresholds=[0.5,1]),
+            tf.keras.metrics.Recall(thresholds=[0.5,1]),
+            tf.keras.metrics.F1Score(threshold=0.5)
+            ],      
     run_eagerly=True,
 )
 
@@ -406,8 +404,7 @@ for i in range(0,NUM_CLASSES):
             tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
             tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
-            tf.keras.metrics.F1Score(threshold=0.5),
-            tf.keras.metrics.IoU(num_classes=25,target_class_ids=[i]),      
+            tf.keras.metrics.F1Score(threshold=0.5),      
         ],
         run_eagerly=True,
     )
