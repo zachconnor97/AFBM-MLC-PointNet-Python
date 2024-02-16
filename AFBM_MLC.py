@@ -21,7 +21,7 @@ NUM_POINTS = 100
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
-BATCH_SIZE = 16
+BATCH_SIZE = 128
 NUM_CLASSES = 25
 NUM_EPOCHS = 1
 LEARN_RATE = 0.0003
@@ -75,8 +75,11 @@ labels = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15',
 class PerLabelMetricCallBack(tf.keras.callbacks.Callback):
     def __init__(self, test_data):
         self.test_data = test_data
-    def on_epoch_end(self, epoch, logs=None):
-        x_data, y_data = self.test_data
+        
+    def on_epoch_end(self, batch, epoch, logs=None):
+        data = self.test_data
+        
+        x_data, y_data = data
         
         correct = 0
         incorrect = 0
@@ -387,7 +390,7 @@ model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 
 #Once the model is defined it can be trained like any other standard classification model
 #using `.compile()` and `.fit()`.
-
+acc_per_label = PerLabelMetricCallBack(val_ds)
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
@@ -407,7 +410,7 @@ model.compile(
 #model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
-train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[PerLabelMetricCallBack(), GarbageMan()])
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[acc_per_label, GarbageMan()])
 
 ## Save history file
 histdf = pd.DataFrame(train_hist.history)
