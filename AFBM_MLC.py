@@ -70,6 +70,58 @@ class PerLabelMetric(Metric):
         # Reset the state of the metric
         B.batch_set_value([(v, 0) for v in self.variables])
 
+labels = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24']
+
+class PerLabelMetricCallBack(tf.keras.callbacks.Callback):
+    def __init__(self, test_data):
+        self.test_data = test_data
+    def on_epoch_end(self, epoch, logs=None):
+        x_data, y_data = self.test_data
+        
+        correct = 0
+        incorrect = 0
+
+        x_result = self.model.predict(x_data, verbose=0)
+
+        x_numpy = []
+
+        for i in labels:
+            self.class_history.append([])
+
+        class_correct = [0] * len(labels)
+        class_incorrect = [0] * len(labels)
+
+        for i in range(len(x_data)):
+            x = x_data[i]
+            y = y_data[i]
+
+            res = x_result[i]
+
+            actual_label = np.argmax(y)
+            pred_label = np.argmax(y)
+
+            if(pred_label == actual_label):
+                x_numpy.append(["cor:", str(y), str(res), str(pred_label)])
+                class_correct[actual_label] += 1
+                correct += 1
+            else:
+                x_numpy.append(["inc:", str(y), str(res), str(pred_label)])
+                class_incorrect[actual_label] += 1
+                incorrect += 1
+        print("\tCorrect: %d" %(correct))
+        print("\tIncorrect: %d" %(incorrect))
+
+        for i in range(len(labels)):
+            tot = float(class_correct[i] + class_incorrect[i])
+            class_acc = -1
+            if (tot > 0):
+                class_acc = float(class_correct[i]) / tot
+            print("\t%s: %.3f" %(class_correct[i], class_acc))
+        acc = float(correct) / float(correct + incorrect)
+
+        print("\tCurrent Network Accuracy: %.3f" %(acc))
+
+
 """
 class BinaryTruePositives(keras.metrics.Metric):
 
@@ -339,7 +391,7 @@ model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-    metrics=[PerLabelMetric(num_labels=NUM_CLASSES),
+    metrics=[#PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.BinaryAccuracy(threshold=0.5),
              tf.keras.metrics.Precision(thresholds=[0.5,1]),
              tf.keras.metrics.Recall(thresholds=[0.5,1]),
@@ -355,7 +407,7 @@ model.compile(
 #model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
-train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[PerLabelMetricCallBack(), GarbageMan()])
 
 ## Save history file
 histdf = pd.DataFrame(train_hist.history)
@@ -369,7 +421,7 @@ for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
-        metrics=[PerLabelMetric(num_labels=NUM_CLASSES),
+        metrics=[#PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
             tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
             tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
