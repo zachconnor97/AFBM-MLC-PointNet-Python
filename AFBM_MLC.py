@@ -51,7 +51,7 @@ class PerLabelMetric(Metric):
             false_positives = B.sum(B.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
             true_negatives = B.sum(B.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
             false_negatives = B.sum(B.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
-            
+            print(true_positives)
             self.true_positives[i].assign_add(true_positives)
             self.false_positives[i].assign_add(false_positives)
             self.true_negatives[i].assign_add(true_negatives)
@@ -211,12 +211,9 @@ def generate_dataset(filename):
     """
     return train_ds, val_ds, label_weights
 
-
-
 database = "AFBMData_NoChairs_Short2.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
 #print(label_weights)
-
 #save datasets
 #save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE))
@@ -241,7 +238,6 @@ for batch in range(len(train_data)):
     #print(points.numpy().max())
     #print(points.numpy())
 """
-
 
 ### PointNet Model
 #Each convolution and fully-connected layer (with exception for end layers) consits of
@@ -333,7 +329,7 @@ x = dense_bn(x, 256)
 outputs = layers.Dense(NUM_CLASSES, activation="sigmoid")(x)
 
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
-model.summary()
+#model.summary()
 
 ### Train model
 
