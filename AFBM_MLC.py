@@ -232,8 +232,8 @@ def generate_dataset(filename):
 
 database = "AFBMData_NoChairs_Augmented.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-print(type(label_weights))
-print("\tLabel Weights: %d",label_weights)
+#print(type(label_weights))
+#print("\tLabel Weights: %d",label_weights)
 
 with open("Label_Weights.csv", mode='w') as f:
     writer = csv.writer(f)
