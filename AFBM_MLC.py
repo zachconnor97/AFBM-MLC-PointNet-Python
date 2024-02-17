@@ -231,6 +231,11 @@ def generate_dataset(filename):
 
 database = "AFBMData_NoChairs_Augmented.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
+
+print("\tLabel Weights: %d",label_weights)
+with open("Label_Weights", mode='w') as f:
+    label_weights.to_csv(f)
+
 #save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE))
 
