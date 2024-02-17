@@ -24,7 +24,7 @@ print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
-NUM_EPOCHS = 10
+NUM_EPOCHS = 15
 LEARN_RATE = 0.00025
 username = 'Zachariah'
 
@@ -389,7 +389,7 @@ model.save(save_path + '_AFBM Model')
 
 ## Save history file
 histdf = pd.DataFrame(train_hist.history)
-histfile = save_path + '_train_history.csv'
+histfile = save_path + '_train_history2.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
@@ -410,7 +410,7 @@ for i in range(0,NUM_CLASSES):
     data.append(model.evaluate(x=val_ds))
     
 histdf = pd.DataFrame(data)
-histfile = save_path + '_label_validation_.csv'
+histfile = save_path + '_label_validation2.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
