@@ -11,19 +11,20 @@ from datetime import date
 import gc
 from tensorflow.keras.metrics import Metric
 from keras import backend as B
+import csv
 
 physical_devices = tf.config.list_physical_devices('GPU')
 #print(physical_devices)
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 2000
+NUM_POINTS = 5000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
-NUM_EPOCHS = 1
+NUM_EPOCHS = 10
 LEARN_RATE = 0.0003
 username = 'Zachariah'
 
@@ -231,10 +232,13 @@ def generate_dataset(filename):
 
 database = "AFBMData_NoChairs_Augmented.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-
+print(type(label_weights))
 print("\tLabel Weights: %d",label_weights)
-with open("Label_Weights", mode='w') as f:
-    label_weights.to_csv(f)
+
+with open("Label_Weights.csv", mode='w') as f:
+    writer = csv.writer(f)
+    for key, value in label_weights.items():
+        writer.writerow([key, value])
 
 #save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE))
