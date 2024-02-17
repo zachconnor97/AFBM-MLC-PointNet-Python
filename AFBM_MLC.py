@@ -18,14 +18,14 @@ physical_devices = tf.config.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 5000
+NUM_POINTS = 2000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
 BATCH_SIZE = 32
 NUM_CLASSES = 25
 NUM_EPOCHS = 10
-LEARN_RATE = 0.0003
+LEARN_RATE = 0.00025
 username = 'Zachariah'
 
 class GarbageMan(tf.keras.callbacks.Callback):
