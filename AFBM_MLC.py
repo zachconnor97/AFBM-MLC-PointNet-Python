@@ -385,7 +385,7 @@ model.compile(
 train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 #model.fit(x=val_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 #model.evaluate(x=val_ds,callbacks=[acc_per_label])
-
+model.save(save_path + '_AFBM Model')
 
 ## Save history file
 histdf = pd.DataFrame(train_hist.history)
