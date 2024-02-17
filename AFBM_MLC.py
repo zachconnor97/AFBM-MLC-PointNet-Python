@@ -13,15 +13,15 @@ from tensorflow.keras.metrics import Metric
 from keras import backend as B
 
 physical_devices = tf.config.list_physical_devices('GPU')
-print(physical_devices)
+#print(physical_devices)
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
-NUM_POINTS = 100
+NUM_POINTS = 2000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 print("Sample Ratio:")
 print(1/SAMPLE_RATIO)
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 NUM_CLASSES = 25
 NUM_EPOCHS = 1
 LEARN_RATE = 0.0003
@@ -51,7 +51,7 @@ class PerLabelMetric(Metric):
             false_positives = B.sum(B.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
             true_negatives = B.sum(B.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
             false_negatives = B.sum(B.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
-            print(true_positives)
+            print(self.true_positives[i])
             self.true_positives[i].assign_add(true_positives)
             self.false_positives[i].assign_add(false_positives)
             self.true_negatives[i].assign_add(true_negatives)
@@ -169,7 +169,7 @@ def augment(points):
 def generate_dataset(filename):
 
     # Import the csv and convert to strings
-    df = pd.read_csv("AFBMData_NoChairs.csv")
+    df = pd.read_csv(filename)
     df = df.astype('str')
     
     # Seperates cloud paths to pandas series 
@@ -181,14 +181,14 @@ def generate_dataset(filename):
     df.pop('.obj paths')
     df.pop('fileid')
     df.pop('status')
-
+    num_files = float(len(df))
     sparse_matrix = Sparse_Matrix_Encoding(df) 
     df = []
     label_counts = sparse_matrix.sum(axis=0)
-    label_weights = (13586. / (25 * label_counts))
+    label_weights = (num_files / (25 * label_counts))
     label_weights = {k: v for k, v in enumerate(label_weights)}
     #print(type(label_weights))
-    print(label_weights)
+    #print(label_weights)
 
     # Slice file paths and labels to tf.data.Dataset
     file_paths = np.asmatrix(file_paths)
@@ -229,10 +229,8 @@ def generate_dataset(filename):
     """
     return train_ds, val_ds, label_weights
 
-database = "AFBMData_NoChairs_Short2.csv"
+database = "AFBMData_NoChairs_Augmented.csv"
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-#print(label_weights)
-#save datasets
 #save_path = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE))
 
@@ -242,8 +240,8 @@ val_path = str(save_path + "val_ds")
 #val_ds.save(val_path)
 
 
-load_path = "C:/Users/" + username + "/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/"
-#load_path = "/mnt/c/Users/" + username + "/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/"
+#load_path = "C:/Users/" + username + "/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/"
+load_path = "/mnt/c/Users/" + username + "/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/"
 #train_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000train_ds')
 #val_ds = tf.data.Dataset.load(load_path + '2024-02-07_32_2000val_ds')
 
@@ -374,14 +372,19 @@ model.compile(
 #model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
-train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[acc_per_label, GarbageMan()])
+
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+#model.fit(x=val_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+#model.evaluate(x=val_ds,callbacks=[acc_per_label])
+
 
 ## Save history file
 histdf = pd.DataFrame(train_hist.history)
-histfile = save_path + '_train_test.csv'
+histfile = save_path + '_train_history.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
+    
 # Validation / Evaluation per Label
 data = []
 for i in range(0,NUM_CLASSES):
@@ -389,11 +392,6 @@ for i in range(0,NUM_CLASSES):
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
         metrics=[
-            #PerLabelMetric(num_labels=NUM_CLASSES),
-            #tf.keras.metrics.TruePositives(thresholds=[0.5,1]),
-            #tf.keras.metrics.TrueNegatives(thresholds=[0.5,1]),
-            #tf.keras.metrics.FalsePositives(thresholds=[0.5,1]),
-            #tf.keras.metrics.FalseNegatives(thresholds=[0.5,1]),
             tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.F1Score(threshold=0.5),      
@@ -403,7 +401,7 @@ for i in range(0,NUM_CLASSES):
     data.append(model.evaluate(x=val_ds))
     
 histdf = pd.DataFrame(data)
-histfile = save_path + '_label_validation_test.csv'
+histfile = save_path + '_label_validation_.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
@@ -414,7 +412,6 @@ with open(histfile, mode='w') as f:
 ## Load Model here
 #keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
 #model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
-
 ## Test if the loaded model is the same
 #model.summary()
 
