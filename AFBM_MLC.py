@@ -36,7 +36,7 @@ class GarbageMan(tf.keras.callbacks.Callback):
 # Custom Label Metric
 class PerLabelMetric(Metric):
     def __init__(self,name='per_label_metric', num_labels=NUM_CLASSES, **kwargs):
-        super(PerLabelMetric, self). __init__(name=name,**kwargs)
+        super(PerLabelMetric, self).__init__(name=name,**kwargs)
         self.num_labels = num_labels
         self.true_positives = self.add_weight(name='true_positives', shape=(self.num_labels), initializer='zeros')
         self.true_negatives = self.add_weight(name='true_negatives', shape=(self.num_labels), initializer='zeros')
@@ -52,11 +52,11 @@ class PerLabelMetric(Metric):
             false_positives = B.sum(B.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
             true_negatives = B.sum(B.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
             false_negatives = B.sum(B.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
-            print(self.true_positives[i])
-            self.true_positives[i].assign_add(true_positives)
-            self.false_positives[i].assign_add(false_positives)
-            self.true_negatives[i].assign_add(true_negatives)
-            self.false_negatives[i].assign_add(false_negatives)
+            print(self.true_positives[i].numpy())
+            self.true_positives[i].__add__(true_positives)
+            self.false_positives[i].__add__(false_positives)
+            self.true_negatives[i].__add__(true_negatives)
+            self.false_negatives[i].__add__(false_negatives)
 
     def result(self):
         #precision = self.true_positives / (self.true_positives + self.false_positives + B.epsilon())
@@ -65,7 +65,7 @@ class PerLabelMetric(Metric):
         tn = self.true_negatives
         fp = self.false_positives
         fn = self.false_negatives
-        return tp, tn, fp, fn
+        return tp.numpy(), tn.numpy(), fp.numpy(), fn.numpy()
 
     def reset_states(self):
         # Reset the state of the metric
@@ -360,7 +360,8 @@ model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 
 #Once the model is defined it can be trained like any other standard classification model
 #using `.compile()` and `.fit()`.
-acc_per_label = PerLabelMetricCallBack(val_ds)
+#acc_per_label = PerLabelMetricCallBack(val_ds)
+"""
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
@@ -373,26 +374,27 @@ model.compile(
             ],      
     run_eagerly=True,
 )
-
+"""
 ## Save Model
 #model.save(save_path + '_AFBM Model')
 ## Load Model here
-#keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-#model = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
+keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
+model = tf.keras.models.load_model("/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/2024-02-16_32_2000_20_Learning Rate_0.00025_AFBM Model", custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})  #save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
 
-train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+#train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 #model.fit(x=val_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 #model.evaluate(x=val_ds,callbacks=[acc_per_label])
-model.save(save_path + '_AFBM Model')
+#model.save(save_path + '_AFBM Model')
 
+"""
 ## Save history file
 histdf = pd.DataFrame(train_hist.history)
 histfile = save_path + '_train_history2.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
-
+"""
     
 # Validation / Evaluation per Label
 data = []
@@ -401,6 +403,7 @@ for i in range(0,NUM_CLASSES):
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
         metrics=[
+            PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.F1Score(threshold=0.5),      
@@ -410,7 +413,7 @@ for i in range(0,NUM_CLASSES):
     data.append(model.evaluate(x=val_ds))
     
 histdf = pd.DataFrame(data)
-histfile = save_path + '_label_validation2.csv'
+histfile = save_path + '_label_validation_Testing.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
