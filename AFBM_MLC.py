@@ -60,14 +60,18 @@ class PerLabelMetric(Metric):
             #print(self.false_positives[i].numpy())
             #print(self.false_negatives[i].numpy())
             #print(self.true_negatives[i].numpy())
+        #print(self.true_positives.numpy())
+        return self
 
     def result(self):
         #precision = self.true_positives / (self.true_positives + self.false_positives + B.epsilon())
         #recall = self.true_positives / (self.true_positives + self.false_negatives + B.epsilon())
+        #print(self.true_positives)
         tp = self.true_positives
         tn = self.true_negatives
         fp = self.false_positives
         fn = self.false_negatives
+        #print(tp.numpy())
         return tp.numpy(), tn.numpy(), fp.numpy(), fn.numpy()
 
     def reset_states(self):
@@ -405,15 +409,18 @@ model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
     metrics=[
-        PerLabelMetric(num_labels=3), #NUM_CLASSES),
+        PerLabelMetric(num_labels=25), #NUM_CLASSES),
         tf.keras.metrics.F1Score(threshold=0.5),
         ],
         run_eagerly=True,
     )
 data=model.evaluate(x=val_ds)
-
-
-for i in range(0,NUM_CLASSES):
+print(pd.DataFrame(data))
+histfile = save_path + '_label_validation_Testing2.csv'
+with open(histfile, mode='w') as f:
+    pd.DataFrame(data).to_csv(f)
+data = []
+for i in range(0,3): #NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
