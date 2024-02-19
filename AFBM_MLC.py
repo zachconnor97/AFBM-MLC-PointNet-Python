@@ -47,12 +47,16 @@ class PerLabelMetric(Metric):
         for i in range(self.num_labels):
             y_true_label = y_true[:, i]
             y_pred_label = y_pred[:, i]
-            
+            print(y_true_label.numpy())
+            print(y_pred_label.numpy())
             true_positives = B.sum(B.cast(y_true_label * B.round(y_pred_label), 'float32'))
             false_positives = B.sum(B.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
             true_negatives = B.sum(B.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
             false_negatives = B.sum(B.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
             print(self.true_positives[i].numpy())
+            print(self.false_positives[i].numpy())
+            print(self.false_negatives[i].numpy())
+            print(self.true_negatives[i].numpy())
             self.true_positives[i].__add__(true_positives)
             self.false_positives[i].__add__(false_positives)
             self.true_negatives[i].__add__(true_negatives)
@@ -398,22 +402,32 @@ with open(histfile, mode='w') as f:
     
 # Validation / Evaluation per Label
 data = []
+model.compile(
+    loss=tf.keras.losses.BinaryCrossentropy(),
+    optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
+    metrics=[
+        PerLabelMetric(num_labels=NUM_CLASSES),
+        tf.keras.metrics.F1Score(threshold=0.5),
+        ],
+        run_eagerly=True,
+    )
+data=model.evaluate(x=val_ds)
+
+
 for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
         metrics=[
-            PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.Precision(thresholds=[0.5, 1],class_id=i),
             tf.keras.metrics.Recall(thresholds=[0.5, 1],class_id=i),
-            tf.keras.metrics.F1Score(threshold=0.5),      
         ],
         run_eagerly=True,
     )
     data.append(model.evaluate(x=val_ds))
-    
+ 
 histdf = pd.DataFrame(data)
-histfile = save_path + '_label_validation_Testing.csv'
+histfile = save_path + '_label_validation_Testing2.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
