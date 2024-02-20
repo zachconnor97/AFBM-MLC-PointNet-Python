@@ -71,7 +71,11 @@ class PerLabelMetric(Metric):
         tn = self.tn
         fp = self.fp
         fn = self.fn
-        return tp.numpy(), tn.numpy(), fp.numpy(), fn.numpy()
+        acc = (tp + tn) / (tp + tn + fp + fn)
+        p = tp / (tp + fp)
+        r = tp / (tp + fn)
+        f1 = (2 * tp) / ((2 * tp) + fp + fn)
+        return tp.numpy(), tn.numpy(), fp.numpy(), fn.numpy(), acc.numpy(), p.numpy(), r.numpy(), f1.numpy()
 
     def reset_states(self):
         # Reset the state of the metric
