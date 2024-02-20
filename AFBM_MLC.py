@@ -369,11 +369,12 @@ model.compile(
     )
 data=model.evaluate(x=val_ds)
 metrics = data[1]
-print(pd.DataFrame(metrics))
+metrics = pd.DataFrame(metrics).T
+print(metrics)
 histfile = save_path + '_label_validation_allmets_2.csv'
 
 with open(histfile, mode='w') as f:
-    pd.DataFrame(metrics).to_csv(f)
+    metrics.to_csv(f)
 
 """
 data = []
