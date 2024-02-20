@@ -44,23 +44,23 @@ class PerLabelMetric(Metric):
         self.false_negatives = self.add_weight(name='false_negatives', shape=(self.num_labels), initializer='zeros')
     def update_state(self, y_true, y_pred, sample_weight=None):
         # Custom logic to compute the metric for each label
-        for i in range(self.num_labels):
+        for i in range(2): #self.num_labels):
             y_true_label = y_true[:, i]
             y_pred_label = y_pred[:, i]
             true_positives = B.sum(y_true_label * B.round(y_pred_label), axis=0)
             false_positives = B.sum((1 - y_true_label) * B.round(y_pred_label), axis=0)
             true_negatives = B.sum((1 - y_true_label) * (1 - B.round(y_pred_label)), axis=0)
             false_negatives = B.sum(y_true_label * (1 - B.round(y_pred_label)), axis=0)
-
+            print(type(self.true_negatives[i]))
             self.true_positives[i].__add__(true_positives)
             self.false_positives[i].__add__(false_positives)
             self.true_negatives[i].__add__(true_negatives)
             self.false_negatives[i].__add__(false_negatives)
-            #print(self.true_positives[i].numpy())
+            print(self.true_positives[i].numpy())
             #print(self.false_positives[i].numpy())
             #print(self.false_negatives[i].numpy())
             #print(self.true_negatives[i].numpy())
-        #print(self.true_positives.numpy())
+        print(self.true_positives.numpy())
         return self
 
     def result(self):
