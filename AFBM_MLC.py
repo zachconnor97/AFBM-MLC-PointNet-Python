@@ -371,10 +371,10 @@ data=model.evaluate(x=val_ds)
 metrics = data[1]
 print(pd.DataFrame(metrics))
 histfile = save_path + '_label_validation_allmets_2.csv'
-"""
+
 with open(histfile, mode='w') as f:
     pd.DataFrame(metrics).to_csv(f)
-"""
+
 """
 data = []
 for i in range(0,NUM_CLASSES):
