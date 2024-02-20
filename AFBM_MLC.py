@@ -42,8 +42,6 @@ class PerLabelMetric(Metric):
         self.tn = self.add_weight(name='tn', shape=(self.num_labels), initializer='zeros')
         self.fp = self.add_weight(name='fp', shape=(self.num_labels), initializer='zeros')
         self.fn = self.add_weight(name='fn', shape=(self.num_labels), initializer='zeros')
-        self.p = self.add_weight(name='precision', shape=(self.num_labels,), initializer='zeros')
-        self.r = self.add_weight(name='recall', shape=(self.num_labels,), initializer='zeros')
     def update_state(self, y_true, y_pred, sample_weight=None):
         # Custom logic to compute the metric for each label
         for i in range(self.num_labels):
@@ -55,16 +53,10 @@ class PerLabelMetric(Metric):
             tn = B.sum((1 - y_true_label) * (1 - B.round(y_pred_label)), axis=0)
             fn = B.sum(y_true_label * (1 - B.round(y_pred_label)), axis=0)
 
-            p = tp / (tp + fp)
-            r = tp / (tp + fn)
-
             self.tp[i].assign(self.tp[i] + tp)
             self.fp[i].assign(self.fp[i] + fp)
             self.tn[i].assign(self.tn[i] + tn)
             self.fn[i].assign(self.fn[i] + fn)
-
-            self.p[i].assign(B.mean(p[i], p))
-            self.r[i].assign(B.mean(r[i], r))
 
     def result(self):
         tp = self.tp
