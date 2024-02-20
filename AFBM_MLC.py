@@ -38,40 +38,29 @@ class PerLabelMetric(Metric):
     def __init__(self,name='per_label_metric', num_labels=NUM_CLASSES, **kwargs):
         super(PerLabelMetric, self).__init__(name=name,**kwargs)
         self.num_labels = num_labels
-        self.true_positives = self.add_weight(name='true_positives', shape=(self.num_labels), initializer='zeros')
-        self.true_negatives = self.add_weight(name='true_negatives', shape=(self.num_labels), initializer='zeros')
-        self.false_positives = self.add_weight(name='false_positives', shape=(self.num_labels), initializer='zeros')
-        self.false_negatives = self.add_weight(name='false_negatives', shape=(self.num_labels), initializer='zeros')
+        self.tp = self.add_weight(name='tp', shape=(self.num_labels), initializer='zeros')
+        self.tn = self.add_weight(name='tn', shape=(self.num_labels), initializer='zeros')
+        self.fp = self.add_weight(name='fp', shape=(self.num_labels), initializer='zeros')
+        self.fn = self.add_weight(name='fn', shape=(self.num_labels), initializer='zeros')
     def update_state(self, y_true, y_pred, sample_weight=None):
         # Custom logic to compute the metric for each label
-        for i in range(2): #self.num_labels):
+        for i in range(self.num_labels):
             y_true_label = y_true[:, i]
             y_pred_label = y_pred[:, i]
-            true_positives = B.sum(y_true_label * B.round(y_pred_label), axis=0)
-            false_positives = B.sum((1 - y_true_label) * B.round(y_pred_label), axis=0)
-            true_negatives = B.sum((1 - y_true_label) * (1 - B.round(y_pred_label)), axis=0)
-            false_negatives = B.sum(y_true_label * (1 - B.round(y_pred_label)), axis=0)
-            print(type(self.true_negatives[i]))
-            self.true_positives[i].__add__(true_positives)
-            self.false_positives[i].__add__(false_positives)
-            self.true_negatives[i].__add__(true_negatives)
-            self.false_negatives[i].__add__(false_negatives)
-            print(self.true_positives[i].numpy())
-            #print(self.false_positives[i].numpy())
-            #print(self.false_negatives[i].numpy())
-            #print(self.true_negatives[i].numpy())
-        print(self.true_positives.numpy())
-        return self
+            tp = B.sum(y_true_label * B.round(y_pred_label), axis=0)
+            fp = B.sum((1 - y_true_label) * B.round(y_pred_label), axis=0)
+            tn = B.sum((1 - y_true_label) * (1 - B.round(y_pred_label)), axis=0)
+            fn = B.sum(y_true_label * (1 - B.round(y_pred_label)), axis=0)
+            self.tp[i].assign(self.tp[i] + tp)
+            self.fp[i].assign(self.fp[i] + fp)
+            self.tn[i].assign(self.tn[i] + tn)
+            self.fn[i].assign(self.fn[i] + fn)
 
     def result(self):
-        #precision = self.true_positives / (self.true_positives + self.false_positives + B.epsilon())
-        #recall = self.true_positives / (self.true_positives + self.false_negatives + B.epsilon())
-        #print(self.true_positives)
-        tp = self.true_positives
-        tn = self.true_negatives
-        fp = self.false_positives
-        fn = self.false_negatives
-        #print(tp.numpy())
+        tp = self.tp
+        tn = self.tn
+        fp = self.fp
+        fn = self.fn
         return tp.numpy(), tn.numpy(), fp.numpy(), fn.numpy()
 
     def reset_states(self):
@@ -79,46 +68,6 @@ class PerLabelMetric(Metric):
         B.batch_set_value([(v, 0) for v in self.variables])
 
 labels = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24']
-
-class PerLabelMetricCallBack(tf.keras.callbacks.Callback):
-    def __init__(self, test_data):
-        self.test_data = test_data
-
-    def on_epoch_end(self, batch, epoch, logs=None):
-        data = self.test_data
-        x_data, y_data = data
-        correct = 0
-        incorrect = 0
-        x_result = self.model.predict(x_data, verbose=0)
-        x_numpy = []
-        for i in labels:
-            self.class_history.append([])
-        class_correct = [0] * len(labels)
-        class_incorrect = [0] * len(labels)
-        for i in range(len(x_data)):
-            x = x_data[i]
-            y = y_data[i]
-            res = x_result[i]
-            actual_label = np.argmax(y)
-            pred_label = np.argmax(y)
-            if(pred_label == actual_label):
-                x_numpy.append(["cor:", str(y), str(res), str(pred_label)])
-                class_correct[actual_label] += 1
-                correct += 1
-            else:
-                x_numpy.append(["inc:", str(y), str(res), str(pred_label)])
-                class_incorrect[actual_label] += 1
-                incorrect += 1
-        print("\tCorrect: %d" %(correct))
-        print("\tIncorrect: %d" %(incorrect))
-        for i in range(len(labels)):
-            tot = float(class_correct[i] + class_incorrect[i])
-            class_acc = -1
-            if (tot > 0):
-                class_acc = float(class_correct[i]) / tot
-            print("\t%s: %.3f" %(class_correct[i], class_acc))
-        acc = float(correct) / float(correct + incorrect)
-        print("\tCurrent Network Accuracy: %.3f" %(acc))
 
 def pc_read(path):
     
@@ -416,11 +365,11 @@ model.compile(
     )
 data=model.evaluate(x=val_ds)
 print(pd.DataFrame(data))
-histfile = save_path + '_label_validation_Testing2.csv'
+histfile = save_path + '_label_validation_tptnfpfnf1.csv'
 with open(histfile, mode='w') as f:
     pd.DataFrame(data).to_csv(f)
 data = []
-for i in range(0,3): #NUM_CLASSES):
+for i in range(0,NUM_CLASSES):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(),
         optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
