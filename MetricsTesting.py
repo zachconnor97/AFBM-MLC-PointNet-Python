@@ -226,31 +226,33 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
 
 # Custom Label Metric
 class PerLabelMetric(Metric):
-    def __init__(self,name='per_label_metric', num_labels=1, **kwargs):
-        super(PerLabelMetric, self). __init__(name=name,**kwargs)
+    def __init__(self,name='per_label_metric', num_labels=NUM_CLASSES, **kwargs):
+        super(PerLabelMetric, self).__init__(name=name,**kwargs)
         self.num_labels = num_labels
-
-        # Assuming self.num_labels is the number of labels
-        self.true_positives = self.add_weight(name='true_positives', shape=(self.num_labels),  initializer='zeros',)
+        self.true_positives = self.add_weight(name='true_positives', shape=(self.num_labels), initializer='zeros')
         self.true_negatives = self.add_weight(name='true_negatives', shape=(self.num_labels), initializer='zeros')
         self.false_positives = self.add_weight(name='false_positives', shape=(self.num_labels), initializer='zeros')
         self.false_negatives = self.add_weight(name='false_negatives', shape=(self.num_labels), initializer='zeros')
-
     def update_state(self, y_true, y_pred, sample_weight=None):
         # Custom logic to compute the metric for each label
-        for i in range(self.num_labels):
+        for i in range(2): #self.num_labels):
             y_true_label = y_true[:, i]
             y_pred_label = y_pred[:, i]
-            
-            true_positives = B.sum(B.cast(y_true_label * B.round(y_pred_label), 'float32'))
-            false_positives = B.sum(B.cast((1 - y_true_label) * B.round(y_pred_label), 'float32'))
-            true_negatives = B.sum(B.cast((1 - y_true_label) * (1 - B.round(y_pred_label)), 'float32'))
-            false_negatives = B.sum(B.cast(y_true_label * (1 - B.round(y_pred_label)), 'float32'))
-            
-            self.true_positives[i].assign_add(true_positives)
-            self.false_positives[i].assign_add(false_positives)
-            self.true_negatives[i].assign_add(true_negatives)
-            self.false_negatives[i].assign_add(false_negatives)
+            true_positives = B.sum(y_true_label * B.round(y_pred_label), axis=0)
+            false_positives = B.sum((1 - y_true_label) * B.round(y_pred_label), axis=0)
+            true_negatives = B.sum((1 - y_true_label) * (1 - B.round(y_pred_label)), axis=0)
+            false_negatives = B.sum(y_true_label * (1 - B.round(y_pred_label)), axis=0)
+            print(type(self.true_negatives[i]))
+            self.true_positives[i].assign(self.true_positives[i] + true_positives)
+            self.false_positives[i].assign(self.false_positives[i] + false_positives)
+            self.true_negatives[i].assign(self.true_negatives[i] + true_negatives)
+            self.false_negatives[i].assign(self.false_negatives[i] + false_negatives)
+            print(self.true_positives[i].numpy())
+            #print(self.false_positives[i].numpy())
+            #print(self.false_negatives[i].numpy())
+            #print(self.true_negatives[i].numpy())
+        print(self.true_positives.numpy())
+        return self
 
     def result(self):
         #precision = self.true_positives / (self.true_positives + self.false_positives + B.epsilon())

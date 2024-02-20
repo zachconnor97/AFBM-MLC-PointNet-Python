@@ -33,7 +33,7 @@ class GarbageMan(tf.keras.callbacks.Callback):
         gc.collect()
         tf.keras.backend.clear_session()
 
-# Custom Label Metric
+# Custom Label Metric for Prediction matrix
 class PerLabelMetric(Metric):
     def __init__(self,name='per_label_metric', num_labels=NUM_CLASSES, **kwargs):
         super(PerLabelMetric, self).__init__(name=name,**kwargs)
@@ -42,19 +42,29 @@ class PerLabelMetric(Metric):
         self.tn = self.add_weight(name='tn', shape=(self.num_labels), initializer='zeros')
         self.fp = self.add_weight(name='fp', shape=(self.num_labels), initializer='zeros')
         self.fn = self.add_weight(name='fn', shape=(self.num_labels), initializer='zeros')
+        self.p = self.add_weight(name='precision', shape=(self.num_labels,), initializer='zeros')
+        self.r = self.add_weight(name='recall', shape=(self.num_labels,), initializer='zeros')
     def update_state(self, y_true, y_pred, sample_weight=None):
         # Custom logic to compute the metric for each label
         for i in range(self.num_labels):
             y_true_label = y_true[:, i]
             y_pred_label = y_pred[:, i]
+            
             tp = B.sum(y_true_label * B.round(y_pred_label), axis=0)
             fp = B.sum((1 - y_true_label) * B.round(y_pred_label), axis=0)
             tn = B.sum((1 - y_true_label) * (1 - B.round(y_pred_label)), axis=0)
             fn = B.sum(y_true_label * (1 - B.round(y_pred_label)), axis=0)
+
+            p = tp / (tp + fp + B.epsilon())
+            r = tp / (tp + fn + B.epsilon())
+
             self.tp[i].assign(self.tp[i] + tp)
             self.fp[i].assign(self.fp[i] + fp)
             self.tn[i].assign(self.tn[i] + tn)
             self.fn[i].assign(self.fn[i] + fn)
+
+            self.p[i].assign_add(p)
+            self.r[i].assign_add(r)
 
     def result(self):
         tp = self.tp
