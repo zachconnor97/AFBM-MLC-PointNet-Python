@@ -55,16 +55,16 @@ class PerLabelMetric(Metric):
             tn = B.sum((1 - y_true_label) * (1 - B.round(y_pred_label)), axis=0)
             fn = B.sum(y_true_label * (1 - B.round(y_pred_label)), axis=0)
 
-            p = tp / (tp + fp + B.epsilon())
-            r = tp / (tp + fn + B.epsilon())
+            p = tp / (tp + fp)
+            r = tp / (tp + fn)
 
             self.tp[i].assign(self.tp[i] + tp)
             self.fp[i].assign(self.fp[i] + fp)
             self.tn[i].assign(self.tn[i] + tn)
             self.fn[i].assign(self.fn[i] + fn)
 
-            self.p[i].assign_add(p)
-            self.r[i].assign_add(r)
+            self.p[i].assign(B.mean(p[i], p))
+            self.r[i].assign(B.mean(r[i], r))
 
     def result(self):
         tp = self.tp
