@@ -361,19 +361,19 @@ with open(histfile, mode='w') as f:
 # Validation / Evaluation per Label
 data = []
 model.compile(
-    loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
     metrics=[
-        PerLabelMetric(num_labels=25), #NUM_CLASSES),
-        tf.keras.metrics.F1Score(threshold=0.5),
+        PerLabelMetric(num_labels=NUM_CLASSES),
         ],
         run_eagerly=True,
     )
 data=model.evaluate(x=val_ds)
 print(pd.DataFrame(data))
-histfile = save_path + '_label_validation_tptnfpfnf1.csv'
+histfile = save_path + '_label_validation_allmets_2.csv'
 with open(histfile, mode='w') as f:
     pd.DataFrame(data).to_csv(f)
+    
+"""
 data = []
 for i in range(0,NUM_CLASSES):
     model.compile(
@@ -391,7 +391,7 @@ histdf = pd.DataFrame(data)
 histfile = save_path + '_label_validation_Testing2.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
-
+"""
 
 #model.summary()
 ## Save Model
