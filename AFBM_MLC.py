@@ -15,7 +15,7 @@ import csv
 
 physical_devices = tf.config.list_physical_devices('GPU')
 #print(physical_devices)
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+#tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 tf.random.set_seed(1234)
 NUM_POINTS = 2000
@@ -340,8 +340,8 @@ model.compile(
 ## Save Model
 #model.save(save_path + '_AFBM Model')
 ## Load Model here
-keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-model = tf.keras.models.load_model("/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/2024-02-16_32_2000_20_Learning Rate_0.00025_AFBM Model", custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})  #save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
+#keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
+#model = tf.keras.models.load_model("/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/2024-02-16_32_2000_20_Learning Rate_0.00025_AFBM Model", custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})  #save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
 

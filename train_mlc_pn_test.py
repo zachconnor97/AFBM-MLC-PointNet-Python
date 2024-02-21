@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from model import pointnet, generator
-from AFBM_MLC import PerLabelMetric, generate_dataset, GarbageMan
+from utils import PerLabelMetric, GarbageMan
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -14,9 +14,9 @@ BATCH_SIZE = 32
 NUM_EPOCHS = 1
 
 database = "AFBMData_NoChairs_Augmented.csv"
-train_ds, val_ds, label_weights = generate_dataset(filename=database)
+#train_ds, val_ds, label_weights = generate_dataset(filename=database)
 
-pn = pointnet(num_classes=NUM_CLASSES,num_points=NUM_POINTS,training=TRAINING)
+pn = pointnet(num_classes=NUM_CLASSES,num_points=NUM_POINTS,train=TRAINING)
 pn.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
@@ -30,7 +30,7 @@ pn.compile(
     run_eagerly=True,
 )
 
-gen = generator(num_points=NUM_POINTS,num_classes=NUM_CLASSES,training=TRAINING)
+gen = generator(num_points=NUM_POINTS,num_classes=NUM_CLASSES,train=TRAINING)
 gen.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
@@ -43,6 +43,8 @@ gen.compile(
     ],
     run_eagerly=True,
 )
+
+t_dum = tf.TensorArray(dtype='float64',size=[5000,3])
 
 #thist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 

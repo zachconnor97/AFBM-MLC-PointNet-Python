@@ -5,19 +5,19 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
-def conv_bn(x, filters, training=True):
+def conv_bn(x, filters, train=True):
     x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
-    x = layers.BatchNormalization(momentum=0.0, trainable=training)(x)
+    x = layers.BatchNormalization(momentum=0.0, trainable=train)(x)
     return layers.Activation('LeakyReLU')(x)
 
-def dconv_bn(x, filters, training=True):
+def dconv_bn(x, filters, train=True):
     x = layers.Conv1DTranspose(filters, kernel_size=1, padding="valid")(x)
-    x = layers.BatchNormalization(momentum=0.0, trainable=training)(x)
+    x = layers.BatchNormalization(momentum=0.0, trainable=train)(x)
     return layers.Activation('LeakyReLU')(x)
 
-def dense_bn(x, filters, training=True):
+def dense_bn(x, filters, train=True):
     x = layers.Dense(filters)(x)
-    x = layers.BatchNormalization(momentum=0.0, training=training)(x)
+    x = layers.BatchNormalization(momentum=0.0, trainable=train)(x)
     return layers.Activation('LeakyReLU')(x)
 
 class OrthogonalRegularizer(keras.regularizers.Regularizer):
@@ -43,15 +43,15 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
 def orthogonal_regularizer_from_config(config):
     return OrthogonalRegularizer(**config)
 
-def tnet(inputs, num_features, training=True):
+def tnet(inputs, num_features, train=True):
     bias = keras.initializers.Constant(np.eye(num_features).flatten())
     reg = OrthogonalRegularizer(num_features)
-    x = conv_bn(inputs, 64, training=training)
-    x = conv_bn(x, 128, training=training)
-    x = conv_bn(x, 1024, training=training)
+    x = conv_bn(inputs, 64, train=train)
+    x = conv_bn(x, 128, train=train)
+    x = conv_bn(x, 1024, train=train)
     x = layers.GlobalMaxPooling1D()(x)
-    x = dense_bn(x, 512, training=training)
-    x = dense_bn(x, 256, training=training)
+    x = dense_bn(x, 512, train=train)
+    x = dense_bn(x, 256, train=train)
     x = layers.Dense(
         num_features * num_features,
         kernel_initializer="zeros",
@@ -61,7 +61,7 @@ def tnet(inputs, num_features, training=True):
     feat_T = layers.Reshape((num_features, num_features))(x)
     return layers.Dot(axes=(2, 1))([inputs, feat_T])
 
-def pointnet(num_points, num_classes, training=True):
+def pointnet(num_points, num_classes, train=True):
     """
     Returns Keras MLC-PointNet Implementation
     Args:
@@ -69,21 +69,21 @@ def pointnet(num_points, num_classes, training=True):
         num_points (scalar): Number of points in the point cloud
     """    
     inputs = keras.Input(shape=(num_points, 3))
-    x = tnet(inputs, 3, training=training)
-    x = conv_bn(x, 64, training=training)
-    x = conv_bn(x, 64, training=training)
-    x = tnet(x, 64, training=training)
-    x = conv_bn(x, 64, training=training)
-    x = conv_bn(x, 128, training=training)
-    x = conv_bn(x, 1024, training=training)
+    x = tnet(inputs, 3, train=train)
+    x = conv_bn(x, 64, train=train)
+    x = conv_bn(x, 64, train=train)
+    x = tnet(x, 64, train=train)
+    x = conv_bn(x, 64, train=train)
+    x = conv_bn(x, 128, train=train)
+    x = conv_bn(x, 1024, train=train)
     x = layers.GlobalMaxPooling1D()(x)
-    x = dense_bn(x, 512, training=training)
-    x = dense_bn(x, 256, training=training)
+    x = dense_bn(x, 512, train=train)
+    x = dense_bn(x, 256, train=train)
     outputs = layers.Dense(num_classes, activation="sigmoid")(x)
     model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
     return model
 
-def generator(num_points, num_classes, training=True):
+def generator(num_points, num_classes, train=True):
     """
     Returns Keras C-GAN
     Args:
@@ -92,10 +92,10 @@ def generator(num_points, num_classes, training=True):
         num_classes (integer): Number of classes         
     """    
     input = keras.Input(shape=(num_classes,1))
-    x = dconv_bn(input, 512, training=training)
-    x = dconv_bn(input, 256, training=training)
-    x = dconv_bn(input, 128, training=training)
-    x = dconv_bn(input, 64, training=training)
-    x = dconv_bn(input, 1, training=training)
+    x = dconv_bn(input, 512, train=train)
+    x = dconv_bn(input, 256, train=train)
+    x = dconv_bn(input, 128, train=train)
+    x = dconv_bn(input, 64, train=train)
+    x = dconv_bn(input, 1, train=train)
     model = keras.Model(inputs=input, outputs=x, name="c_gan")
     return model
