@@ -45,10 +45,8 @@ def orthogonal_regularizer_from_config(config):
     return OrthogonalRegularizer(**config)
 
 def tnet(inputs, num_features, training=True):
-    # Initalise bias as the indentity matrix
     bias = keras.initializers.Constant(np.eye(num_features).flatten())
     reg = OrthogonalRegularizer(num_features)
-
     x = conv_bn(inputs, 64, training=training)
     x = conv_bn(x, 128, training=training)
     x = conv_bn(x, 1024, training=training)
@@ -62,7 +60,6 @@ def tnet(inputs, num_features, training=True):
         activity_regularizer=reg,
     )(x)
     feat_T = layers.Reshape((num_features, num_features))(x)
-    # Apply affine transformation to input features
     return layers.Dot(axes=(2, 1))([inputs, feat_T])
 
 def pointnet(num_points, num_classes, training=True):
@@ -72,7 +69,6 @@ def pointnet(num_points, num_classes, training=True):
         training (boolean): Training or not
         num_points (scalar): Number of points in the point cloud
     """    
-
     inputs = keras.Input(shape=(num_points, 3))
     x = tnet(inputs, 3, training=training)
     x = conv_bn(x, 64, training=training)
