@@ -82,6 +82,7 @@ def pointnet(num_points, num_classes, training=True):
     x = dense_bn(x, 256, training=training)
     outputs = layers.Dense(num_classes, activation="sigmoid")(x)
     model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
+    return model
 
 def generator(num_points, num_classes, training=True):
     input = keras.Input(shape=(num_classes,1))
@@ -91,3 +92,4 @@ def generator(num_points, num_classes, training=True):
     x = dconv_bn(input, 64, training=training)
     x = dconv_bn(input, 1, training=training)
     model = keras.Model(inputs=input, outputs=x, name="c_gan")
+    return model
