@@ -6,6 +6,7 @@ from utils import PerLabelMetric, GarbageMan
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+
 NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
@@ -21,11 +22,8 @@ pn.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
     metrics=[
-            PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-            tf.keras.metrics.Precision(thresholds=[0.5,1]),
-            tf.keras.metrics.Recall(thresholds=[0.5,1]),
-            tf.keras.metrics.F1Score(threshold=0.5),
+            PerLabelMetric(num_labels=NUM_CLASSES),
             ],      
     run_eagerly=True,
 )
@@ -35,17 +33,22 @@ gen.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
     metrics=[
-        PerLabelMetric(num_labels=NUM_CLASSES),
+        #PerLabelMetric(num_labels=NUM_CLASSES),
         tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-        tf.keras.metrics.Precision(thresholds=[0.5,1]),
-        tf.keras.metrics.Recall(thresholds=[0.5,1]),
-            tf.keras.metrics.F1Score(threshold=0.5),
+        #tf.keras.metrics.Precision(thresholds=[0.5,1]),
+        #tf.keras.metrics.Recall(thresholds=[0.5,1]),
+        #tf.keras.metrics.F1Score(threshold=0.5),
     ],
     run_eagerly=True,
 )
 
-t_dum = tf.TensorArray(dtype='float64',size=[5000,3])
-
+t_dum = tf.constant(np.random.rand(BATCH_SIZE,NUM_POINTS,3),dtype='float64')
+l_dum = tf.constant(np.round(np.random.rand(BATCH_SIZE,NUM_CLASSES)),dtype='float64')
+print(t_dum)
+print(l_dum)
 #thist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
-#val_data = pn.evaluate(x=val_ds)
+val_data = pn.evaluate(x=t_dum, y=l_dum,batch_size=BATCH_SIZE)
+
+gen_pred = gen.predict(x=l_dum, batch_size=BATCH_SIZE) #gen.evaluate(x=l_dum, y=t_dum,batch_size=BATCH_SIZE)
+print(gen_pred)
