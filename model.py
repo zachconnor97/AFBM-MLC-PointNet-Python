@@ -40,7 +40,6 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
     def from_config(cls, config):
         return cls(num_features=config.pop('num_features', None), **config)
     
-## Custom function to instantiate the regularizer during loading
 def orthogonal_regularizer_from_config(config):
     return OrthogonalRegularizer(**config)
 
@@ -85,6 +84,13 @@ def pointnet(num_points, num_classes, training=True):
     return model
 
 def generator(num_points, num_classes, training=True):
+    """
+    Returns Keras C-GAN
+    Args:
+        training (boolean): Training or not
+        num_points (integer): Number of points in the point cloud
+        num_classes (integer): Number of classes         
+    """    
     input = keras.Input(shape=(num_classes,1))
     x = dconv_bn(input, 512, training=training)
     x = dconv_bn(input, 256, training=training)
