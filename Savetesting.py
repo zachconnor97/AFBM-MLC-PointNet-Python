@@ -12,6 +12,7 @@ import gc
 from tensorflow.keras.metrics import Metric
 from keras import backend as B
 from keras.callbacks import ModelCheckpoint
+from keras.callbacks import EarlyStopping
 import csv
 
 #physical_devices = tf.config.list_physical_devices('GPU')
