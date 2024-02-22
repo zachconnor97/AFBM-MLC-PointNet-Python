@@ -24,7 +24,7 @@ EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
-    save_path,
+    save_path=save_path,
     monitor='val_loss',  # Monitor validation loss
     save_best_only=True,  # Save only the best model
     mode='min',  # Save when validation loss is minimized
