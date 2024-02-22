@@ -5,13 +5,13 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
-def conv_bn(x, filters, train=True):
-    x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
+def conv_bn(x, filters, stride=1, train=True):
+    x = layers.Conv1D(filters, strides=stride, kernel_size=1, padding="valid")(x)
     x = layers.BatchNormalization(momentum=0.0, trainable=train)(x)
     return layers.Activation('LeakyReLU')(x)
 
-def dconv_bn(x, filters, train=True):
-    x = layers.Conv1DTranspose(filters, kernel_size=1, padding="valid")(x)
+def dconv_bn(x, filters, stride=1, train=True):
+    x = layers.Conv1DTranspose(filters, kernel_size=1, strides=stride, padding="valid")(x)
     x = layers.BatchNormalization(momentum=0.0, trainable=train)(x)
     return layers.Activation('LeakyReLU')(x)
 
@@ -92,10 +92,17 @@ def generator(num_points, num_classes, train=True):
         num_classes (integer): Number of classes         
     """    
     input = keras.Input(shape=(num_classes,1))
-    x = dconv_bn(input, 512, train=train)
-    x = dconv_bn(input, 256, train=train)
-    x = dconv_bn(input, 128, train=train)
-    x = dconv_bn(input, 64, train=train)
-    x = dconv_bn(input, 1, train=train)
+    x = conv_bn(input, 1028, train=train)
+    x = conv_bn(x, 512, train=train)
+    x = conv_bn(x, 256, train=train)
+    x = conv_bn(x, 128, train=train)
+    x = conv_bn(x, 1, stride=num_classes, train=train)
+    x = dconv_bn(x, 1, stride=num_points, train=train)
+    x = dconv_bn(x, num_points/8, train=train)
+    x = dconv_bn(x, num_points/4, train=train)
+    x = dconv_bn(x, num_points/2, train=train)
+    x = dconv_bn(x, num_points, train=train)
+    #x = layers.Reshape((5000,3))(x)
+    x = layers.Dense(3, activation="sigmoid")(x)
     model = keras.Model(inputs=input, outputs=x, name="c_gan")
     return model

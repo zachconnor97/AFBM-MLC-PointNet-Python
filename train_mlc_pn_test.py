@@ -7,11 +7,11 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
-NUM_POINTS = 5000
+NUM_POINTS = 2000
 NUM_CLASSES = 25
-TRAINING = True
+TRAINING = False
 LEARN_RATE = 0.0003
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 NUM_EPOCHS = 1
 
 database = "AFBMData_NoChairs_Augmented.csv"
@@ -44,11 +44,15 @@ gen.compile(
 
 t_dum = tf.constant(np.random.rand(BATCH_SIZE,NUM_POINTS,3),dtype='float64')
 l_dum = tf.constant(np.round(np.random.rand(BATCH_SIZE,NUM_CLASSES)),dtype='float64')
-#print(t_dum)
-#print(l_dum)
+#print(np.shape(t_dum))
+#print(np.shape(l_dum))
 #thist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
-val_data = pn.evaluate(x=t_dum, y=l_dum,batch_size=BATCH_SIZE)
+#val_data = pn.evaluate(x=t_dum, y=l_dum,batch_size=BATCH_SIZE)
+print(pn.output_shape)
 
+print(gen.output_shape)
 gen_pred = gen.predict(x=l_dum, batch_size=BATCH_SIZE) #gen.evaluate(x=l_dum, y=t_dum,batch_size=BATCH_SIZE)
+
 print(np.shape(gen_pred))
+print("\t Generator Output: %d",gen_pred)
