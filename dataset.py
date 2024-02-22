@@ -67,10 +67,13 @@ def Sparse_Matrix_Encoding(df):
   return sparse_matrix
 
 def augment(points):
-    # jitter points
-    points += tf.random.uniform(points.shape, -0.005, 0.005, dtype=tf.float64)
-    # shuffle points
-    points = tf.random.shuffle(points)
+    try:
+        # jitter points
+        points += tf.random.uniform(points.shape, -0.005, 0.005, dtype=tf.float64)
+        # shuffle points
+        points = tf.random.shuffle(points)
+    except:
+        points = points
     return points
 
 def generate_dataset(filename):
