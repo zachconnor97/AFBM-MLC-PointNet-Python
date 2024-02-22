@@ -44,15 +44,12 @@ tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validat
 pn.save(save_path + '_AFBM Model')
 
 ## Save history file
-histdf = pd.DataFrame(tist.history[0]).T
+histdf = pd.DataFrame(tist.history)
 histfile = save_path + '_train_history_per_label_met.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
-histdf = pd.DataFrame(tist.history[1:])
-histfile = save_path + '_train_history.csv'
-with open(histfile, mode='w') as f:
-    histdf.to_csv(f)
+
 
 # Validation / Evaluation per Label
 data = []
