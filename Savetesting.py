@@ -303,6 +303,8 @@ model_checkpoint = ModelCheckpoint(
     verbose=1  # Show information about saving
 )
 
+#Early stopping callback
+estop = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3)
 
 #The main network can be then implemented in the same manner where the t-net mini models
 #can be dropped in a layers in the graph. Here we replicate the network architecture
@@ -356,8 +358,8 @@ model.compile(
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
 
-#train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint])
-#model.fit(x=val_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint])
+#train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, estop])
+#model.fit(x=val_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, estop])
 #model.evaluate(x=val_ds,callbacks=[acc_per_label])
 #model.save(save_path + '_AFBM Model')
 
