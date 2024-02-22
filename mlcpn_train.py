@@ -40,6 +40,8 @@ pn.compile(
 )
 
 tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+pn.save(save_path + '_AFBM Model')
+
 ## Save history file
 histdf = pd.DataFrame(tist.history[0]).T
 histfile = save_path + '_train_history_per_label_met.csv'
