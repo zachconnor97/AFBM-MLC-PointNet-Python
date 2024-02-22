@@ -13,7 +13,7 @@ from tensorflow.keras.metrics import Metric
 from keras import backend as B
 import csv
 
-physical_devices = tf.config.list_physical_devices('GPU')
+#physical_devices = tf.config.list_physical_devices('GPU')
 #print(physical_devices)
 #tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
@@ -357,7 +357,8 @@ histfile = save_path + '_train_history2.csv'
 with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 """
-    
+
+
 # Validation / Evaluation per Label
 data = []
 model.compile(

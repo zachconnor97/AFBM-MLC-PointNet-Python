@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from model import pointnet, generator
 from utils import PerLabelMetric, GarbageMan
+from dataset import generate_dataset
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -12,10 +13,10 @@ NUM_CLASSES = 25
 TRAINING = False
 LEARN_RATE = 0.0003
 BATCH_SIZE = 16
-NUM_EPOCHS = 1
-
+NUM_EPOCHS = 10
+username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
-#train_ds, val_ds, label_weights = generate_dataset(filename=database)
+train_ds, val_ds, label_weights = generate_dataset(filename=database)
 
 pn = pointnet(num_classes=NUM_CLASSES,num_points=NUM_POINTS,train=TRAINING)
 pn.compile(
@@ -49,10 +50,12 @@ l_dum = tf.constant(np.round(np.random.rand(BATCH_SIZE,NUM_CLASSES)),dtype='floa
 #thist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 #val_data = pn.evaluate(x=t_dum, y=l_dum,batch_size=BATCH_SIZE)
-print(pn.output_shape)
+#print(pn.output_shape)
 
-print(gen.output_shape)
+#print(gen.output_shape)
 gen_pred = gen.predict(x=l_dum, batch_size=BATCH_SIZE) #gen.evaluate(x=l_dum, y=t_dum,batch_size=BATCH_SIZE)
-
-print(np.shape(gen_pred))
-print("\t Generator Output: %d",gen_pred)
+gentrain = gen.fit(x=l_dum, y=t_dum, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
+#print(np.shape(gen_pred))
+#print("\t Generator Output: %d",gen_pred)
+#gentrain = gen.evaluate(x=val_ds, batch_size=BATCH_SIZE)
+#print(gentrain)
