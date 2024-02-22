@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from datetime import date 
-from model import pointnet, generator
+from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
 from utils import PerLabelMetric, GarbageMan
 from dataset import generate_dataset
 import os
@@ -10,10 +10,11 @@ import csv
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
+EPS = 1e-6
 NUM_POINTS = 2000
 NUM_CLASSES = 25
 TRAINING = True
-LEARN_RATE = 0.00025
+LEARN_RATE = 0.000025
 BATCH_SIZE = 32
 NUM_EPOCHS = 25
 username = 'Zachariah'
@@ -40,7 +41,7 @@ with open("Label_Weights.csv", mode='w') as f:
 pn = pointnet(num_classes=NUM_CLASSES,num_points=NUM_POINTS,train=TRAINING)
 pn.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
-    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
     metrics=[
             #PerLabelMetric(num_labels=NUM_CLASSES),
             tf.keras.metrics.BinaryAccuracy(threshold=0.5),
@@ -50,7 +51,8 @@ pn.compile(
     run_eagerly=True,
 )
 
-tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), ModelCheckpoint(), EarlyStopping()])
+
+tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, EStop])
 pn.save(save_path + '_AFBM Model')
 
 ## Save history file
@@ -60,11 +62,14 @@ with open(histfile, mode='w') as f:
     histdf.to_csv(f)
 
 
+tf.keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
+pn = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})  #save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
+
 
 # Validation / Evaluation per Label
 data = []
 pn.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
     metrics=[
         PerLabelMetric(num_labels=NUM_CLASSES),
         ],
@@ -73,7 +78,7 @@ pn.compile(
 data=pn.evaluate(x=val_ds)
 metrics = data[1]
 metrics = pd.DataFrame(metrics).T
-print(metrics)
+#print(metrics)
 histfile = save_path + '_label_validation_allmets_2.csv'
 
 with open(histfile, mode='w') as f:

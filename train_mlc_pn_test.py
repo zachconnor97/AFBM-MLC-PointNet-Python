@@ -45,8 +45,8 @@ gen.compile(
 
 t_dum = tf.constant(np.random.rand(BATCH_SIZE,NUM_POINTS,3),dtype='float64')
 l_dum = tf.constant(np.round(np.random.rand(BATCH_SIZE,NUM_CLASSES)),dtype='float64')
-#print(np.shape(t_dum))
-#print(np.shape(l_dum))
+print(np.shape(t_dum))
+print(np.shape(l_dum))
 #thist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 
 #val_data = pn.evaluate(x=t_dum, y=l_dum,batch_size=BATCH_SIZE)
@@ -54,8 +54,8 @@ l_dum = tf.constant(np.round(np.random.rand(BATCH_SIZE,NUM_CLASSES)),dtype='floa
 
 #print(gen.output_shape)
 gen_pred = gen.predict(x=l_dum, batch_size=BATCH_SIZE) #gen.evaluate(x=l_dum, y=t_dum,batch_size=BATCH_SIZE)
-gentrain = gen.fit(x=l_dum, y=t_dum, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
-#print(np.shape(gen_pred))
+#gentrain = gen.fit(x=l_dum, y=t_dum, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
+print(np.shape(gen_pred))
 #print("\t Generator Output: %d",gen_pred)
 #gentrain = gen.evaluate(x=val_ds, batch_size=BATCH_SIZE)
 #print(gentrain)
