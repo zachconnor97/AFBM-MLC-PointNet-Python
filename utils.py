@@ -5,6 +5,7 @@ from keras.metrics import Metric
 from keras import backend as B
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+from keras.callbacks import ModelCheckpoint
 
 # Need to update this to come from other file
 NUM_CLASSES = 25

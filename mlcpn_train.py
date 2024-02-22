@@ -8,7 +8,7 @@ from dataset import generate_dataset
 import os
 import csv
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
+from keras.callbacks import ModelCheckpoint
 
 NUM_POINTS = 2000
 NUM_CLASSES = 25
@@ -20,6 +20,14 @@ username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE))
 
+#Callback for saving best model
+model_checkpoint = ModelCheckpoint(
+    save_path,
+    monitor='val_loss',  # Monitor validation loss
+    save_best_only=True,  # Save only the best model
+    mode='min',  # Save when validation loss is minimized
+    verbose=1  # Show information about saving
+)
 
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
 with open("Label_Weights.csv", mode='w') as f:
@@ -40,7 +48,7 @@ pn.compile(
     run_eagerly=True,
 )
 
-tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), ModelCheckpoint()])
 pn.save(save_path + '_AFBM Model')
 
 ## Save history file
