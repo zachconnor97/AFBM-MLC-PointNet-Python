@@ -8,7 +8,7 @@ from dataset import generate_dataset
 import os
 import csv
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 NUM_POINTS = 2000
 NUM_CLASSES = 25
@@ -19,6 +19,8 @@ NUM_EPOCHS = 25
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE))
+
+EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
@@ -48,7 +50,7 @@ pn.compile(
     run_eagerly=True,
 )
 
-tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), ModelCheckpoint()])
+tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), ModelCheckpoint(), EarlyStopping()])
 pn.save(save_path + '_AFBM Model')
 
 ## Save history file
