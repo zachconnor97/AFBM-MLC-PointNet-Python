@@ -16,7 +16,7 @@ import csv
 
 NUM_POINTS = 2000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 username = 'Zachariah'
 
 def pc_read(path):

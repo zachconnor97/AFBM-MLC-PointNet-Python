@@ -48,6 +48,6 @@ class PerLabelMetric(Metric):
         f1 = (2 * tp) / ((2 * tp) + fp + fn)
         return tp.numpy(), tn.numpy(), fp.numpy(), fn.numpy(), acc.numpy(), p.numpy(), r.numpy(), f1.numpy()
 
-    def reset_states(self):
+    def reset_state(self):
         # Reset the state of the metric
         B.batch_set_value([(v, 0) for v in self.variables])
