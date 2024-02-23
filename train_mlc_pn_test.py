@@ -32,7 +32,7 @@ pn.compile(
 """
 gen = generator(num_points=NUM_POINTS,num_classes=NUM_CLASSES,train=TRAINING)
 gen.compile(
-    loss=tf.keras.losses.MeanSquaredError() #BinaryCrossentropy(),
+    loss=tf.keras.losses.MeanSquaredError(), #BinaryCrossentropy(),
     optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
     metrics=[
         #PerLabelMetric(num_labels=NUM_CLASSES),
