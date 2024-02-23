@@ -14,7 +14,7 @@ NUM_CLASSES = 25
 TRAINING = False
 LEARN_RATE = 0.0003
 BATCH_SIZE = 32
-NUM_EPOCHS = 3
+NUM_EPOCHS = 1
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 """
@@ -64,6 +64,5 @@ pc_gen = gen.predict(x=label_in)
 
 pcd = o3d.geometry.PointCloud()
 pcd.points = o3d.utility.Vector3dVector(pc_gen[0,:,:])
-#o3d.visualization.draw_geometries([pcd])
-o3d.io.write_point_cloud('gen_pc_import_export_store_solid.ply', pcd, format='auto', write_ascii=False, compressed=False, print_progress=True)
+o3d.io.write_point_cloud(filename='gen_pc_import_export_store_solid.ply', pointcloud=pcd, write_ascii=False, compressed=False, print_progress=True)
 #
