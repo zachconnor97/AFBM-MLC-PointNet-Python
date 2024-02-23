@@ -8,11 +8,11 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
-NUM_POINTS = 5000
+NUM_POINTS = 2000
 NUM_CLASSES = 25
 TRAINING = False
 LEARN_RATE = 0.0003
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 NUM_EPOCHS = 10
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
