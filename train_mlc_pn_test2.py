@@ -14,7 +14,7 @@ NUM_CLASSES = 25
 TRAINING = False
 LEARN_RATE = 0.0003
 BATCH_SIZE = 32
-NUM_EPOCHS = 10
+NUM_EPOCHS = 3
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 """
