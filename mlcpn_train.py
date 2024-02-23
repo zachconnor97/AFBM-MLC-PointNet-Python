@@ -10,12 +10,12 @@ import csv
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
-EPS = 0.1
-NUM_POINTS = 2000
+EPS = 1e-7
+NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
-LEARN_RATE = 0.0025
-BATCH_SIZE = 32
+LEARN_RATE = 0.00025
+BATCH_SIZE = 16
 NUM_EPOCHS = 25
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
