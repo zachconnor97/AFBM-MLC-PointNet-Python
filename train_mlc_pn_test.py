@@ -6,6 +6,7 @@ from utils import PerLabelMetric, GarbageMan
 from dataset import generate_dataset, generator_dataset
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import open3d as o3d
 
 
 NUM_POINTS = 2000
@@ -53,11 +54,16 @@ gen.compile(
 #val_data = pn.evaluate(x=t_dum, y=l_dum,batch_size=BATCH_SIZE)
 #print(pn.output_shape)
 
-#print(gen.output_shape)
-#gen_pred = gen.predict(x=l_dum, batch_size=BATCH_SIZE) #gen.evaluate(x=l_dum, y=t_dum,batch_size=BATCH_SIZE)
+
+label_in = tf.constant([0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1], shape=(1,25), dtype='float64')
+
 gtrain_ds, gval_ds, label_weights = generator_dataset(filename=database)
 gentrain = gen.fit(x=gtrain_ds,validation_data=gval_ds, epochs=NUM_EPOCHS, batch_size=BATCH_SIZE)
-#print(np.shape(gen_pred))
-#print("\t Generator Output: %d",gen_pred)
-#gentrain = gen.evaluate(x=val_ds, batch_size=BATCH_SIZE)
-#print(gentrain)
+
+pc_gen = gen.predict(x=label_in) 
+
+pcd = o3d.geometry.PointCloud()
+pcd.points = o3d.utility.Vector3dVector(pc_gen[0,:,:])
+o3d.visualization.draw_geometries([pcd])
+
+#
