@@ -14,9 +14,9 @@ from keras import backend as B
 import csv
 
 
-NUM_POINTS = 2000
+NUM_POINTS = 5000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 username = 'Zachariah'
 
 def pc_read(path):

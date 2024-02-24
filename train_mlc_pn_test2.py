@@ -9,12 +9,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import open3d as o3d
 
 
-NUM_POINTS = 2000
+NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = False
 LEARN_RATE = 0.0003
-BATCH_SIZE = 32
-NUM_EPOCHS = 1
+BATCH_SIZE = 8
+NUM_EPOCHS = 5
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 """
@@ -37,7 +37,7 @@ gen.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
     metrics=[
         #PerLabelMetric(num_labels=NUM_CLASSES),
-        tf.keras.metrics.BinaryAccuracy(threshold=0.5),
+        tf.keras.metrics.MeanSquaredError()
         #tf.keras.metrics.Precision(thresholds=[0.5,1]),
         #tf.keras.metrics.Recall(thresholds=[0.5,1]),
         #tf.keras.metrics.F1Score(threshold=0.5),
@@ -64,5 +64,5 @@ pc_gen = gen.predict(x=label_in)
 
 pcd = o3d.geometry.PointCloud()
 pcd.points = o3d.utility.Vector3dVector(pc_gen[0,:,:])
-o3d.io.write_point_cloud(filename='gen_pc_import_export_store_solid.ply', pointcloud=pcd, write_ascii=False, compressed=False, print_progress=True)
+o3d.io.write_point_cloud(filename='gen_pc_import_export_store_solid2.ply', pointcloud=pcd, write_ascii=True, compressed=False, print_progress=True)
 #
