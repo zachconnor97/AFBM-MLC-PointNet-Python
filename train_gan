@@ -17,7 +17,7 @@ TRAINING = True
 LEARN_RATE = 0.000025
 BATCH_SIZE = 16
 NUM_EPOCHS = 25
-username = 'Zachariah'
+username = 'gabri'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
@@ -47,7 +47,7 @@ def report(generator, loss):
 
 def training_loop(generator, x, y):
 
-  for epoch in NUM_EPOCHS:
+  for epoch in range(NUM_EPOCHS):
     # Update the model with the single giant batch
     train(generator, x, y, learning_rate=0.1)
 
@@ -55,14 +55,7 @@ def training_loop(generator, x, y):
     weights.append(generator.w.numpy())
     biases.append(generator.b.numpy())
     current_loss = loss(y, generator(x))
-
-current_loss = loss(y, generator(x))
-
-print(f"Starting:")
-print("    ", report(generator, current_loss))
-
-training_loop(generator, x, y)
-
+    print(f"Epoch {epoch + 1}: {report(generator, current_loss)}")
 
 
 #Callback for saving best model
@@ -92,6 +85,17 @@ pn.compile(
             ],      
     run_eagerly=True,
 )
+
+# Generator Code
+weights = []
+biases = []
+training_loop(generator, x=train_ds, y=target_labels)
+
+current_loss = loss(y, generator(x))
+
+print(f"Starting:")
+print("    ", report(generator, current_loss))
+training_loop(generator, x, y)
 
 
 tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, EStop])
