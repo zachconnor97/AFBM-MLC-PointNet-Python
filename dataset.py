@@ -188,7 +188,11 @@ def generator_dataset(filename):
     train_ds = tf.data.Dataset.zip((train_label, train_points))
     val_ds = val_ds.batch(BATCH_SIZE)
     train_ds = train_ds.batch(BATCH_SIZE) # ADDS A lot of time .shuffle(buffer_size=20000,reshuffle_each_iteration=True)
-
+    
+    train_label = train_label.batch(BATCH_SIZE)
+    train_points = train_points.batch(BATCH_SIZE)
+    val_label = val_label.batch(BATCH_SIZE)
+    val_points = val_points.batch(BATCH_SIZE)
     #Testing stuff
     """
     data = afbm_dataset.take(1)
@@ -200,4 +204,4 @@ def generator_dataset(filename):
     pcd.points = open3d.utility.Vector3dVector(points.numpy())
     open3d.visualization.draw_geometries([pcd])
     """
-    return train_ds, val_ds, label_weights
+    return train_ds, val_ds, label_weights, train_label, train_points, val_label, val_points
