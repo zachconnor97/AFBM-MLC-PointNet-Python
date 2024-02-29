@@ -22,7 +22,8 @@ database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
-
+print(gmodel.w)
+print(gmodel.b)
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
 # This computes a single loss value for an entire batch - Zach change this to desired loss function
@@ -30,7 +31,7 @@ def loss(target_y, predicted_y):
   return tf.reduce_mean(tf.square(target_y - predicted_y))
 
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
-  stacked_loss= 0 
+  stacked_loss = 0 
   for step, (xbt, ybt) in enumerate(train_ds):
   
     with tf.GradientTape() as t:
@@ -39,7 +40,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       stacked_loss = stacked_loss + current_loss
 
     # Use GradientTape to calculate the gradients with respect to W and b
-    dw, db = t.gradient(current_loss, [gmodel.w, gmodel.b])
+    dw, db = t.gradient(current_loss, [gmodel., gmodel.b])
 
     # Subtract the gradient scaled by the learning rate
     gmodel.w.assign_sub(LEARN_RATE * dw)
