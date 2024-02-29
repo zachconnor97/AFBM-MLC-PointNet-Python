@@ -27,7 +27,7 @@ EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 def loss(target_y, predicted_y):
   return tf.reduce_mean(tf.square(target_y - predicted_y))
 
-def train(generator, x, y, LEARN_RATE):
+def train(generator, x, y, LEARN_RATE): # X is labels and Y is train_ds
 
   with tf.GradientTape() as t:
     # Trainable variables are automatically tracked by GradientTape
@@ -86,10 +86,10 @@ pn.compile(
     run_eagerly=True,
 )
 
-# Generator Code
+# Generator Code for the training loop
 weights = []
 biases = []
-training_loop(generator, x=train_ds, y=target_labels)
+training_loop(generator, x=train_label, y=train_points)
 
 current_loss = loss(y, generator(x))
 
