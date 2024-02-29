@@ -43,7 +43,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       stacked_loss = stacked_loss + current_loss
 
     # Use GradientTape to calculate the gradients with respect to W and b
-    dw, db = t.gradient(current_loss, [gmodel.get_weights()[0], gmodel.get_weights()[1]])
+    dw, db = t.gradient( [gmodel.get_weights()[0], gmodel.get_weights()[1]]) #current_loss,
 
     # Subtract the gradient scaled by the learning rate
     gmodel.get_weights()[0].assign_sub(LEARN_RATE * dw)
