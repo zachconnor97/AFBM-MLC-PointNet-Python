@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import date 
 from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
 from utils import PerLabelMetric, GarbageMan
-from dataset import generate_dataset
+from dataset import generator_dataset
 import os
 import csv
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -21,41 +21,47 @@ username = 'gabri'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
+gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
+
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
 # This computes a single loss value for an entire batch - Zach change this to desired loss function
 def loss(target_y, predicted_y):
   return tf.reduce_mean(tf.square(target_y - predicted_y))
 
-def train(generator, x, y, LEARN_RATE): # X is labels and Y is train_ds
+def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
+  stacked_loss= 0 
+  for step, (xbt, ybt) in enumerate(train_ds):
+  
+    with tf.GradientTape() as t:
+      # Trainable variables are automatically tracked by GradientTape
+      current_loss = loss(ybt, gmodel(xbt))
+      stacked_loss = stacked_loss + current_loss
 
-  with tf.GradientTape() as t:
-    # Trainable variables are automatically tracked by GradientTape
-    current_loss = loss(y, generator(x))
+    # Use GradientTape to calculate the gradients with respect to W and b
+    dw, db = t.gradient(current_loss, [gmodel.w, gmodel.b])
 
-  # Use GradientTape to calculate the gradients with respect to W and b
-  dw, db = t.gradient(current_loss, [generator.w, generator.b])
-
-  # Subtract the gradient scaled by the learning rate
-  generator.w.assign_sub(LEARN_RATE * dw)
-  generator.b.assign_sub(LEARN_RATE * db)
+    # Subtract the gradient scaled by the learning rate
+    gmodel.w.assign_sub(LEARN_RATE * dw)
+    gmodel.b.assign_sub(LEARN_RATE * db)
+  return stacked_loss/step
 
 # Define a training loop
-def report(generator, loss):
-  return f"W = {generator.w.numpy():1.2f}, b = {generator.b.numpy():1.2f}, loss={loss:2.5f}"
+def report(gmodel, loss):
+  return f"W = {gmodel.w.numpy():1.2f}, b = {gmodel.b.numpy():1.2f}, loss={loss:2.5f}"
 
 
-def training_loop(generator, x, y):
+def training_loop(gmodel, train_ds):
 
   for epoch in range(NUM_EPOCHS):
     # Update the model with the single giant batch
-    train(generator, x, y, learning_rate=0.1)
+    e_loss = train(gmodel, train_ds, LEARN_RATE=0.1)
 
     # Track this before I update
-    weights.append(generator.w.numpy())
-    biases.append(generator.b.numpy())
-    current_loss = loss(y, generator(x))
-    print(f"Epoch {epoch + 1}: {report(generator, current_loss)}")
+    weights.append(gmodel.w.numpy())
+    biases.append(gmodel.b.numpy())
+    
+    print(f"Epoch {epoch + 1}: {report(gmodel, e_loss)}")
 
 
 #Callback for saving best model
@@ -67,8 +73,9 @@ model_checkpoint = ModelCheckpoint(
     verbose=1  # Show information about saving
 )
 
-train_ds, val_ds, label_weights = generate_dataset(filename=database)
-with open("Label_Weights.csv", mode='w') as f:
+train_ds, val_ds, label_weights, train_label, train_points, val_label, val_points = generator_dataset(filename=database)
+
+"""with open("Label_Weights.csv", mode='w') as f:
     writer = csv.writer(f)
     for key, value in label_weights.items():
         writer.writerow([key, value])
@@ -85,19 +92,20 @@ pn.compile(
             ],      
     run_eagerly=True,
 )
+"""
 
-# Generator Code for the training loop
+# gmodel Code for the training loop
 weights = []
 biases = []
-training_loop(generator, x=train_label, y=train_points)
 
-current_loss = loss(y, generator(x))
+
+#current_loss = loss(y = train_points, gmodel(train_label))
 
 print(f"Starting:")
-print("    ", report(generator, current_loss))
-training_loop(generator, x, y)
+#print("    ", report(gmodel, current_loss=1))
+training_loop(gmodel, train_ds)
 
-
+"""
 tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, EStop])
 pn.save(save_path + '_AFBM Model')
 
@@ -129,3 +137,5 @@ histfile = save_path + '_label_validation_allmets_2.csv'
 
 with open(histfile, mode='w') as f:
     metrics.to_csv(f)
+
+"""
