@@ -54,7 +54,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
 
 # Define a training loop
 def report(gmodel, loss):
-  return f"W = {gmodel.w.numpy():1.2f}, b = {gmodel.b.numpy():1.2f}, loss={loss:2.5f}"
+  return f"W = {gmodel.w.numpy():1.2f}, b = {gmodel.b.numpy():1.2f}, loss={loss:2.5f}" # update this 
 
 
 def training_loop(gmodel, train_ds):
@@ -64,7 +64,7 @@ def training_loop(gmodel, train_ds):
     e_loss = train(gmodel, train_ds, LEARN_RATE=0.1)
 
     # Track this before I update
-    weights.append(gmodel.w.numpy())
+    weights.append(gmodel.w.numpy()) # update this 
     biases.append(gmodel.b.numpy())
     
     print(f"Epoch {epoch + 1}: {report(gmodel, e_loss)}")
