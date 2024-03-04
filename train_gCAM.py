@@ -33,7 +33,7 @@ def loss(target_y, predicted_y, label_weights):
   #print("Target shape:", target_y.shape)
   #print("Predicted shape:", predicted_y.shape)
   bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-  return bce(target_y, predicted_y, label_weight=label_weights).numpy()
+  return bce(target_y, predicted_y).numpy() #bce(target_y, predicted_y, label_weight=label_weights).numpy()
 
 def train(pn_model, train_ds, label_weights, learn_rate): # X is points and Y is labels
     stacked_loss = 0 
