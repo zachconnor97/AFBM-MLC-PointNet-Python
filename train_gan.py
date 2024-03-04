@@ -30,8 +30,8 @@ EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 # This computes a single loss value for an entire batch - Zach change this to desired loss function
 def loss(target_y, predicted_y):
   target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
-  print("Target shape:", target_y.shape)
-  print("Predicted shape:", predicted_y.shape)
+  #print("Target shape:", target_y.shape)
+  #print("Predicted shape:", predicted_y.shape)
   return tf.reduce_mean(tf.square(target_y - predicted_y))
 
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
