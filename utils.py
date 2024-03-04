@@ -8,7 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from keras.callbacks import ModelCheckpoint
 
 # Need to update this to come from other file
-NUM_CLASSES = 24
+NUM_CLASSES = 25
 
 class GarbageMan(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):

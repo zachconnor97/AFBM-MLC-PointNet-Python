@@ -14,7 +14,7 @@ from keras import backend as B
 import csv
 
 
-NUM_POINTS = 200
+NUM_POINTS = 2000
 SAMPLE_RATIO = int(10000 / NUM_POINTS)
 BATCH_SIZE = 16
 username = 'Zachariah'
