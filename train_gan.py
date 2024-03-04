@@ -37,7 +37,7 @@ def loss(target_y, predicted_y):
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
   stacked_loss = 0 
   for step, (xbt, ybt) in enumerate(train_ds):
-  
+    print(f"Step: {step}")
     with tf.GradientTape() as t:
       # Trainable variables are automatically tracked by GradientTape
       current_loss = loss(ybt, gmodel(xbt))
