@@ -21,6 +21,7 @@ username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
+g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 print(gmodel.get_weights()[0])
 print(gmodel.get_weights()[1])
@@ -42,12 +43,11 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       current_loss = loss(ybt, gmodel(xbt))
       stacked_loss = stacked_loss + current_loss
 
-    # Use GradientTape to calculate the gradients with respect to W and b
-    dw, db = t.gradient(current_loss, [gmodel.get_weights()[0], gmodel.get_weights()[1]]) #current_loss,
-
+    grads = t.gradient(current_loss, gmodel.trainable_weights)
+    
+    
     # Subtract the gradient scaled by the learning rate
-    gmodel.get_weights()[0].assign_sub(LEARN_RATE * dw)
-    gmodel.get_weights()[1].assign_sub(LEARN_RATE * db)
+    g_optimizer.apply_gradients(zip(grads, gmodel.trainable_weights))
   return stacked_loss/step
 
 # Define a training loop
