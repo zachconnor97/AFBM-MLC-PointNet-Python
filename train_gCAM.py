@@ -27,26 +27,41 @@ print(pn_model.get_weights()[0])
 print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
-def loss(target_y, predicted_y):
+def loss(target_y, predicted_y, label_weights):
   # Update to binary cross entropy loss
   target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
   #print("Target shape:", target_y.shape)
   #print("Predicted shape:", predicted_y.shape)
-  return tf.reduce_mean(tf.square(target_y - predicted_y))
+  bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+  return bce(target_y, predicted_y, label_weight=label_weights).numpy()
 
-def train(pn_model, train_ds, learn_rate): # X is points and Y is labels
-  stacked_loss = 0 
-  for step, (xbt, ybt) in enumerate(train_ds):
-    print(f"Step: {step}")
-    with tf.GradientTape() as t:
-      # Trainable variables are automatically tracked by GradientTape
-      current_loss = loss(ybt, pn_model(xbt))
-      stacked_loss = stacked_loss + current_loss
-    print(f"Current Loss: {current_loss}")
-    grads = t.gradient(current_loss, pn_model.trainable_weights)    
-    # Subtract the gradient scaled by the learning rate
-    g_optimizer.apply_gradients(zip(grads, pn_model.trainable_weights))
-  return stacked_loss/step
+def train(pn_model, train_ds, label_weights, learn_rate): # X is points and Y is labels
+    stacked_loss = 0 
+    for step, (xbt, ybt) in enumerate(train_ds):
+        print(f"Step: {step}")
+        with tf.GradientTape() as t:
+            # Trainable variables are automatically tracked by GradientTape
+            current_loss = loss(ybt, pn_model(xbt), label_weights)
+            stacked_loss = stacked_loss + current_loss
+        print(f"Current Loss: {current_loss}")
+        grads = t.gradient(current_loss, pn_model.trainable_weights)    
+        # Subtract the gradient scaled by the learning rate
+        g_optimizer.apply_gradients(zip(grads*learn_rate, pn_model.trainable_weights))
+    return stacked_loss/step
+
+def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
+    stacked_loss = 0 
+    for step, (xbt, ybt) in enumerate(val_ds):
+        print(f"Step: {step}")
+        with tf.GradientTape() as t:
+            # Trainable variables are automatically tracked by GradientTape
+            current_loss = loss(ybt, pn_model(xbt), label_weights)
+            stacked_loss = stacked_loss + current_loss
+        print(f"Current Loss: {current_loss}")
+        #grads = t.gradient(current_loss, pn_model.trainable_weights)    
+        # Subtract the gradient scaled by the learning rate
+        #g_optimizer.apply_gradients(zip(grads*learn_rate, pn_model.trainable_weights))
+    return stacked_loss/step
 
 # Define a training loop
 """
@@ -55,14 +70,17 @@ def report(pn_model, loss):
 """
 
 def training_loop(pn_model, train_ds, val_ds, label_weights):
-  for epoch in range(NUM_EPOCHS):
-    print(f"Epoch {epoch}:")
-    # Update the model with the single giant batch
-    e_loss = train(pn_model, train_ds, LEARN_RATE=0.1)
-    # Track this before I update
-    weights.append(pn_model.get_weights()[0])
-    biases.append(pn_model.get_weights()[1])
-    print(f"W = {pn_model.get_weights()[0]}, B = = {pn_model.get_weights()[1]}")
+    for epoch in range(NUM_EPOCHS):
+        print(f"Epoch {epoch}:")
+        # Update the model with the single giant batch
+        e_loss = train(pn_model, train_ds, label_weights, learn_rate=LEARN_RATE)
+        # Track this before I update
+        weights.append(pn_model.get_weights()[0])
+        biases.append(pn_model.get_weights()[1])
+        print(f"W = {pn_model.get_weights()[0]}, B = = {pn_model.get_weights()[1]}")
+    print(f"Validation Loss: {validate(pn_model, val_ds, label_weights)}")
+        
+
 
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
