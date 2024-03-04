@@ -49,8 +49,10 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
   return stacked_loss/step
 
 # Define a training loop
+"""
 def report(gmodel, loss):
   return f"W = {gmodel.get_weights()[0]:1.2f}, b = {gmodel.get_weights()[1]:1.2f}, loss={loss:2.5f}"
+"""
 
 def training_loop(gmodel, train_ds):
   for epoch in range(NUM_EPOCHS):
@@ -60,7 +62,7 @@ def training_loop(gmodel, train_ds):
     # Track this before I update
     weights.append(gmodel.get_weights()[0])
     biases.append(gmodel.get_weights()[1])
-    print(f"{report(gmodel, e_loss)}")
+    print(f"W = {gmodel.get_weights()[0]}, B = = {gmodel.get_weights()[1]}")
 
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
