@@ -58,6 +58,7 @@ def report(gmodel, loss):
 def training_loop(gmodel, train_ds):
 
   for epoch in range(NUM_EPOCHS):
+    print(f"Epoch {epoch}:")
     # Update the model with the single giant batch
     e_loss = train(gmodel, train_ds, LEARN_RATE=0.1)
 
@@ -65,7 +66,7 @@ def training_loop(gmodel, train_ds):
     weights.append(gmodel.get_weights()[0].numpy())
     biases.append(gmodel.get_weights()[0].numpy())
     
-    print(f"Epoch {epoch + 1}: {report(gmodel, e_loss)}")
+    print(f"{report(gmodel, e_loss)}")
 
 
 #Callback for saving best model
