@@ -2,12 +2,12 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from datetime import date 
-from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
-from utils import PerLabelMetric, GarbageMan
-from dataset import generator_dataset
 import os
 import csv
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
+from utils import PerLabelMetric, GarbageMan
+from dataset import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 EPS = 1e-7
@@ -42,10 +42,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       # Trainable variables are automatically tracked by GradientTape
       current_loss = loss(ybt, gmodel(xbt))
       stacked_loss = stacked_loss + current_loss
-
-    grads = t.gradient(current_loss, gmodel.trainable_weights)
-    
-    
+    grads = t.gradient(current_loss, gmodel.trainable_weights)    
     # Subtract the gradient scaled by the learning rate
     g_optimizer.apply_gradients(zip(grads, gmodel.trainable_weights))
   return stacked_loss/step
@@ -54,20 +51,15 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
 def report(gmodel, loss):
   return f"W = {gmodel.get_weights()[1].numpy():1.2f}, b = {gmodel.get_weights()[1].numpy():1.2f}, loss={loss:2.5f}"
 
-
 def training_loop(gmodel, train_ds):
-
   for epoch in range(NUM_EPOCHS):
     print(f"Epoch {epoch}:")
     # Update the model with the single giant batch
     e_loss = train(gmodel, train_ds, LEARN_RATE=0.1)
-
     # Track this before I update
     weights.append(gmodel.get_weights()[0].numpy())
     biases.append(gmodel.get_weights()[0].numpy())
-    
     print(f"{report(gmodel, e_loss)}")
-
 
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
