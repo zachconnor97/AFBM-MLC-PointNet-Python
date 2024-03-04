@@ -11,14 +11,14 @@ from dataset import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 EPS = 1e-7
-NUM_POINTS = 2000
-NUM_CLASSES = 25
+NUM_POINTS = 200
+NUM_CLASSES = 24
 TRAINING = True
 LEARN_RATE = 0.000025
 BATCH_SIZE = 16
 NUM_EPOCHS = 25
 username = 'Zachariah'
-database = "AFBMData_NoChairs_Augmented.csv"
+database = "AFBMData_NoChairs_Short2.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
@@ -42,6 +42,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       # Trainable variables are automatically tracked by GradientTape
       current_loss = loss(ybt, gmodel(xbt))
       stacked_loss = stacked_loss + current_loss
+    print(f"Current Loss: {current_loss}")
     grads = t.gradient(current_loss, gmodel.trainable_weights)    
     # Subtract the gradient scaled by the learning rate
     g_optimizer.apply_gradients(zip(grads, gmodel.trainable_weights))
@@ -49,7 +50,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
 
 # Define a training loop
 def report(gmodel, loss):
-  return f"W = {gmodel.get_weights()[1].numpy():1.2f}, b = {gmodel.get_weights()[1].numpy():1.2f}, loss={loss:2.5f}"
+  return f"W = {gmodel.get_weights()[0]:1.2f}, b = {gmodel.get_weights()[1]:1.2f}, loss={loss:2.5f}"
 
 def training_loop(gmodel, train_ds):
   for epoch in range(NUM_EPOCHS):
@@ -57,8 +58,8 @@ def training_loop(gmodel, train_ds):
     # Update the model with the single giant batch
     e_loss = train(gmodel, train_ds, LEARN_RATE=0.1)
     # Track this before I update
-    weights.append(gmodel.get_weights()[0].numpy())
-    biases.append(gmodel.get_weights()[0].numpy())
+    weights.append(gmodel.get_weights()[0])
+    biases.append(gmodel.get_weights()[1])
     print(f"{report(gmodel, e_loss)}")
 
 #Callback for saving best model
