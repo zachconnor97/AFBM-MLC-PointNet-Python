@@ -53,7 +53,7 @@ def wbce_loss(target_y, predicted_y, label_weights=None):
 def train(pn_model, train_ds, learn_rate, label_weights=None): # X is points and Y is labels
     stacked_loss = 0 
     for step, (xbt, ybt) in enumerate(train_ds):
-        print(f"Step: {step}")
+        #print(f"Step: {step}")
         with tf.GradientTape() as t:
             # Trainable variables are automatically tracked by GradientTape
             #current_loss = loss(ybt, pn_model(xbt))
@@ -67,12 +67,12 @@ def train(pn_model, train_ds, learn_rate, label_weights=None): # X is points and
 def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
     stacked_loss = 0 
     for step, (xbt, ybt) in enumerate(val_ds):
-        print(f"Step: {step}")
+        #print(f"Step: {step}")
         with tf.GradientTape() as t:
             # Trainable variables are automatically tracked by GradientTape
             current_loss = wbce_loss(ybt, pn_model(xbt))
             stacked_loss = stacked_loss + current_loss
-        print(f"Current Loss: {current_loss}")
+        #print(f"Current Loss: {current_loss}")
         #grads = t.gradient(current_loss, pn_model.trainable_weights)    
         # Subtract the gradient scaled by the learning rate
         #g_optimizer.apply_gradients(zip(grads*learn_rate, pn_model.trainable_weights))
@@ -94,7 +94,8 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         weights.append(pn_model.get_weights()[0])
         biases.append(pn_model.get_weights()[1])
         print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
-    print(f"Validation Loss: {validate(pn_model, val_ds, label_weights)}")
+        vloss = validate(pn_model, val_ds, label_weights)
+        print(f"Validation Loss: {vloss}")
         
 
 
