@@ -39,18 +39,21 @@ def loss(target_y, predicted_y, label_weights=None):
 def wbce_loss(target_y, predicted_y, label_weights=None):
     from keras.src import backend, backend_config
     epsilon = backend_config.epsilon
-    lw=np.array(list(label_weights.items()))
-    lw = lw[:,1]
     target = tf.convert_to_tensor(target_y, dtype='float32')
     output = tf.convert_to_tensor(predicted_y, dtype='float32')
     epsilon_ = tf.constant(epsilon(), output.dtype.base_dtype)
     output = tf.clip_by_value(output, epsilon_, 1.0 - epsilon_)
     bceloss = target * tf.math.log(output + epsilon())
     bceloss += (1-target) * tf.math.log(1 - output + epsilon())
-    wbceloss = backend.mean(-bceloss * lw) 
+    if label_weights != None:
+        lw=np.array(list(label_weights.items()))
+        lw = lw[:,1]
+        wbceloss = backend.mean(-bceloss * lw) 
+    else:
+        wbceloss = backend.mean(-bceloss) 
     return wbceloss
 
-def train(pn_model, train_ds, learn_rate, label_weights=None): # X is points and Y is labels
+def train(pn_model, train_ds, label_weights=None): # X is points and Y is labels
     stacked_loss = 0 
     for step, (xbt, ybt) in enumerate(train_ds):
         #print(f"Step: {step}")
