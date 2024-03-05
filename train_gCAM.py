@@ -32,7 +32,9 @@ def loss(target_y, predicted_y, label_weights):
   target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
   #print("Target shape:", target_y.shape)
   #print("Predicted shape:", predicted_y.shape)
+
   bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+  # Label weights not working
   return bce(target_y, predicted_y).numpy() #bce(target_y, predicted_y, label_weight=label_weights).numpy()
 
 def train(pn_model, train_ds, label_weights, learn_rate): # X is points and Y is labels
