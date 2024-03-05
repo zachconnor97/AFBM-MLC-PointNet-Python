@@ -33,9 +33,7 @@ def loss(target_y, predicted_y, label_weights=None):
     # Update to binary cross entropy loss
     target_y = tf.cast(target_y, dtype=tf.float32)
     bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-    loss = bce(target_y, predicted_y).numpy() 
-    # print(loss)
-    # print(type(loss))
+    loss = bce(target_y, predicted_y) 
     return loss
 
 def wbce_loss(target_y, predicted_y, label_weights=None):
@@ -50,9 +48,7 @@ def wbce_loss(target_y, predicted_y, label_weights=None):
     bceloss = target * tf.math.log(output + epsilon())
     bceloss += (1-target) * tf.math.log(1 - output + epsilon())
     wbceloss = backend.mean(-bceloss * lw) 
-    print(wbceloss.numpy())
-    print(type(wbceloss.numpy()))
-    return wbceloss.numpy()
+    return wbceloss
 
 def train(pn_model, train_ds, learn_rate, label_weights=None): # X is points and Y is labels
     stacked_loss = 0 
@@ -60,14 +56,14 @@ def train(pn_model, train_ds, learn_rate, label_weights=None): # X is points and
         print(f"Step: {step}")
         with tf.GradientTape() as t:
             # Trainable variables are automatically tracked by GradientTape
-            current_loss = loss(ybt, pn_model(xbt))
-            #current_loss = wbce_loss(ybt, pn_model(xbt), label_weights)
+            #current_loss = loss(ybt, pn_model(xbt))
+            current_loss = wbce_loss(ybt, pn_model(xbt), label_weights)
             stacked_loss = stacked_loss + current_loss
-        print(f"Current Loss: {current_loss}")
+        #print(f"Current Loss: {current_loss}")
         grads = t.gradient(current_loss, pn_model.trainable_weights)    
         # Subtract the gradient scaled by the learning rate
-        g_optimizer.apply_gradients(zip(grads, pn_model.trainable_weights))
-        #g_optimizer.apply_gradients(zip(grads*learn_rate, pn_model.trainable_weights))
+        #g_optimizer.apply_gradients(zip(grads, pn_model.trainable_weights))
+        g_optimizer.apply_gradients(zip(grads*learn_rate, pn_model.trainable_weights))
     return stacked_loss/step
 
 def validate(pn_model, val_ds, label_weights): # X is points and Y is labels

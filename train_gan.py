@@ -16,7 +16,7 @@ NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.000025
 BATCH_SIZE = 16
-NUM_EPOCHS = 25
+NUM_EPOCHS = 1
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
@@ -32,7 +32,10 @@ def loss(target_y, predicted_y):
   target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
   #print("Target shape:", target_y.shape)
   #print("Predicted shape:", predicted_y.shape)
-  return tf.reduce_mean(tf.square(target_y - predicted_y))
+  l = tf.reduce_mean(tf.square(target_y - predicted_y))
+  print(type(l))
+  print(l)
+  return l
 
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
   stacked_loss = 0 
