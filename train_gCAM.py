@@ -96,7 +96,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         # Track this before I update
         weights.append(pn_model.get_weights()[0])
         biases.append(pn_model.get_weights()[1])
-        print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
+        #print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
         vloss = validate(pn_model, val_ds, label_weights)
         print(f"Validation Loss: {vloss}")
         
