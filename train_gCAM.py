@@ -89,10 +89,11 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         print(f"Epoch {epoch}:")
         # Update the model with the single giant batch
         e_loss = train(pn_model, train_ds, label_weights=label_weights, learn_rate=LEARN_RATE)
+        print(f"Training Loss: {e_loss}")
         # Track this before I update
         weights.append(pn_model.get_weights()[0])
         biases.append(pn_model.get_weights()[1])
-        print(f"W = {pn_model.get_weights()[0]}, B = = {pn_model.get_weights()[1]}")
+        print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
     print(f"Validation Loss: {validate(pn_model, val_ds, label_weights)}")
         
 
