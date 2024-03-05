@@ -9,7 +9,8 @@ from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regular
 from utils import PerLabelMetric, GarbageMan
 from dataset import generate_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-
+from keras.src import backend_config
+epsilon = backend_config.epsilon
 EPS = 1e-7
 NUM_POINTS = 2000
 NUM_CLASSES = 25
@@ -28,14 +29,20 @@ print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
 def loss(target_y, predicted_y, label_weights):
-  # Update to binary cross entropy loss
-  target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
-  #print("Target shape:", target_y.shape)
-  #print("Predicted shape:", predicted_y.shape)
-
-  bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-  # Label weights not working
-  return bce(target_y, predicted_y).numpy() #bce(target_y, predicted_y, label_weight=label_weights).numpy()
+    # Update to binary cross entropy loss
+    #target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
+    #print("Target shape:", target_y.shape)
+    #print("Predicted shape:", predicted_y.shape)
+    target = tf.convert_to_tensor(target_y)
+    output = tf.convert_to_tensor(predicted_y)
+    #bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+    # Label weights not working
+    epsilon_ = tf.constant(epsilon(), output.dtype.base_dtype)
+    #print(epsilon_)
+    output = tf.clip_by_value(output, epsilon_, 1.0 - epsilon_)
+    wbceloss = target * tf.math.log(output + epsilon())
+    wbceloss += (1-target) * tf.math.log(1 - predicted_y + epsilon())
+    return -wbceloss.numpy() #bce(target_y, predicted_y).numpy() #bce(target_y, predicted_y, label_weight=label_weights).numpy()
 
 def train(pn_model, train_ds, label_weights, learn_rate): # X is points and Y is labels
     stacked_loss = 0 
