@@ -76,7 +76,7 @@ def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
         print(f"Step: {step}")
         with tf.GradientTape() as t:
             # Trainable variables are automatically tracked by GradientTape
-            current_loss = wbce_loss(ybt, pn_model(xbt), label_weights)
+            current_loss = wbce_loss(ybt, pn_model(xbt))
             stacked_loss = stacked_loss + current_loss
         print(f"Current Loss: {current_loss}")
         #grads = t.gradient(current_loss, pn_model.trainable_weights)    
