@@ -69,14 +69,14 @@ def wbce_loss(target_y, predicted_y, label_weights=None):
     print(type(wbceloss.numpy()))
     return wbceloss.numpy()
 
-def train(pn_model, train_ds, label_weights, learn_rate): # X is points and Y is labels
+def train(pn_model, train_ds, learn_rate, label_weights=None): # X is points and Y is labels
     stacked_loss = 0 
     for step, (xbt, ybt) in enumerate(train_ds):
         print(f"Step: {step}")
         with tf.GradientTape() as t:
             # Trainable variables are automatically tracked by GradientTape
             current_loss = loss(ybt, pn_model(xbt))
-            current_loss = wbce_loss(ybt, pn_model(xbt), label_weights)
+            #current_loss = wbce_loss(ybt, pn_model(xbt), label_weights)
             stacked_loss = stacked_loss + current_loss
         print(f"Current Loss: {current_loss}")
         grads = t.gradient(current_loss, pn_model.trainable_weights)    
@@ -108,7 +108,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
     for epoch in range(NUM_EPOCHS):
         print(f"Epoch {epoch}:")
         # Update the model with the single giant batch
-        e_loss = train(pn_model, train_ds, label_weights, learn_rate=LEARN_RATE)
+        e_loss = train(pn_model, train_ds, label_weights=label_weights, learn_rate=LEARN_RATE)
         # Track this before I update
         weights.append(pn_model.get_weights()[0])
         biases.append(pn_model.get_weights()[1])
