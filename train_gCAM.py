@@ -28,6 +28,7 @@ pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 #print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
+"""
 def loss(target_y, predicted_y, label_weights):
     # Update to binary cross entropy loss
     #target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
@@ -46,6 +47,19 @@ def loss(target_y, predicted_y, label_weights):
     wbceloss = target * tf.math.log(output + epsilon())
     wbceloss += (1-target) * tf.math.log(1 - predicted_y + epsilon())
     return -wbceloss #bce(target_y, predicted_y).numpy() #bce(target_y, predicted_y, label_weight=label_weights).numpy()
+"""
+def wbce_loss(target_y, predicted_y, label_weights=None):
+    from keras.src import backend, backend_config
+    epsilon = backend_config.epsilon
+    # Update to binary cross entropy loss
+    target = tf.convert_to_tensor(target_y, dtype='float32')
+    output = tf.convert_to_tensor(predicted_y, dtype='float32')
+    epsilon_ = tf.constant(epsilon(), output.dtype.base_dtype)
+    output = tf.clip_by_value(output, epsilon_, 1.0 - epsilon_)
+    bceloss = target * tf.math.log(output + epsilon())
+    bceloss += (1-target) * tf.math.log(1 - output + epsilon())
+    wbceloss = backend.mean(-bceloss * label_weights) 
+    return wbceloss
 
 def train(pn_model, train_ds, label_weights, learn_rate): # X is points and Y is labels
     stacked_loss = 0 
@@ -53,7 +67,7 @@ def train(pn_model, train_ds, label_weights, learn_rate): # X is points and Y is
         print(f"Step: {step}")
         with tf.GradientTape() as t:
             # Trainable variables are automatically tracked by GradientTape
-            current_loss = loss(ybt, pn_model(xbt), label_weights)
+            current_loss = wbce_loss(ybt, pn_model(xbt), label_weights)
             stacked_loss = stacked_loss + current_loss
         print(f"Current Loss: {current_loss}")
         grads = t.gradient(current_loss, pn_model.trainable_weights)    
@@ -67,7 +81,7 @@ def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
         print(f"Step: {step}")
         with tf.GradientTape() as t:
             # Trainable variables are automatically tracked by GradientTape
-            current_loss = loss(ybt, pn_model(xbt), label_weights)
+            current_loss = wbce_loss(ybt, pn_model(xbt), label_weights)
             stacked_loss = stacked_loss + current_loss
         print(f"Current Loss: {current_loss}")
         #grads = t.gradient(current_loss, pn_model.trainable_weights)    
