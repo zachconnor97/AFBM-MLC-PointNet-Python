@@ -91,7 +91,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
     for epoch in range(NUM_EPOCHS):
         print(f"Epoch {epoch}:")
         # Update the model with the single giant batch
-        e_loss = train(pn_model, train_ds, label_weights=label_weights, learn_rate=LEARN_RATE)
+        e_loss = train(pn_model, train_ds, label_weights=label_weights)
         print(f"Training Loss: {e_loss}")
         # Track this before I update
         weights.append(pn_model.get_weights()[0])
