@@ -24,8 +24,8 @@ save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
-print(pn_model.get_weights()[0])
-print(pn_model.get_weights()[1])
+#print(pn_model.get_weights()[0])
+#print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
 def loss(target_y, predicted_y, label_weights):
@@ -40,9 +40,12 @@ def loss(target_y, predicted_y, label_weights):
     epsilon_ = tf.constant(epsilon(), output.dtype.base_dtype)
     #print(epsilon_)
     output = tf.clip_by_value(output, epsilon_, 1.0 - epsilon_)
+    # multiply label weights by binary output
+    # collapse label weights, multiply loss by weighting. Still becomes same weight?
+    # maybe need to loop along labels to get the weights in
     wbceloss = target * tf.math.log(output + epsilon())
     wbceloss += (1-target) * tf.math.log(1 - predicted_y + epsilon())
-    return -wbceloss.numpy() #bce(target_y, predicted_y).numpy() #bce(target_y, predicted_y, label_weight=label_weights).numpy()
+    return -wbceloss #bce(target_y, predicted_y).numpy() #bce(target_y, predicted_y, label_weight=label_weights).numpy()
 
 def train(pn_model, train_ds, label_weights, learn_rate): # X is points and Y is labels
     stacked_loss = 0 
