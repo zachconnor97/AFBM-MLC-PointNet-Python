@@ -61,6 +61,8 @@ def train(pn_model, train_ds, learn_rate, label_weights=None): # X is points and
             stacked_loss = stacked_loss + current_loss
         #print(f"Current Loss: {current_loss}")
         grads = t.gradient(current_loss, pn_model.trainable_weights)    
+        #print(grads)
+        #print(type(grads))
         # Subtract the gradient scaled by the learning rate
         #g_optimizer.apply_gradients(zip(grads, pn_model.trainable_weights))
         g_optimizer.apply_gradients(zip(grads*learn_rate, pn_model.trainable_weights))
