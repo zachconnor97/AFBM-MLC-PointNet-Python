@@ -17,7 +17,7 @@ NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.000025
 BATCH_SIZE = 16
-NUM_EPOCHS = 5
+NUM_EPOCHS = 5 #25
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
@@ -27,7 +27,11 @@ pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 #print(pn_model.get_weights()[0])
 #print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
-
+patience = 3
+echeck = 0
+ediff = 0.01
+cur_loss = 0.0
+prev_loss = 0.0
 
 def loss(target_y, predicted_y, label_weights=None):
     # Update to binary cross entropy loss
@@ -99,8 +103,14 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         #print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
         vloss = validate(pn_model, val_ds, label_weights)
         print(f"Validation Loss: {vloss}")
-        
 
+        cur_loss = vloss
+        if  prev_loss - cur_loss > ediff:
+            echeck = echeck + 1
+            if echeck > patience:
+                print("Validation loss not improving. Breaking the training loop.")
+                break
+        prev_loss = cur_loss
 
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
