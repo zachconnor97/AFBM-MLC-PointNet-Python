@@ -90,7 +90,7 @@ def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
 def report(pn_model, loss):
   return f"W = {pn_model.get_weights()[0]:1.2f}, b = {pn_model.get_weights()[1]:1.2f}, loss={loss:2.5f}"
 """
-
+prev_loss = 0
 def training_loop(pn_model, train_ds, val_ds, label_weights):
     for epoch in range(NUM_EPOCHS):
         print(f"Epoch {epoch}:")
