@@ -29,7 +29,7 @@ pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 patience = 3
 echeck = 0
-ediff = 0.01
+ediff = 0.001
 cur_loss = 0.0
 prev_loss = 0.0
 
