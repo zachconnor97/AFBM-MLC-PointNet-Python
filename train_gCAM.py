@@ -15,7 +15,7 @@ EPS = 1e-7
 NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
-LEARN_RATE = 0.00025
+LEARN_RATE = 0.25
 BATCH_SIZE = 16
 NUM_EPOCHS = 18
 username = 'Zachariah'
@@ -27,7 +27,7 @@ pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 #print(pn_model.get_weights()[0])
 #print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
-patience = 10
+patience = 1
 echeck = 0
 ediff = 0.001
 cur_loss = 0.0
@@ -94,6 +94,7 @@ def report(pn_model, loss):
 def training_loop(pn_model, train_ds, val_ds, label_weights):
     prev_loss = 0
     echeck = 0
+    weights = []
     for epoch in range(NUM_EPOCHS):
         print(f"Epoch {epoch}:")
         # Update the model with the single giant batch
@@ -110,7 +111,9 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         if abs(prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
             if echeck > patience:
-                weights = np.array(weights[end-echeck])
+                weights = np.array(weights)
+                print(f"Weights Length: {len(weights)} \n Weights Size: {np.shape(weights)} \n Weights: {weights}")
+                weights = weights(len(weights)-echeck)
                 for layer in pn_model:
                     layer.set_weights(weights)
                 print("Validation loss not improving. Breaking the training loop.")
@@ -131,14 +134,13 @@ model_checkpoint = ModelCheckpoint(
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
 
 # pn_model Code for the training loop
-weights = []
 
 #current_loss = loss(y = train_points, pn_model(train_label))
 
 print(f"Starting:")
 #print("    ", report(pn_model, current_loss=1))
 training_loop(pn_model, train_ds, val_ds, label_weights)
-pn_model.save(save_path + '_AFBM Model')
+#pn_model.save(save_path + '_AFBM Model')
 # Validation / Evaluation per Label
 data = []
 pn_model.compile(
@@ -152,7 +154,7 @@ data=pn_model.evaluate(x=val_ds)
 metrics = data[1]
 metrics = pd.DataFrame(metrics).T
 #print(metrics)
-histfile = save_path + '_label_validation_allmets_2.csv'
+histfile = save_path + '_label_validation_allmets.csv'
 
 with open(histfile, mode='w') as f:
     metrics.to_csv(f)
