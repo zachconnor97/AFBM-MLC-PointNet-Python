@@ -27,7 +27,7 @@ pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 #print(pn_model.get_weights()[0])
 #print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
-patience = 1
+patience = 0
 echeck = 0
 ediff = 0.001
 cur_loss = 0.0
@@ -106,19 +106,18 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         # Add weights and biases saving here
         vloss = validate(pn_model, val_ds, label_weights)
         print(f"Validation Loss: {vloss}")
-               
+          
         cur_loss = vloss
+        prev_loss = cur_loss # PLACEHOLDER
         if abs(prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
+            pn_model.save_weights('pn_weights.h5', overwrite=True)
             if echeck > patience:
-                weights = np.array(weights)
-                print(f"Weights Length: {len(weights)} \n Weights Size: {np.shape(weights)} \n Weights: {weights}")
-                weights = weights(len(weights)-echeck)
-                for layer in pn_model:
-                    layer.set_weights(weights)
+                pn_model.load_weight('pn_weights_' + epoch-1 + '.h5')
                 print("Validation loss not improving. Breaking the training loop.")
                 break
         else:
+            pn_model.save_weights(str('pn_weights_' + epoch + '.h5'), overwrite=True)
             echeck = 0
         prev_loss = cur_loss
 
