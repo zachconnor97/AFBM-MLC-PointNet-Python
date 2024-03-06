@@ -17,7 +17,7 @@ NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.000025
 BATCH_SIZE = 16
-NUM_EPOCHS = 25
+NUM_EPOCHS = 1 #25
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
@@ -142,6 +142,24 @@ biases = []
 print(f"Starting:")
 #print("    ", report(pn_model, current_loss=1))
 training_loop(pn_model, train_ds, val_ds, label_weights)
+
+# Validation / Evaluation per Label
+data = []
+pn_model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
+    metrics=[
+        PerLabelMetric(num_labels=NUM_CLASSES),
+        ],
+        run_eagerly=True,
+    )
+data=pn_model.evaluate(x=val_ds)
+metrics = data[1]
+metrics = pd.DataFrame(metrics).T
+#print(metrics)
+histfile = save_path + '_label_validation_allmets_2.csv'
+
+with open(histfile, mode='w') as f:
+    metrics.to_csv(f)
 
 """
 tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, EStop])
