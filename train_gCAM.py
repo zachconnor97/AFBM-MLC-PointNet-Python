@@ -119,8 +119,6 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
             echeck = 0
         prev_loss = cur_loss
 
-        
-
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
     filepath=save_path,
