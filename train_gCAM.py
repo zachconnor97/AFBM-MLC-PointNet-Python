@@ -113,7 +113,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
             echeck = echeck + 1
             pn_model.save_weights('pn_weights.h5', overwrite=True)
             if echeck > patience:
-                pn_model.load_weight('pn_weights_' + epoch-1 + '.h5')
+                pn_model.load_weights('pn_weights_' + epoch-1 + '.h5')
                 print("Validation loss not improving. Breaking the training loop.")
                 break
         else:
