@@ -4,6 +4,9 @@ import pandas as pd
 from datetime import date 
 import os
 import csv
+import open3d as o3d
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
 from utils import PerLabelMetric, GarbageMan
@@ -160,6 +163,7 @@ with open(histfile, mode='w') as f:
 
 
 def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
+    # from keras.io but need to modify for pcs instead
     gradm = tf.keras.models.Model(
         model.inputs, [model.get_layer(last_conv_layer_name).output, model.output]
     )
@@ -168,47 +172,20 @@ def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
         if pred_index is None:
             pred_index = tf.argmax(preds[0])
         label_channel = preds[:, pred_index]
-
     grads = tape.gradient(label_channel, last_conv_layer_output)
-
     pooled_grads = tf.reduce_mean(grads, axis=(0,1,2))
-
     last_conv_layer_output = last_conv_layer_output[0]
-    heatmap = last_conv_layer_output @ pooled_
-
+    heatcloud = last_conv_layer_output @ pooled_grads[...,tf.newaxis]
+    heatcloud = tf.squeeze(heatcloud)
+    heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
     return heatcloud.numpy()
 
-"""
-tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, EStop])
-pn.save(save_path + '_AFBM Model')
-
-## Save history file
-histdf = pd.DataFrame(tist.history)
-histfile = save_path + '_train_history_per_label_met.csv'
-with open(histfile, mode='w') as f:
-    histdf.to_csv(f)
-
-
-tf.keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-pn = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})  #save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
-
-
-# Validation / Evaluation per Label
-data = []
-pn.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
-    metrics=[
-        PerLabelMetric(num_labels=NUM_CLASSES),
-        ],
-        run_eagerly=True,
-    )
-data=pn.evaluate(x=val_ds)
-metrics = data[1]
-metrics = pd.DataFrame(metrics).T
-#print(metrics)
-histfile = save_path + '_label_validation_allmets_2.csv'
-
-with open(histfile, mode='w') as f:
-    metrics.to_csv(f)
-
-"""
+# Test GradCAM stuff
+testcloud = [] # use open3d to import point cloud from file
+pn_model.layers[-1].activation = None
+lln = 'dense_2' # double check this
+labels = pn_model.predict(testcloud)
+print("Predicted Labels: ", labels)
+heatcloud = gradcam_heatcloud(testcloud, pn_model, lln)
+plt.matshow(heatcloud)
+plt.show()
