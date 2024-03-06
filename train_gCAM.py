@@ -12,7 +12,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend_config
 epsilon = backend_config.epsilon
 EPS = 1e-7
-NUM_POINTS = 2000
+NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.000025
