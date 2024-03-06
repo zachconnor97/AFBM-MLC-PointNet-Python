@@ -100,25 +100,25 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         e_loss = train(pn_model, train_ds, label_weights=label_weights)
         print(f"Training Loss: {e_loss}")
         # Track this before I update
-        weights.append(pn_model.get_weights()[0])
-        biases.append(pn_model.get_weights()[1])
+        weights.append(pn_model.get_weights())
         #print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
         # Add weights and biases saving here
         vloss = validate(pn_model, val_ds, label_weights)
         print(f"Validation Loss: {vloss}")
                
         cur_loss = vloss
-        if cur_loss > prev_loss:
-            best_weights = weights.append(pn_model.get_weights()[0])
-            best_biases = biases.append(pn_model.get_weights()[1])
-
-        elif  abs(prev_loss - cur_loss) < ediff:
+        if abs(prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
             if echeck > patience:
+                weights = np.array(weights[end-echeck])
+                for layer in pn_model:
+                    layer.set_weights(weights)
                 print("Validation loss not improving. Breaking the training loop.")
                 break
+        else:
+            echeck = 0
         prev_loss = cur_loss
-    return best_weights, best_biases
+
         
 
 #Callback for saving best model
