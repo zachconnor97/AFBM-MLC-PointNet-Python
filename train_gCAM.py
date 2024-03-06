@@ -90,8 +90,10 @@ def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
 def report(pn_model, loss):
   return f"W = {pn_model.get_weights()[0]:1.2f}, b = {pn_model.get_weights()[1]:1.2f}, loss={loss:2.5f}"
 """
-prev_loss = 0
+
 def training_loop(pn_model, train_ds, val_ds, label_weights):
+    prev_loss = 0
+    echeck = 0
     for epoch in range(NUM_EPOCHS):
         print(f"Epoch {epoch}:")
         # Update the model with the single giant batch
@@ -105,7 +107,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         print(f"Validation Loss: {vloss}")
 
         cur_loss = vloss
-        if  prev_loss - cur_loss > ediff:
+        if  (prev_loss - cur_loss) > ediff:
             echeck = echeck + 1
             if echeck > patience:
                 print("Validation loss not improving. Breaking the training loop.")
