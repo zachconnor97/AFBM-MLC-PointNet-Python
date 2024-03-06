@@ -107,7 +107,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         print(f"Validation Loss: {vloss}")
         """        
         cur_loss = vloss
-        if  (prev_loss - cur_loss) > ediff:
+        if  (prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
             if echeck > patience:
                 print("Validation loss not improving. Breaking the training loop.")
