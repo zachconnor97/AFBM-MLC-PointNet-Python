@@ -100,20 +100,25 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         e_loss = train(pn_model, train_ds, label_weights=label_weights)
         print(f"Training Loss: {e_loss}")
         # Track this before I update
-        weights.append(pn_model.get_weights()[0])
-        biases.append(pn_model.get_weights()[1])
+        weights.append(pn_model.get_weights())
         #print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
+        # Add weights and biases saving here
         vloss = validate(pn_model, val_ds, label_weights)
         print(f"Validation Loss: {vloss}")
                
         cur_loss = vloss
-        if  abs(prev_loss - cur_loss) < ediff:
+        if abs(prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
             if echeck > patience:
+                weights = np.array(weights[end-echeck])
+                for layer in pn_model:
+                    layer.set_weights(weights)
                 print("Validation loss not improving. Breaking the training loop.")
                 break
+        else:
+            echeck = 0
         prev_loss = cur_loss
-        
+
         
 
 #Callback for saving best model
@@ -127,36 +132,15 @@ model_checkpoint = ModelCheckpoint(
 
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
 
-"""with open("Label_Weights.csv", mode='w') as f:
-    writer = csv.writer(f)
-    for key, value in label_weights.items():
-        writer.writerow([key, value])
-
-pn = pointnet(num_classes=NUM_CLASSES,num_points=NUM_POINTS,train=TRAINING)
-pn.compile(
-    loss=tf.keras.losses.BinaryCrossentropy(),
-    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
-    metrics=[
-            #PerLabelMetric(num_labels=NUM_CLASSES),
-            tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-            tf.keras.metrics.Precision(thresholds=[0.5,1]),
-            tf.keras.metrics.Recall(thresholds=[0.5,1]),
-            ],      
-    run_eagerly=True,
-)
-"""
-
 # pn_model Code for the training loop
 weights = []
-biases = []
-
 
 #current_loss = loss(y = train_points, pn_model(train_label))
 
 print(f"Starting:")
 #print("    ", report(pn_model, current_loss=1))
 training_loop(pn_model, train_ds, val_ds, label_weights)
-
+pn_model.save(save_path + '_AFBM Model')
 # Validation / Evaluation per Label
 data = []
 pn_model.compile(
