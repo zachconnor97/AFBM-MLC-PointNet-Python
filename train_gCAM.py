@@ -105,15 +105,15 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         #print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
         vloss = validate(pn_model, val_ds, label_weights)
         print(f"Validation Loss: {vloss}")
-        """        
+               
         cur_loss = vloss
-        if  (prev_loss - cur_loss) < ediff:
+        if  abs(prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
             if echeck > patience:
                 print("Validation loss not improving. Breaking the training loop.")
                 break
         prev_loss = cur_loss
-        """
+        
 
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
