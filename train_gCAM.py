@@ -17,7 +17,7 @@ NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.000025
 BATCH_SIZE = 16
-NUM_EPOCHS = 5
+NUM_EPOCHS = 25
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
@@ -98,7 +98,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         biases.append(pn_model.get_weights()[1])
         #print(f"W = {pn_model.get_weights()[0]}, B = {pn_model.get_weights()[1]}")
         vloss = validate(pn_model, val_ds, label_weights)
-        print(f"Validation Loss: {vloss}")
+        print(f"Custom Validation Loss: {vloss}")
         
 
 
