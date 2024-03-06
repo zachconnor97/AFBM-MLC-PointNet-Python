@@ -183,7 +183,7 @@ def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
 # Test GradCAM stuff
 testcloud = [] # use open3d to import point cloud from file
 pn_model.layers[-1].activation = None
-lln = 'dense_2' # double check this
+lln = 'dense_8' # double check this
 labels = pn_model.predict(testcloud)
 print("Predicted Labels: ", labels)
 heatcloud = gradcam_heatcloud(testcloud, pn_model, lln)
