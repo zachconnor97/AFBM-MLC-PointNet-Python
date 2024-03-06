@@ -22,6 +22,20 @@ def bce_builtin(target_y, predicted_y, label_weights=None):
     bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     return bce(target_y, predicted_y).numpy()*label_weights
 
+def pc_loss(target_y, predicted_y, label_weights=None):
+    from keras.src import backend, backend_config
+    epsilon = backend_config.epsilon
+    # Update to binary cross entropy loss
+    target = tf.convert_to_tensor(target_y, dtype='float32')
+    output = tf.convert_to_tensor(predicted_y, dtype='float32')
+    epsilon_ = tf.constant(epsilon(), output.dtype.base_dtype)
+    #output = tf.clip_by_value(output, epsilon_, 1.0 - epsilon_)
+    #bceloss = target * tf.math.log(output + epsilon())
+    #bceloss += (1-target) * tf.math.log(1 - output + epsilon())
+    #wbceloss = backend.mean(-bceloss * LW) 
+    pc_loss = 1 #place holder
+    return pc_loss
+
 ypred = [[0.2, 0.6, 0.01, 0.95],
         [0.7, 0.3, 0.9, 0.8]]
 ytrue = [[0, 0, 0, 1],

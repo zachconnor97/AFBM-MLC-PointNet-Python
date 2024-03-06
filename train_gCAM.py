@@ -27,7 +27,7 @@ pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 #print(pn_model.get_weights()[0])
 #print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
-patience = 3
+patience = 10
 echeck = 0
 ediff = 0.001
 cur_loss = 0.0
