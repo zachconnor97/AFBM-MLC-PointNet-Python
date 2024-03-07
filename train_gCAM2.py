@@ -175,7 +175,7 @@ def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
             pred_index = tf.argmax(preds[0])
         label_channel = preds[:, pred_index]
     grads = tape.gradient(label_channel, last_conv_layer_output)
-    pooled_grads = tf.reduce_mean(grads, axis=(0,1,2))
+    pooled_grads = tf.reduce_mean(grads, axis=(0,1,2)) # error here
     last_conv_layer_output = last_conv_layer_output[0]
     heatcloud = last_conv_layer_output @ pooled_grads[...,tf.newaxis]
     heatcloud = tf.squeeze(heatcloud)
@@ -185,13 +185,15 @@ def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
 # Test GradCAM stuff
 pn_model.load_weights('pn_weights_test.h5')
 testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+testcloud = testcloud.uniform_down_sample(every_k_points=2)
 testcloud = testcloud.points
 testcloud = np.asarray([testcloud])[0]
+testcloud = np.reshape(testcloud, (1,5000,3))
 testcloud = tf.constant(testcloud, dtype='float64')
-print(f"Cloud: {testcloud}")
+print(f"Cloud: {np.shape(testcloud.numpy())}")
 pn_model.layers[-1].activation = None
 lln = 'dense_8' # double check this
-labels = pn_model.predict(testcloud)
+labels = pn_model.predict(testcloud.numpy())
 print("Predicted Labels: ", labels)
 heatcloud = gradcam_heatcloud(testcloud, pn_model, lln)
 plt.matshow(heatcloud)
