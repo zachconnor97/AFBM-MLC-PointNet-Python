@@ -190,7 +190,6 @@ testcloud = testcloud.points
 testcloud = np.asarray([testcloud])[0]
 testcloud = np.reshape(testcloud, (1,5000,3))
 testcloud = tf.constant(testcloud, dtype='float64')
-print(f"Cloud: {np.shape(testcloud.numpy())}")
 pn_model.layers[-1].activation = None
 lln = 'dense_8' # double check this
 labels = pn_model.predict(testcloud.numpy())
