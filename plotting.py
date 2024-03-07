@@ -1,4 +1,4 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import pandas as pd
 
 # accuracy is column 6
@@ -20,10 +20,11 @@ labels = [
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
 
-
 for threshold in thresholds:
-    df = pd.read_csv(f"C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/2024-02-23_16_5000_25_Learning Rate_2.5e-05_Epsilon 1e-07_train_history_per_label_met.csv", header = None)
-    dataframes.append(thresholds)
+    #df = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"),)
+    df = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"),skiprows=1)
+
+    #dataframes.append(thresholds)
     dataframes.append(df)
 
 print(dataframes)
@@ -31,7 +32,7 @@ print(dataframes)
 for metric in metrics:
     plt.figure(figsize=(8, 6))
     for i in range(0,24):
-        plt.plot(df['threshold'], df[metric], label=labels[i])
+        plt.plot(thresholds, df[metric], label=labels[i])
     plt.title(f"{metric.capitalize()} vs Threshold")
     plt.xlabel("Threshold")
     plt.ylabel(metric.capitalize())
