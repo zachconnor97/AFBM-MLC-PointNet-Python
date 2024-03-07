@@ -15,7 +15,7 @@ EPS = 1e-7
 NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
-LEARN_RATE = 0.00025
+LEARN_RATE = 0.0005
 BATCH_SIZE = 16
 NUM_EPOCHS = 25
 username = 'Zachariah'
@@ -52,9 +52,9 @@ def wbce_loss(target_y, predicted_y, label_weights=None):
     if label_weights != None:
         lw=np.array(list(label_weights.items()))
         lw = lw[:,1]
-        wbceloss = backend.mean(-bceloss * lw) 
+        wbceloss = backend.sum(-bceloss * lw) 
     else:
-        wbceloss = backend.mean(-bceloss) 
+        wbceloss = backend.sum(-bceloss) 
     return wbceloss
 
 def train(pn_model, train_ds, label_weights=None): # X is points and Y is labels
