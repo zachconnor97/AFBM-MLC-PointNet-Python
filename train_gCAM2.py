@@ -95,6 +95,7 @@ def report(pn_model, loss):
 """
 
 def training_loop(pn_model, train_ds, val_ds, label_weights):
+    print(f"Starting:")
     prev_loss = 0
     echeck = 0
     weights = []
@@ -139,10 +140,11 @@ train_ds, val_ds, label_weights = generate_dataset(filename=database)
 
 #current_loss = loss(y = train_points, pn_model(train_label))
 
-print(f"Starting:")
+#print(f"Starting:")
 #print("    ", report(pn_model, current_loss=1))
-training_loop(pn_model, train_ds, val_ds, label_weights)
+#training_loop(pn_model, train_ds, val_ds, label_weights)
 #pn_model.save(save_path + '_AFBM Model')
+"""
 # Validation / Evaluation per Label
 data = []
 pn_model.compile(
@@ -160,7 +162,7 @@ histfile = save_path + '_label_validation_allmets.csv'
 
 with open(histfile, mode='w') as f:
     metrics.to_csv(f)
-
+"""
 
 def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
     # from keras.io but need to modify for pcs instead
@@ -181,7 +183,12 @@ def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
     return heatcloud.numpy()
 
 # Test GradCAM stuff
-testcloud = [] # use open3d to import point cloud from file
+pn_model.load_weights('pn_weights_test.h5')
+testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+testcloud = testcloud.points
+testcloud = np.asarray([testcloud])[0]
+testcloud = tf.constant(testcloud, dtype='float64')
+print(f"Cloud: {testcloud}")
 pn_model.layers[-1].activation = None
 lln = 'dense_8' # double check this
 labels = pn_model.predict(testcloud)
