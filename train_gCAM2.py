@@ -164,25 +164,29 @@ with open(histfile, mode='w') as f:
     metrics.to_csv(f)
 """
 
-def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
+def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     """
-    
+    Inputs:
+    cloud: Point Cloud Input. Must be tensor shaped (1, Num Points, Num Dims)
+    model: Point Net Model. Takes in point cloud, returns labels
+    lcln: Name of the last convolutional layer in PointNet
+    label_idx: Index of label to generate heatcloud for
     """
     # from keras.io but need to modify for pcs instead
     gradm = tf.keras.models.Model(
-        model.inputs, [model.get_layer(last_conv_layer_name).output, model.output]
+        model.inputs, [model.get_layer(lcln).output, model.output]
     )
     with tf.GradientTape() as tape:
-        last_conv_layer_output, preds = gradm(cloud)
+        lclo, preds = gradm(cloud)
         #print(preds)
-        if pred_index is None:
-            pred_index = tf.argmax(preds[0])
-        label_channel = preds[:, pred_index]
-    grads = tape.gradient(label_channel, last_conv_layer_output)
+        if label_idx is None:
+            label_idx = tf.argmax(preds[0])
+        label_channel = preds[:, label_idx]
+    grads = tape.gradient(label_channel, lclo)
     #print(grads)
     pooled_grads = tf.reduce_mean(grads, axis=1) # error here
-    last_conv_layer_output = last_conv_layer_output[0]
-    heatcloud = last_conv_layer_output @ pooled_grads[...,tf.newaxis]
+    lclo = lclo[0]
+    heatcloud = lclo @ pooled_grads[...,tf.newaxis]
     heatcloud = tf.squeeze(heatcloud)
     heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
     return heatcloud.numpy()
