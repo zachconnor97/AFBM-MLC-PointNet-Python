@@ -157,38 +157,3 @@ histfile = save_path + '_label_validation_allmets.csv'
 
 with open(histfile, mode='w') as f:
     metrics.to_csv(f)
-
-"""
-tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, EStop])
-pn.save(save_path + '_AFBM Model')
-
-## Save history file
-histdf = pd.DataFrame(tist.history)
-histfile = save_path + '_train_history_per_label_met.csv'
-with open(histfile, mode='w') as f:
-    histdf.to_csv(f)
-
-
-tf.keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-pn = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})  #save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
-
-
-# Validation / Evaluation per Label
-data = []
-pn.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
-    metrics=[
-        PerLabelMetric(num_labels=NUM_CLASSES),
-        ],
-        run_eagerly=True,
-    )
-data=pn.evaluate(x=val_ds)
-metrics = data[1]
-metrics = pd.DataFrame(metrics).T
-#print(metrics)
-histfile = save_path + '_label_validation_allmets_2.csv'
-
-with open(histfile, mode='w') as f:
-    metrics.to_csv(f)
-
-"""
