@@ -184,7 +184,8 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
         label_channel = preds[:, label_idx]
     grads = tape.gradient(label_channel, lclo)
     #print(grads)
-    pooled_grads = tf.reduce_mean(grads, axis=1) # error here
+    #pooled_grads = tf.reduce_mean(grads, axis=0) # Dimensionality of this var is causing issue in line 190...
+    pooled_grads = tf.reduce_mean(grads, axis=(0,1,2))
     lclo = lclo[0]
     heatcloud = lclo @ pooled_grads[...,tf.newaxis]
     heatcloud = tf.squeeze(heatcloud)
@@ -200,9 +201,11 @@ testcloud = np.asarray([testcloud])[0]
 testcloud = np.reshape(testcloud, (1,5000,3))
 testcloud = tf.constant(testcloud, dtype='float64')
 pn_model.layers[-1].activation = None
-lln = 'dense_8' # double check this
+lln = 'conv1d_10'  # double check this
 labels = pn_model.predict(testcloud.numpy())
 #print("Predicted Labels: ", labels)
-heatcloud = gradcam_heatcloud(testcloud, pn_model, lln, 2)
-plt.matshow(heatcloud)
-plt.show()
+pn_model.summary()
+heatcloud = gradcam_heatcloud(testcloud, pn_model, lln)
+print(heatcloud)
+#plt.matshow(heatcloud)
+#plt.show()
