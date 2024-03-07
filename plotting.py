@@ -19,16 +19,19 @@ labels = [
     'ImportLE', 'ImportLiquid', 'ImportSolid',
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
-
+df = pd.DataFrame()
 for threshold in thresholds:
     #df = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"),)
-    df = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"),skiprows=1)
+    file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"))
 
     #dataframes.append(thresholds)
-    dataframes.append(df)
+    df = pd.concat((df, file), axis=0)
+    
 
-print(dataframes)
 
+
+print(df)
+"""
 for metric in metrics:
     plt.figure(figsize=(8, 6))
     for i in range(0,24):
@@ -44,3 +47,4 @@ for metric in metrics:
 
 print("Plots saved successfully.")
 
+"""
