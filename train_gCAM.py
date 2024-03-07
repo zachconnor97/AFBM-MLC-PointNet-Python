@@ -108,7 +108,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         print(f"Validation Loss: {vloss}")
           
         cur_loss = vloss
-        #prev_loss = cur_loss # PLACEHOLDER
+        
         if abs(prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
             pn_model.save_weights('pn_weights.h5', overwrite=True)
