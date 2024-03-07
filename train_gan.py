@@ -9,40 +9,60 @@ from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regular
 from utils import PerLabelMetric, GarbageMan
 from dataset import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-
+from keras.src import backend
 EPS = 1e-7
 NUM_POINTS = 2000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.000025
 BATCH_SIZE = 16
-NUM_EPOCHS = 1
+NUM_EPOCHS = 10
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
-print(gmodel.get_weights()[0])
-print(gmodel.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
-# This computes a single loss value for an entire batch - Zach change this to desired loss function
-def loss(target_y, predicted_y):
-  # cloud loss
-  xt_mn = predicted_y
+def pc_loss(tt, tg):
+  tt = tf.constant(tt.numpy(), dtype=tf.float64)
+  tg = tf.constant(tg.numpy(), dtype=tf.float64)
   # find average of x, y, and z coords
-  # find second moment of inertia tensors M2_g M2_t
-  # Invert M2_t, calculate R_inv = M2_g, M2_t_inv
-  # loss = abs((R_inv)^-1 - IDM)
+  xt_mn = backend.mean(tt[:,0])
+  yt_mn = backend.mean(tt[:,1])
+  zt_mn = backend.mean(tt[:,2])
+  xg_mn = backend.mean(tg[:,0])
+  yg_mn = backend.mean(tg[:,1])
+  zg_mn = backend.mean(tg[:,2])
 
-  target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
-  #print("Target shape:", target_y.shape)
-  #print("Predicted shape:", predicted_y.shape)
-  l = tf.reduce_mean(tf.square(target_y - predicted_y))
-  print(type(l))
-  print(l)
-  return l
+  # find second moment of inertia tensors M2_g M2_t
+  tixx = backend.mean(tf.math.subtract(tt[:,0],xt_mn) ** 2)
+  tixy = backend.mean(tf.matmul(tf.math.subtract(tt[:,0],xt_mn), tf.transpose(tf.math.subtract(tt[:,0],yt_mn))))
+  tixz = backend.mean(tf.matmul(tf.math.subtract(tt[:,0],xt_mn), tf.transpose(tf.math.subtract(tt[:,0],zt_mn))))
+  tiyy = backend.mean(tf.math.subtract(tt[:,0],yt_mn) ** 2)
+  tiyz = backend.mean(tf.matmul(tf.math.subtract(tt[:,0],yt_mn), tf.transpose(tf.math.subtract(tt[:,0],zt_mn))))
+  tizz = backend.mean(tf.math.subtract(tt[:,0],zt_mn) ** 2)
+  M2_t = tf.stack([[tixx, tixy, tixz],
+                  [tixy, tiyy, tiyz],
+                  [tixz, tiyz, tizz]])
+  gixx = backend.mean(tf.math.subtract(tg[:,0],xg_mn) ** 2)
+  gixy = backend.mean(tf.matmul(tf.math.subtract(tg[:,0],xg_mn), tf.transpose(tf.math.subtract(tg[:,0],yg_mn))))
+  gixz = backend.mean(tf.matmul(tf.math.subtract(tg[:,0],xg_mn), tf.transpose(tf.math.subtract(tg[:,0],zg_mn))))
+  giyy = backend.mean(tf.math.subtract(tg[:,0],yg_mn) ** 2)
+  giyz = backend.mean(tf.matmul(tf.math.subtract(tg[:,0],yg_mn), tf.transpose(tf.math.subtract(tg[:,0],zg_mn))))
+  gizz = backend.mean(tf.math.subtract(tg[:,0],zg_mn) ** 2)
+  M2_g = tf.stack([[gixx, gixy, gixz],
+                  [gixy, giyy, giyz],
+                  [gixz, giyz, gizz]])
+  M2_t_inv = tf.linalg.inv((M2_t))
+  r_inv = tf.matmul(M2_g,tf.transpose(M2_t_inv))
+  r = tf.linalg.inv(r_inv)
+  eye = tf.linalg.eye(3,3)
+  r = tf.constant(r.numpy(), dtype=tf.float32)
+  pc_loss = backend.abs(r - eye)
+  pc_loss = backend.mean(pc_loss)
+  return pc_loss
 
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
   stacked_loss = 0 
@@ -50,7 +70,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
     print(f"Step: {step}")
     with tf.GradientTape() as t:
       # Trainable variables are automatically tracked by GradientTape
-      current_loss = loss(ybt, gmodel(xbt))
+      current_loss = pc_loss(ybt, gmodel(xbt))
       stacked_loss = stacked_loss + current_loss
     print(f"Current Loss: {current_loss}")
     grads = t.gradient(current_loss, gmodel.trainable_weights)    
@@ -68,11 +88,12 @@ def training_loop(gmodel, train_ds):
   for epoch in range(NUM_EPOCHS):
     print(f"Epoch {epoch}:")
     # Update the model with the single giant batch
-    e_loss = train(gmodel, train_ds, LEARN_RATE=0.1)
+    e_loss = train(gmodel, train_ds, LEARN_RATE=0.001)
+    print(f"Mean Loss: {e_loss}")
     # Track this before I update
     weights.append(gmodel.get_weights()[0])
     biases.append(gmodel.get_weights()[1])
-    print(f"W = {gmodel.get_weights()[0]}, B = = {gmodel.get_weights()[1]}")
+    #print(f"W = {gmodel.get_weights()[0]}, B = = {gmodel.get_weights()[1]}")
 
 #Callback for saving best model
 model_checkpoint = ModelCheckpoint(
