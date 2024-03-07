@@ -22,7 +22,7 @@ def bce_builtin(target_y, predicted_y, label_weights=None):
     bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     return bce(target_y, predicted_y).numpy()*label_weights
 
-def pc_loss(tt, tg, label_weights=None):
+def pc_loss(tt, tg):
     # find average of x, y, and z coords
     xt_mn = backend.mean(tt[:,0])
     yt_mn = backend.mean(tt[:,1])
@@ -30,12 +30,32 @@ def pc_loss(tt, tg, label_weights=None):
     xg_mn = backend.mean(tg[:,0])
     yg_mn = backend.mean(tg[:,1])
     zg_mn = backend.mean(tg[:,2])
-    # find second moment of inertia tensors M2_g M2_t
 
-    # Invert M2_t, calculate R_inv = M2_g, M2_t_inv
-    # loss = abs((R_inv)^-1 - IDM)
-    pc_loss = 1 #place holder
-    return pc_loss
+    # find second moment of inertia tensors M2_g M2_t
+    tixx = backend.mean(tf.math.subtract(tt[:,0],xt_mn) ** 2)
+    tixy = backend.mean(tf.math.subtract(tt[:,0],xt_mn) * tf.math.subtract(tt[:,0],yt_mn))
+    tixz = backend.mean(tf.math.subtract(tt[:,0],xt_mn) * tf.math.subtract(tt[:,0],zt_mn))
+    tiyy = backend.mean(tf.math.subtract(tt[:,0],yt_mn) ** 2)
+    tiyz = backend.mean(tf.math.subtract(tt[:,0],yt_mn) * tf.math.subtract(tt[:,0],zt_mn))
+    tizz = backend.mean(tf.math.subtract(tt[:,0],zt_mn) ** 2)
+    M2_t = tf.stack([[tixx, tixy, tixz],
+                    [tixy, tiyy, tiyz],
+                    [tixz, tiyz, tizz]])
+    gixx = backend.mean(tf.math.subtract(tg[:,0],xg_mn) ** 2)
+    gixy = backend.mean(tf.math.subtract(tg[:,0],xg_mn) * tf.math.subtract(tt[:,0],yg_mn))
+    gixz = backend.mean(tf.math.subtract(tg[:,0],xg_mn) * tf.math.subtract(tt[:,0],zg_mn))
+    giyy = backend.mean(tf.math.subtract(tg[:,0],yg_mn) ** 2)
+    giyz = backend.mean(tf.math.subtract(tg[:,0],yg_mn) * tf.math.subtract(tt[:,0],zg_mn))
+    gizz = backend.mean(tf.math.subtract(tg[:,0],zg_mn) ** 2)
+    M2_g = tf.stack([[gixx, gixy, gixz],
+                    [gixy, giyy, giyz],
+                    [gixz, giyz, gizz]])
+    M2_t_inv = tf.linalg.inv((M2_t))
+    r_inv = tf.matmul(M2_g,M2_t_inv)
+    r = tf.linalg.inv(r_inv)
+    pc_loss = backend.abs(r - tf.linalg.eye(3,3))
+    pc_loss = backend.mean(pc_loss)
+    return pc_loss.numpy()
 
 def loss(target_y, predicted_y):
     # cloud loss
@@ -86,4 +106,6 @@ pc_true = [[0.2, 0.1, 0.5],
 
 pc_gen = tf.constant(pc_gen, tf.float32)
 pc_true = tf.constant(pc_true, tf.float32)
-print(pc_gen[:,0].numpy())
+#print(pc_gen[:,0].numpy())
+l = pc_loss(pc_true,pc_gen)
+print(l)
