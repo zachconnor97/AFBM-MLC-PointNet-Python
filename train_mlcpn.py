@@ -23,7 +23,7 @@ database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
-pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
+pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 #print(pn_model.get_weights()[0])
 #print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
@@ -136,24 +136,28 @@ train_ds, val_ds, label_weights = generate_dataset(filename=database)
 
 #current_loss = loss(y = train_points, pn_model(train_label))
 
-print(f"Starting:")
+#print(f"Starting:")
 #print("    ", report(pn_model, current_loss=1))
-training_loop(pn_model, train_ds, val_ds, label_weights)
+#training_loop(pn_model, train_ds, val_ds, label_weights)
 #pn_model.save(save_path + '_AFBM Model')
 # Validation / Evaluation per Label
-data = []
-pn_model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
-    metrics=[
-        PerLabelMetric(num_labels=NUM_CLASSES),
-        ],
-        run_eagerly=True,
-    )
-data=pn_model.evaluate(x=val_ds)
-metrics = data[1]
-metrics = pd.DataFrame(metrics).T
-#print(metrics)
-histfile = save_path + '_label_validation_allmets.csv'
+pn_model.load_weights('pn_weights_29.h5')
 
-with open(histfile, mode='w') as f:
-    metrics.to_csv(f)
+for i in range(1,10):
+    t = i / 10
+    print(f"Theshold: {t}")
+    data = []
+    pn_model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
+        metrics=[
+            PerLabelMetric(num_labels=NUM_CLASSES,threshold=t),
+            ],
+            run_eagerly=True,
+        )
+    data=pn_model.evaluate(x=val_ds)
+    metrics = data[1]
+    metrics = pd.DataFrame(metrics).T
+    histfile = save_path + '_label_validation_allmets' + str(t) + '.csv'
+
+    with open(histfile, mode='w') as f:
+        metrics.to_csv(f)

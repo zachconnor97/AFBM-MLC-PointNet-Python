@@ -17,9 +17,10 @@ class GarbageMan(tf.keras.callbacks.Callback):
 
 # Custom Label Metric for Prediction matrix
 class PerLabelMetric(Metric):
-    def __init__(self,name='per_label_metric', num_labels=NUM_CLASSES, **kwargs):
+    def __init__(self,name='per_label_metric', num_labels=NUM_CLASSES, threshold=None,**kwargs):
         super(PerLabelMetric, self).__init__(name=name,**kwargs)
         self.num_labels = num_labels
+        self.t = threshold
         self.tp = self.add_weight(name='tp', shape=(self.num_labels), initializer='zeros')
         self.tn = self.add_weight(name='tn', shape=(self.num_labels), initializer='zeros')
         self.fp = self.add_weight(name='fp', shape=(self.num_labels), initializer='zeros')
@@ -29,11 +30,12 @@ class PerLabelMetric(Metric):
         for i in range(self.num_labels):
             y_true_label = y_true[:, i]
             y_pred_label = y_pred[:, i]
-            
-            tp = B.sum(y_true_label * B.round(y_pred_label), axis=0)
-            fp = B.sum((1 - y_true_label) * B.round(y_pred_label), axis=0)
-            tn = B.sum((1 - y_true_label) * (1 - B.round(y_pred_label)), axis=0)
-            fn = B.sum(y_true_label * (1 - B.round(y_pred_label)), axis=0)
+            ypos = tf.cast(tf.math.greater_equal(y_pred_label, self.t), tf.float32)
+            yneg = tf.cast(tf.math.less(y_pred_label, self.t), tf.float32)
+            tp = B.sum(y_true_label * ypos, axis=0)
+            fp = B.sum((1 - y_true_label) * ypos, axis=0)
+            tn = B.sum((1 - y_true_label) * yneg, axis=0)
+            fn = B.sum(y_true_label * yneg, axis=0)
 
             self.tp[i].assign(self.tp[i] + tp)
             self.fp[i].assign(self.fp[i] + fp)

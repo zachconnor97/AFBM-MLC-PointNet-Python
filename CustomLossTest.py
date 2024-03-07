@@ -41,5 +41,16 @@ ypred = [[0.2, 0.6, 0.01, 0.95],
 ytrue = [[0, 0, 0, 1],
         [0, 0, 1, 1]]
 LW = [10,10,0.005,0.005]
-print(f"Built-In Loss: {bce_builtin(ytrue,ypred,label_weights=LW)}")
-print(f"Custom Loss: {wbce_loss(ytrue,ypred,label_weights=LW)}")
+#print(f"Built-In Loss: {bce_builtin(ytrue,ypred,label_weights=LW)}")
+#print(f"Custom Loss: {wbce_loss(ytrue,ypred,label_weights=LW)}")
+t = tf.constant([0.2])
+pos = tf.math.greater_equal(tf.constant(ypred),t)
+neg = tf.math.less(tf.constant(ypred),t)
+pos = tf.cast(pos, tf.float32)
+neg = tf.cast(neg, tf.float32)
+ytrue = tf.cast(ytrue, tf.float32)
+
+print(f"Positives at Threshold: {t.numpy()} : {pos}")
+print(f"Negatives at Threshold: {t.numpy()} : {neg}")
+
+print(f"Y True: {ytrue}")
