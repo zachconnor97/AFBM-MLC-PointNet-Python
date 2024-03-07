@@ -76,7 +76,7 @@ model = model_builder(weights="imagenet")
 
 # Remove last layer's softmax
 model.layers[-1].activation = None
-
+model.summary()
 # Print what the top predicted class is
 preds = model.predict(img_array)
 print("Predicted:", decode_predictions(preds, top=1)[0])
