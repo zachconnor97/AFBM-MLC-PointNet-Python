@@ -29,6 +29,13 @@ EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
 # This computes a single loss value for an entire batch - Zach change this to desired loss function
 def loss(target_y, predicted_y):
+  # cloud loss
+  xt_mn = predicted_y
+  # find average of x, y, and z coords
+  # find second moment of inertia tensors M2_g M2_t
+  # Invert M2_t, calculate R_inv = M2_g, M2_t_inv
+  # loss = abs((R_inv)^-1 - IDM)
+
   target_y = tf.cast(target_y, dtype=tf.float32)  # Assuming float32 is the desired data type
   #print("Target shape:", target_y.shape)
   #print("Predicted shape:", predicted_y.shape)
