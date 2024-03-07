@@ -165,6 +165,9 @@ with open(histfile, mode='w') as f:
 """
 
 def gradcam_heatcloud(cloud, model, last_conv_layer_name, pred_index=None):
+    """
+    
+    """
     # from keras.io but need to modify for pcs instead
     gradm = tf.keras.models.Model(
         model.inputs, [model.get_layer(last_conv_layer_name).output, model.output]

@@ -52,9 +52,9 @@ def wbce_loss(target_y, predicted_y, label_weights=None):
     if label_weights != None:
         lw=np.array(list(label_weights.items()))
         lw = lw[:,1]
-        wbceloss = backend.sum(-bceloss * lw) 
+        wbceloss = backend.mean(-bceloss * lw) 
     else:
-        wbceloss = backend.sum(-bceloss) 
+        wbceloss = backend.mean(-bceloss) 
     return wbceloss
 
 def train(pn_model, train_ds, label_weights=None): # X is points and Y is labels
