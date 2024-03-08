@@ -1,15 +1,11 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# accuracy is column 6
-    # precision is colum 7
-    # recall is column 8
-    # F1 is column 9
-
 thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-metrics = ['accuracy', 'precision', 'recall', 'f1']
+metrics_names = ['accuracy', 'precision', 'recall', 'f1']
 dataframes = []
 labels = [
+    'NA',
     'ConvertCE', 'ConvertEEtoAE', 'ConvertEEtoLE',
     'ConvertKEtoAE', 'ConvertKEtoEE', 'ConvertLEtoCE',
     'ConvertLEtoEE', 'ExportAE', 'ExportAEtoTE',
@@ -20,26 +16,36 @@ labels = [
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
 df = pd.DataFrame()
+# The for loop successfully combines all of the csv files into a single dataframe. Starts with 0.1 and goes to 0.9
 for threshold in thresholds:
-    file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/2024-02-23_16_5000_25_Learning Rate_2.5e-05_Epsilon 1e-07_label_validation_allmets_2_pretty pretty good.csv"))
+    file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets"+ str(threshold) + ".csv"), header = None)
     #file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"))
-    df = pd.concat((df, file), axis=0)
+    file.reset_index(drop=True, inplace=True)
     
-print(df)
-"""
-for metric in metrics:
-    plt.figure(figsize=(8, 6))
-    for i in range(0,24):
-        plt.plot(thresholds, df[metric], label=labels[i])
-    plt.title(f"{metric.capitalize()} vs Threshold")
-    plt.xlabel("Threshold")
-    plt.ylabel(metric.capitalize())
+    # Rename the columns for easier access
+    for i, metrics in enumerate(metrics_names):
+        file = file.rename(columns={i+5: metrics })
+    # Also rename the rows
+    file = file.rename(index=dict(zip(file.index, labels)))
+    file = file.drop(file.index[0])
+    df = pd.concat((df, file), axis=0)
+#print(df)
+
+label_dict_data = {}
+for label in labels:
+    label_dict_data[label] = df[df.index == label]
+print(label_dict_data['ConvertCE']['accuracy'])
+
+for flabel in labels:
+    plt.figure()
+    for metric in metrics_names:
+        data = label_dict_data[label][metric].astype(float)
+        #print(data)
+        plt.plot(thresholds, data, label=metric)
     plt.legend()
-    plt.show()
-    plt.savefig(f"path_to_save_plots/{metric}_vs_threshold.png")  # Save the plot
-    plt.close()  # Close the current figure to release memory
-
-
-print("Plots saved successfully.")
-
-"""
+    plt.xlabel('Threshold')
+    plt.ylabel('Metric Value')
+    plt.title('Metrics vs. Threshold for' + str(flabel))
+    plt.savefig(f"{flabel}+Learning Rate_0.001_plot.png")
+plt.close()
+#print("Plots saved successfully.")
