@@ -48,7 +48,7 @@ for flabel in labels:
     for metric in metrics_names:
         data = label_dict_data[label][metric].astype(float)
         #print(data)
-        plt.plot(thresholds, data, label=metric, linewidth = 4.0)
+        plt.plot(thresholds, data, label=metric, linewidth = 3.0, marker='s')
     plt.legend()
     plt.xlabel('Threshold')
     plt.ylabel('Metric Value')
