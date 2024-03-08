@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-metrics_names = ['accuracy', 'precision', 'recall', 'f1']
+metrics_names = ['precision', 'recall', 'f1']
 dataframes = []
 labels = [
     'NA',
@@ -24,7 +24,7 @@ for threshold in thresholds:
     
     # Rename the columns for easier access
     for i, metrics in enumerate(metrics_names):
-        file = file.rename(columns={i+5: metrics })
+        file = file.rename(columns={i+6: metrics })
     # Also rename the rows
     file = file.rename(index=dict(zip(file.index, labels)))
     file = file.drop(file.index[0])
@@ -34,7 +34,6 @@ for threshold in thresholds:
 label_dict_data = {}
 for label in labels:
     label_dict_data[label] = df[df.index == label]
-print(label_dict_data['ConvertCE']['accuracy'])
 
 for flabel in labels:
     plt.figure()
@@ -46,6 +45,6 @@ for flabel in labels:
     plt.xlabel('Threshold')
     plt.ylabel('Metric Value')
     plt.title('Metrics vs. Threshold for' + str(flabel))
-    plt.savefig(f"{flabel}+Learning Rate_0.001_plot.png")
+    plt.savefig(f"{flabel}+Learning Rate_0.00025_plot.png")
 plt.close()
 #print("Plots saved successfully.")
