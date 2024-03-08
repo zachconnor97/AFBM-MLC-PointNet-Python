@@ -6,7 +6,7 @@ import pandas as pd
     # recall is column 8
     # F1 is column 9
 
-thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
 metrics = ['accuracy', 'precision', 'recall', 'f1']
 dataframes = []
 labels = [
@@ -21,12 +21,10 @@ labels = [
 ]
 df = pd.DataFrame()
 for threshold in thresholds:
-    file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"))
+    file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/2024-02-23_16_5000_25_Learning Rate_2.5e-05_Epsilon 1e-07_label_validation_allmets_2_pretty pretty good.csv"))
+    #file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"))
     df = pd.concat((df, file), axis=0)
     
-
-
-
 print(df)
 """
 for metric in metrics:
