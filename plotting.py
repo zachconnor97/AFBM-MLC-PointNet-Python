@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar  7 19:55:21 2024
+
+@author: gabri
+"""
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -35,16 +42,19 @@ label_dict_data = {}
 for label in labels:
     label_dict_data[label] = df[df.index == label]
 
+
 for flabel in labels:
-    plt.figure()
+    plt.figure(figsize=(8, 6), dpi=90)
     for metric in metrics_names:
         data = label_dict_data[label][metric].astype(float)
         #print(data)
-        plt.plot(thresholds, data, label=metric)
+        plt.plot(thresholds, data, label=metric, linewidth = 4.0)
     plt.legend()
     plt.xlabel('Threshold')
     plt.ylabel('Metric Value')
-    plt.title('Metrics vs. Threshold for' + str(flabel))
+    plt.title('Metrics vs. Threshold for ' + str(flabel))
     plt.savefig(f"{flabel}+Learning Rate_0.00025_plot.png")
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
 plt.close()
-#print("Plots saved successfully.")
+print("Plots saved successfully.")
