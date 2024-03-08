@@ -61,7 +61,7 @@ def pc_loss(tt, tg):
   eye = tf.linalg.eye(3,3)
   r = tf.constant(r.numpy(), dtype=tf.float32)
   pc_loss = backend.abs(r - eye)
-  pc_loss = backend.mean(pc_loss)
+  pc_loss = tf.math.add(1.0, tf.math.log(backend.mean(pc_loss)))
   return pc_loss
 
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds

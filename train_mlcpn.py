@@ -131,8 +131,8 @@ model_checkpoint = ModelCheckpoint(
 )
 
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-label_weights[11] = 18.0
-label_weights[16] = 18.0
+label_weights[11] = 25.0
+label_weights[16] = 25.0
 
 
 training_loop(pn_model, train_ds, val_ds, label_weights)
