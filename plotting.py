@@ -38,7 +38,7 @@ for threshold in thresholds:
     file = file.rename(index=dict(zip(file.index, labels)))
     file = file.drop(file.index[0])
     df = pd.concat((df, file), axis=0)
-#print(df)
+print(df)
 
 label_dict_data = {}
 for label in labels:
@@ -48,7 +48,7 @@ for label in labels:
 for flabel in labels:
     if flabel == 'NA':
         continue
-    plt.figure(figsize=(8, 6), dpi=90)
+    plt.figure(figsize=(8, 6), dpi=300)
     for metric in metrics_names:
         data = label_dict_data[flabel][metric].astype(float)
         #print(f"For {flabel}, {metric}: Length of thresholds={len(thresholds)}, Length of data={len(data)}")
