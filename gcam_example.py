@@ -21,7 +21,7 @@ last_conv_layer_name = "block14_sepconv2_act"
 # The local path to our target image
 img_path = "Bvro0YD.png"
 
-display(Image(img_path))
+#display(Image(img_path))
 
 def get_img_array(img_path, size):
     # `img` is a PIL image of size 299x299
@@ -52,11 +52,11 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None
     # This is the gradient of the output neuron (top predicted or chosen)
     # with regard to the output feature map of the last conv layer
     grads = tape.gradient(class_channel, last_conv_layer_output)
-
+    #print(grads)
     # This is a vector where each entry is the mean intensity of the gradient
     # over a specific feature map channel
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
-
+    print(pooled_grads)
     # We multiply each channel in the feature map array
     # by "how important this channel is" with regard to the top predicted class
     # then sum all the channels to obtain the heatmap class activation
@@ -76,17 +76,17 @@ model = model_builder(weights="imagenet")
 
 # Remove last layer's softmax
 model.layers[-1].activation = None
-model.summary()
+#model.summary()
 # Print what the top predicted class is
 preds = model.predict(img_array)
-print("Predicted:", decode_predictions(preds, top=1)[0])
+#print("Predicted:", decode_predictions(preds, top=1)[0])
 
 # Generate class activation heatmap
 heatmap = make_gradcam_heatmap(img_array, model, last_conv_layer_name)
-
+print(heatmap)
 # Display heatmap
-plt.matshow(heatmap)
-plt.show()
+#plt.matshow(heatmap)
+#plt.show()
 
 def save_and_display_gradcam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
     # Load the original image
