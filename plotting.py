@@ -25,10 +25,8 @@ labels = [
 df = pd.DataFrame()
 # The for loop successfully combines all of the csv files into a single dataframe. Starts with 0.1 and goes to 0.9
 for threshold in thresholds:
-    #file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_"+ str(threshold) + ".csv"), header = None)
-    path = str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Best Results/MLCPN_Validation2024-03-08_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_" + str(threshold) + ".csv")
-    file = pd.read_csv(path)
-    #file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Best Results/MLCPN_Validation2024-03-08_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_" + str(threshold) + ".csv"))
+    file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_"+ str(threshold) + ".csv"), header = None)
+    #file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"))
     file.reset_index(drop=True, inplace=True)
     
     # Rename the columns for easier access
@@ -38,7 +36,7 @@ for threshold in thresholds:
     file = file.rename(index=dict(zip(file.index, labels)))
     file = file.drop(file.index[0])
     df = pd.concat((df, file), axis=0)
-print(df)
+#print(df)
 
 label_dict_data = {}
 for label in labels:
@@ -48,7 +46,7 @@ for label in labels:
 for flabel in labels:
     if flabel == 'NA':
         continue
-    plt.figure(figsize=(8, 6), dpi=300)
+    plt.figure(figsize=(8, 6), dpi=90)
     for metric in metrics_names:
         data = label_dict_data[flabel][metric].astype(float)
         #print(f"For {flabel}, {metric}: Length of thresholds={len(thresholds)}, Length of data={len(data)}")
@@ -59,7 +57,7 @@ for flabel in labels:
     plt.xlabel('Threshold')
     plt.ylabel('Metric Value')
     plt.title('Metrics vs. Threshold for ' + str(flabel))
-    #plt.savefig(f"{flabel}+Learning Rate_0.00025_plot.png")
+    plt.savefig(f"{flabel}+Learning Rate_0.00025_plot.png")
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
 plt.close()
