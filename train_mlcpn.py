@@ -29,7 +29,7 @@ pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 patience = 5
 echeck = 0
-ediff = 0.001
+ediff = 0.0025
 cur_loss = 0.0
 prev_loss = 0.0
 
@@ -120,25 +120,17 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
             pn_model.save_weights(str('pn_weights_' + str(epoch) + '.h5'), overwrite=True)
             echeck = 0
         prev_loss = cur_loss
-
-#Callback for saving best model
-model_checkpoint = ModelCheckpoint(
-    filepath=save_path,
-    monitor='val_loss',  # Monitor validation loss
-    save_best_only=True,  # Save only the best model
-    mode='min',  # Save when validation loss is minimized
-    verbose=1  # Show information about saving
-)
+    pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
 
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-label_weights[11] = 10
-label_weights[16] = 10
+label_weights[11] = 25
+label_weights[16] = 25
 
 training_loop(pn_model, train_ds, val_ds, label_weights)
 pn_model.save(save_path + '_AFBM Model')
 # Validation / Evaluation per Label
 
-pn_model.load_weights('pn_weights_29.h5')
+#pn_model.load_weights('pn_weights_29.h5')
 
 for i in range(1,10):
     t = i / 10

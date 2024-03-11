@@ -76,7 +76,7 @@ model = model_builder(weights="imagenet")
 
 # Remove last layer's softmax
 model.layers[-1].activation = None
-#model.summary()
+model.summary()
 # Print what the top predicted class is
 preds = model.predict(img_array)
 #print("Predicted:", decode_predictions(preds, top=1)[0])
@@ -85,8 +85,8 @@ preds = model.predict(img_array)
 heatmap = make_gradcam_heatmap(img_array, model, last_conv_layer_name)
 print(heatmap)
 # Display heatmap
-#plt.matshow(heatmap)
-#plt.show()
+plt.matshow(heatmap)
+plt.show()
 
 def save_and_display_gradcam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
     # Load the original image
