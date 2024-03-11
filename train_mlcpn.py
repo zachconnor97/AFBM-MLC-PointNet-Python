@@ -20,7 +20,7 @@ BATCH_SIZE = 16
 NUM_EPOCHS = 30
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
-save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_Learning Rate_' + str(LEARN_RATE) + '_Epsilon_' + str(EPS))
+save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation_MOD_WEIGHTS' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_Learning Rate_' + str(LEARN_RATE) + '_Epsilon_' + str(EPS))
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
@@ -131,9 +131,8 @@ model_checkpoint = ModelCheckpoint(
 )
 
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-label_weights[11] = 25.0
-label_weights[16] = 25.0
-
+label_weights[11] = 10
+label_weights[16] = 10
 
 training_loop(pn_model, train_ds, val_ds, label_weights)
 pn_model.save(save_path + '_AFBM Model')
