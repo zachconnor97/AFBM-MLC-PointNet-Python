@@ -25,8 +25,10 @@ labels = [
 df = pd.DataFrame()
 # The for loop successfully combines all of the csv files into a single dataframe. Starts with 0.1 and goes to 0.9
 for threshold in thresholds:
-    file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_"+ str(threshold) + ".csv"), header = None)
+    #file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_"+ str(threshold) + ".csv"), header = None)
     #file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"))
+    path = str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Best Results/MLCPN_Validation2024-03-08_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_" + str(threshold) + ".csv")
+    file = pd.read_csv(path)
     file.reset_index(drop=True, inplace=True)
     
     # Rename the columns for easier access
