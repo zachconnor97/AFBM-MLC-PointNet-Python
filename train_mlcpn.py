@@ -27,9 +27,9 @@ pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 #print(pn_model.get_weights()[0])
 #print(pn_model.get_weights()[1])
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
-patience = 5
+patience = 2 #5
 echeck = 0
-ediff = 0.0025
+ediff = 1 #0.0025
 cur_loss = 0.0
 prev_loss = 0.0
 
@@ -113,20 +113,30 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
             echeck = echeck + 1
             pn_model.save_weights('pn_weights.h5', overwrite=True)
             if echeck > patience:
-                pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
-                print("Validation loss not improving. Breaking the training loop.")
+                try:
+                    pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
+                    #print(f"Validation loss not improving, \nLoaded best weights")
+                    print('weights loaded #1')
+                except:
+                    print('poo')
+                    #print(f"Validation loss not improving. \nUnable to load weights, using last weights")
                 break
         else:
             pn_model.save_weights(str('pn_weights_' + str(epoch) + '.h5'), overwrite=True)
             echeck = 0
         prev_loss = cur_loss
-    pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
+    try:
+        pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
+        print(f"Weights from Epoch {epoch-echeck} Loaded")
+    except:
+        print("Unable to load weights, using last weights")
 
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-label_weights[11] = 25
-label_weights[16] = 25
+label_weights[11] = 7
+label_weights[16] = 7
 
 training_loop(pn_model, train_ds, val_ds, label_weights)
+"""
 pn_model.save(save_path + '_AFBM Model')
 # Validation / Evaluation per Label
 
@@ -150,3 +160,4 @@ for i in range(1,10):
 
     with open(histfile, mode='w') as f:
         metrics.to_csv(f)
+"""
