@@ -26,10 +26,9 @@ g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 #print(pn_model.get_weights()[0])
 #print(pn_model.get_weights()[1])
-EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
-patience = 2 #5
+patience = 5
 echeck = 0
-ediff = 1 #0.0025
+ediff = 0.0025
 cur_loss = 0.0
 prev_loss = 0.0
 
@@ -109,38 +108,35 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
           
         cur_loss = vloss
         #prev_loss = cur_loss # PLACEHOLDER
-        if abs(prev_loss - cur_loss) < ediff:
+        pn_model.save_weights(str('pn_weights_' + str(epoch) + '.h5'), overwrite=True)
+        if (prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
-            pn_model.save_weights('pn_weights.h5', overwrite=True)
             if echeck > patience:
                 try:
                     pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
-                    #print(f"Validation loss not improving, \nLoaded best weights")
-                    print('weights loaded #1')
+                    print(f"Validation loss not improving, \nLoaded best weights")
                 except:
-                    print('poo')
-                    #print(f"Validation loss not improving. \nUnable to load weights, using last weights")
+                    print(f"Validation loss not improving. \nUnable to load weights, using last weights")
                 break
         else:
-            pn_model.save_weights(str('pn_weights_' + str(epoch) + '.h5'), overwrite=True)
             echeck = 0
         prev_loss = cur_loss
     try:
         pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
-        print(f"Weights from Epoch {epoch-echeck} Loaded")
+        print(f"Weights from Epoch {epoch-echeck} Loaded \nWeight Load #2")
     except:
         print("Unable to load weights, using last weights")
 
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-label_weights[11] = 7
-label_weights[16] = 7
+label_weights[11] = 50
+label_weights[16] = 50
 
 training_loop(pn_model, train_ds, val_ds, label_weights)
-"""
+
 pn_model.save(save_path + '_AFBM Model')
 # Validation / Evaluation per Label
 
-#pn_model.load_weights('pn_weights_29.h5')
+#pn_model.load_weights('pn_weights_28.h5')
 
 for i in range(1,10):
     t = i / 10
@@ -160,4 +156,3 @@ for i in range(1,10):
 
     with open(histfile, mode='w') as f:
         metrics.to_csv(f)
-"""
