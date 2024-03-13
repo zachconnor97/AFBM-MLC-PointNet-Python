@@ -8,7 +8,9 @@ Created on Thu Mar  7 19:55:21 2024
 import matplotlib.pyplot as plt
 import pandas as pd
 
-thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+folder = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_12_man_weights_1000/"
+thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+amarker = ['o', '^', 'X']
 metrics_names = ['precision', 'recall', 'f1']
 dataframes = []
 labels = [
@@ -27,8 +29,8 @@ df = pd.DataFrame()
 for threshold in thresholds:
     #file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_"+ str(threshold) + ".csv"), header = None)
     #file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"))
-    path = str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Best Results/MLCPN_Validation2024-03-08_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_" + str(threshold) + ".csv")
-    file = pd.read_csv(path)
+    path = str("MLCPN_Validation_MOD_WEIGHTS2024-03-12_16_5000_30_Learning Rate_0.00025_Epsilon_1e-07_label_validation_allmets_" + str(threshold) + ".csv")
+    file = pd.read_csv(folder+path, header=None)
     file.reset_index(drop=True, inplace=True)
     
     # Rename the columns for easier access
@@ -54,12 +56,13 @@ for flabel in labels:
         #print(f"For {flabel}, {metric}: Length of thresholds={len(thresholds)}, Length of data={len(data)}")
         #print(data)
         #print(thresholds)
-        plt.plot(thresholds, data, label=metric, linewidth = 4.0, marker='s')
+        plt.plot(thresholds, data, label=metric, linewidth = 1.0, marker=amarker[i], markersize = 7.0, linestyle='dotted', color='k')
     plt.legend()
     plt.xlabel('Threshold')
     plt.ylabel('Metric Value')
+    plt.ylim(bottom=0.75, top=1.0)
     plt.title('Metrics vs. Threshold for ' + str(flabel))
-    plt.savefig(f"{flabel}+Learning Rate_0.00025_plot.png")
+    plt.savefig((folder + flabel + "_plot.png"))
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
 plt.close()

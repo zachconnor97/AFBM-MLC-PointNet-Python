@@ -323,7 +323,7 @@ model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 #Once the model is defined it can be trained like any other standard classification model
 #using `.compile()` and `.fit()`.
 #acc_per_label = PerLabelMetricCallBack(val_ds)
-"""
+
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=LEARN_RATE),
@@ -336,7 +336,7 @@ model.compile(
             ],      
     run_eagerly=True,
 )
-"""
+
 ## Save Model
 #model.save(save_path + '_AFBM Model')
 ## Load Model here
@@ -345,7 +345,7 @@ model.compile(
 #model = tf.keras.models.load_model(save_path + '_AFBM Model')
 #model.summary()
 
-#train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
+train_hist = model.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 #model.fit(x=val_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan()])
 #model.evaluate(x=val_ds,callbacks=[acc_per_label])
 #model.save(save_path + '_AFBM Model')

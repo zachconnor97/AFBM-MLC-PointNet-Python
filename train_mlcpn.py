@@ -109,7 +109,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         cur_loss = vloss
         #prev_loss = cur_loss # PLACEHOLDER
         pn_model.save_weights(str('pn_weights_' + str(epoch) + '.h5'), overwrite=True)
-        if (prev_loss - cur_loss) < ediff:
+        if abs(prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
             if echeck > patience:
                 try:
@@ -128,8 +128,10 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
         print("Unable to load weights, using last weights")
 
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
-label_weights[11] = 50
-label_weights[16] = 50
+print(f"Label Weights: {label_weights}")
+#label_weights[11] = 10
+#label_weights[16] = 10
+#print(f"Adjusted Label Weights: {label_weights}")
 
 training_loop(pn_model, train_ds, val_ds, label_weights)
 
