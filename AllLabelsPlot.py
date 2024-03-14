@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
 metrics_names = ['precision', 'recall', 'f1']
 amarker = ['o', '^', 'X']
 dataframes = []
@@ -21,9 +22,9 @@ df = pd.DataFrame()
 #for threshold in thresholds:
     #file = pd.read_csv(str("C:/Users/gabri/OneDrive - Oregon State University/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_"+ str(threshold) + ".csv"), header = None)
     #file = pd.read_csv(str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation2024-03-07_16_5000_30_Learning Rate_0.001_Epsilon_1e-07_label_validation_allmets" + str(threshold) + ".csv"))
-path = str("C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Best Results/MLCPN_Validation2024-03-08_16_5000_30_Learning Rate_0.00025_Epsilon_ 1e-07_label_validation_allmets_" + str(threshold) + ".csv")
+folder = str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_12_autoweights/")
 path = str("MLCPN_ResultsAutoweights.csv")
-file = pd.read_csv(path, header = None)    
+file = pd.read_csv(folder+path, header = None)    
 file.reset_index(drop=True, inplace=True)
 
 # Rename the columns for easier access
@@ -40,14 +41,12 @@ print(df)
 label_dict_data = df
  
 plt.figure(figsize=(8, 6), dpi=100)
-i = 0
 for metric in metrics_names:
     data = label_dict_data[metric].astype(float)
     #print(f"For {flabel}, {metric}: Length of thresholds={len(thresholds)}, Length of data={len(data)}")
     #print(data)
     #print(thresholds)
     plt.plot(data, label=metric, linewidth = 1.0, marker=amarker[i], markersize = 7.0, linestyle='dotted', color='k')
-    i += 1
 plt.legend()
 plt.xlabel('Threshold')
 plt.ylabel('Metric Value')
@@ -55,7 +54,7 @@ plt.ylim(top=1.0)
 plt.title('')
 plt.gca().spines['top'].set_visible(False)
 plt.gca().spines['right'].set_visible(False)    
-plt.savefig(f"C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Best Results/Plots/{flabel}_Learning Rate_0.00025_plot.svg", transparent=True, format='svg')
+#plt.savefig(f"C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_12_autoweights/Plots/{metric}_plot.svg", transparent=True, format='svg')
 plt.show()
-plt.close()
+#plt.close()
 #print("Plots saved successfully.")

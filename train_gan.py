@@ -38,20 +38,20 @@ def pc_loss(tt, tg):
 
   # find second moment of inertia tensors M2_g M2_t
   tixx = backend.mean(tf.math.subtract(tt[:,0],xt_mn) ** 2)
+  tiyy = backend.mean(tf.math.subtract(tt[:,0],yt_mn) ** 2)
+  tizz = backend.mean(tf.math.subtract(tt[:,0],zt_mn) ** 2)
   tixy = backend.mean(tf.matmul(tf.math.subtract(tt[:,0],xt_mn), tf.transpose(tf.math.subtract(tt[:,0],yt_mn))))
   tixz = backend.mean(tf.matmul(tf.math.subtract(tt[:,0],xt_mn), tf.transpose(tf.math.subtract(tt[:,0],zt_mn))))
-  tiyy = backend.mean(tf.math.subtract(tt[:,0],yt_mn) ** 2)
   tiyz = backend.mean(tf.matmul(tf.math.subtract(tt[:,0],yt_mn), tf.transpose(tf.math.subtract(tt[:,0],zt_mn))))
-  tizz = backend.mean(tf.math.subtract(tt[:,0],zt_mn) ** 2)
   M2_t = tf.stack([[tixx, tixy, tixz],
                   [tixy, tiyy, tiyz],
                   [tixz, tiyz, tizz]])
-  gixx = backend.mean(tf.math.subtract(tg[:,0],xg_mn) ** 2)
+  gixx = backend.mean(tf.math.subtract(tg[:,0],xg_mn) ** 2) 
+  giyy = backend.mean(tf.math.subtract(tg[:,0],yg_mn) ** 2)
+  gizz = backend.mean(tf.math.subtract(tg[:,0],zg_mn) ** 2)
   gixy = backend.mean(tf.matmul(tf.math.subtract(tg[:,0],xg_mn), tf.transpose(tf.math.subtract(tg[:,0],yg_mn))))
   gixz = backend.mean(tf.matmul(tf.math.subtract(tg[:,0],xg_mn), tf.transpose(tf.math.subtract(tg[:,0],zg_mn))))
-  giyy = backend.mean(tf.math.subtract(tg[:,0],yg_mn) ** 2)
   giyz = backend.mean(tf.matmul(tf.math.subtract(tg[:,0],yg_mn), tf.transpose(tf.math.subtract(tg[:,0],zg_mn))))
-  gizz = backend.mean(tf.math.subtract(tg[:,0],zg_mn) ** 2)
   M2_g = tf.stack([[gixx, gixy, gixz],
                   [gixy, giyy, giyz],
                   [gixz, giyz, gizz]])
