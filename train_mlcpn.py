@@ -108,12 +108,12 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
           
         cur_loss = vloss
         #prev_loss = cur_loss # PLACEHOLDER
-        pn_model.save_weights(str('pn_weights_' + str(epoch) + '.h5'), overwrite=True)
+        pn_model.save_weights(str(save_path + 'pn_weights_' + str(epoch) + '.h5'), overwrite=True)
         if abs(prev_loss - cur_loss) < ediff:
             echeck = echeck + 1
             if echeck > patience:
                 try:
-                    pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
+                    pn_model.load_weights(save_path + 'pn_weights_' + str(epoch-echeck) + '.h5')
                     print(f"Validation loss not improving, \nLoaded best weights")
                 except:
                     print(f"Validation loss not improving. \nUnable to load weights, using last weights")
@@ -122,7 +122,7 @@ def training_loop(pn_model, train_ds, val_ds, label_weights):
             echeck = 0
         prev_loss = cur_loss
     try:
-        pn_model.load_weights('pn_weights_' + str(epoch-echeck) + '.h5')
+        pn_model.load_weights(save_path + 'pn_weights_' + str(epoch-echeck) + '.h5')
         print(f"Weights from Epoch {epoch-echeck} Loaded \nWeight Load #2")
     except:
         print("Unable to load weights, using last weights")
@@ -154,7 +154,7 @@ for i in range(1,10):
     data=pn_model.evaluate(x=val_ds)
     metrics = data[1]
     metrics = pd.DataFrame(metrics).T
-    histfile = save_path + '_label_validation_allmets_' + str(t) + '.csv'
+    histfile = save_path + '_label_validation_allmets_autoweights_' + str(t) + '.csv'
 
     with open(histfile, mode='w') as f:
         metrics.to_csv(f)
