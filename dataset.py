@@ -2,28 +2,39 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
-from keras import layers
-from matplotlib import pyplot as plt
 import open3d
 import pandas as pd
-from datetime import date 
-import gc
 from tensorflow.keras.metrics import Metric
-from keras import backend as B
-import csv
 
 
 class DataSet:
-    def __init__(self, NUM_POINTS=2000, SAMPLE_RATIO = 10000, BATCH_SIZE=32, username='Zachariah' ) -> None:
-        self.num_points = NUM_POINTS
-        self.sample_ratio = SAMPLE_RATIO//self.num_points
-        self.batch_size = BATCH_SIZE
-        self.username = 'Zachariah'
+    def __init__(self, num_points=2000, sample_ratio = 10000, batch_size=32, username='Zachariah' ) -> None:
+        """_summary_
+
+        Args:
+            NUM_POINTS (int, optional): _description_. Defaults to 2000.
+            SAMPLE_RATIO (int, optional): _description_. Defaults to 10000.
+            BATCH_SIZE (int, optional): _description_. Defaults to 32.
+            username (str, optional): _description_. Defaults to 'Zachariah'.
+        """
+        self.num_points_ = num_points
+        self.sample_ratio_ = sample_ratio//self.num_points_
+        self.batch_size_ = batch_size
+        self.username_ = username
 
     def pc_read(self, path):
+        """_summary_
+        This funtion will read the point cloud of the desired object at the specified path and adjust the number of points to self.num_points_input
+        and self.sample_ratio_.
+
+        Args:
+            path (string): Address of the object to read its point cloud
+
+        Returns:
+            cloud (numpy array): point cloud of the 
+        """
         
-        #cloud_path_header = str('C:/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/')
+        # cloud_path_header = str('/mnt/c/' + self.username + '/Oregon State University/Connor, Zachariah Ayhn - AllClouds10k/')
         # Use second one for WSL
         cloud_path_header = str('/mnt/c/Data/PointNetWork/AllClouds10k/')
         try:
@@ -34,19 +45,28 @@ class DataSet:
             path = path[1:]
             path = cloud_path_header + path 
             cloud = open3d.io.read_point_cloud(path)
-            cloud = cloud.uniform_down_sample(every_k_points=int(self.sample_ratio ))
+            cloud = cloud.uniform_down_sample(every_k_points=int(self.sample_ratio_ ))
         except:
-            cloud = np.random.rand((self.num_points,3))
+            cloud = np.random.rand((self.num_points_,3))
             path = 'ERROR IN PCREAD: Transformation from Tensor to String Failed'
-            print(path)
         finally:
             cloud = cloud.points
             cloud = np.asarray([cloud])[0]
-        
+        if len(cloud) <= 0:
+            print(path)
         return cloud
 
     # ISparse Matrix Encoding Function
     def Sparse_Matrix_Encoding(self, df):
+        """_summary_
+
+        Args:
+            df (Pandas Dataframe):              Input dataframe containing all the labels
+
+        Returns:
+            sparse_matrix (Pandas Dataframe):   Output dataframe with encoded labels for the classes
+                                                (Encoded for multi label classification)
+        """
     
         # Get list/array/whatever of unique labels
         uniquelabels = df.stack().unique()
@@ -69,14 +89,31 @@ class DataSet:
         return sparse_matrix
 
     def augment(self, points):
-        # jitter points
+        """_summary_
+
+        Args:
+            points (numpy array): Point Cloud data of an object
+
+        Returns:
+            points: Augmented point cloud data
+        """
         points += tf.random.uniform(points.shape, -0.005, 0.005, dtype=tf.float64)
         # shuffle points
         points = tf.random.shuffle(points)
         return points
 
     def generate_dataset(self, filename):
+        """_summary_
 
+        Args:
+            filename (string):          Address for full dataset file containing the location and labels
+
+        Returns:
+            train_ds (dataset):         Training Dataset
+            val_ds (dataset):           Validation Dataset
+            label_weights(dictionary):  Weights for each label for the weighted loss function
+
+        """
         # Import the csv and convert to strings
         df = pd.read_csv(filename)
         df = df.astype('str')
@@ -122,8 +159,8 @@ class DataSet:
         #train_ds = tf.data.Dataset.zip((train_points, train_label))
         val_ds = tf.data.Dataset.zip((val_points, val_label))
         train_ds = tf.data.Dataset.zip((train_points, train_label))
-        val_ds = val_ds.batch(self.batch_size)
-        train_ds = train_ds.batch(self.batch_size) # ADDS A lot of time .shuffle(buffer_size=20000,reshuffle_each_iteration=True)
+        val_ds = val_ds.batch(self.batch_size_)
+        train_ds = train_ds.batch(self.batch_size_) # ADDS A lot of time .shuffle(buffer_size=20000,reshuffle_each_iteration=True)
 
         #Testing stuff
         """
