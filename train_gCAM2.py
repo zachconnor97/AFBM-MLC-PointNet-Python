@@ -190,14 +190,14 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
 
     #Checking the shape of the matrices before multipication
     lclo_shape = lclo.shape
-    pooled_grads_shape = pooled_grads[..., tf.newaxis].shape
+    pooled_grads = pooled_grads[..., tf.newaxis]
     print("Shape of lclo:", lclo_shape)
-    print("Shape of pooled_grads:", pooled_grads_shape)
-    # Transpose pooled_grads to have a shape of (1, 5000)
-    pooled_grads_transposed = tf.transpose(pooled_grads[..., tf.newaxis])
-    print("Shape of transposed pooled_grads:", pooled_grads_transposed.shape)
+    print("Shape of pooled_grads:", pooled_grads.shape)
+    # Transpose lclo to have a shape of (1024, 5000)
+    lclo_transposed = tf.transpose(lclo)
+    print("Shape of transposed lclo:", lclo_transposed.shape)
     # Perform matrix multiplication
-    heatcloud = lclo @ pooled_grads_transposed
+    heatcloud = lclo_transposed @ pooled_grads
     #heatcloud = lclo @ pooled_grads[..., tf.newaxis] #error here.
     print(heatcloud)
     heatcloud = tf.squeeze(heatcloud)
