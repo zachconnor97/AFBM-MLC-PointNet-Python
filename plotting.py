@@ -51,18 +51,20 @@ for flabel in labels:
     if flabel == 'NA':
         continue
     plt.figure(figsize=(8, 6), dpi=90)
+    i = 0
     for metric in metrics_names:
         data = label_dict_data[flabel][metric].astype(float)
         #print(f"For {flabel}, {metric}: Length of thresholds={len(thresholds)}, Length of data={len(data)}")
         #print(data)
         #print(thresholds)
         plt.plot(thresholds, data, label=metric, linewidth = 1.0, marker=amarker[i], markersize = 7.0, linestyle='dotted', color='k')
+        i += 1
     plt.legend()
     plt.xlabel('Threshold')
     plt.ylabel('Metric Value')
-    plt.ylim(bottom=0.75, top=1.0)
+    plt.ylim(bottom=0.0, top=1.0)
     plt.title('Metrics vs. Threshold for ' + str(flabel))
-    plt.savefig((folder + flabel + "_plot.png"))
+    plt.savefig((folder + flabel + "_plot.svg"))
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
 plt.close()
