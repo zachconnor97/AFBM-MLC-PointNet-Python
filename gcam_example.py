@@ -52,7 +52,7 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None
     # This is the gradient of the output neuron (top predicted or chosen)
     # with regard to the output feature map of the last conv layer
     grads = tape.gradient(class_channel, last_conv_layer_output)
-    #print(grads)
+    print(grads)
     # This is a vector where each entry is the mean intensity of the gradient
     # over a specific feature map channel
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
@@ -76,14 +76,14 @@ model = model_builder(weights="imagenet")
 
 # Remove last layer's softmax
 model.layers[-1].activation = None
-model.summary()
+#model.summary()
 # Print what the top predicted class is
 preds = model.predict(img_array)
 #print("Predicted:", decode_predictions(preds, top=1)[0])
 
 # Generate class activation heatmap
 heatmap = make_gradcam_heatmap(img_array, model, last_conv_layer_name)
-print(heatmap)
+#print(heatmap)
 # Display heatmap
 plt.matshow(heatmap)
 plt.show()
