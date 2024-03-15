@@ -205,9 +205,9 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     return heatcloud.numpy()
 
 # Test GradCAM stuff
-pn_model.load_weights('MLCPN_BestWeights.h5')
+pn_model.load_weights('MLCPNBestWeights.h5')
 #testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 testcloud = testcloud.uniform_down_sample(every_k_points=2)
 testcloud = testcloud.points
 testcloud = np.asarray([testcloud])[0]
@@ -220,7 +220,11 @@ labels = pn_model.predict(testcloud.numpy())
 print("Predicted Labels: ", labels)
 pn_model.summary()
 heatcloud = gradcam_heatcloud(testcloud, pn_model, lln)
-print(heatcloud.shape)
+print(heatcloud.shape) #This needs to be 5000, not 1024 long
 #heatcloud = np.reshape(heatcloud, (1, -1))
 #plt.matshow(heatcloud)
 #plt.show()
+
+#Write save_and_display_gradcam but for pointcloud
+
+# Create color scale from heat vector, then put those colors onto the original point cloud. 
