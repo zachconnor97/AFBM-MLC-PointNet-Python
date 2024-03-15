@@ -19,7 +19,7 @@ username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation_Examples' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS))
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=TRAINING)
-pn_model.load_weights('weights/pn_weights_28.h5')
+pn_model.load_weights('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_14_AutoWeights_7PM/MLCPN_Validation_3_14BestWeights.h5')
 train_ds, val_ds, label_weights, val_paths = generate_dataset(filename=database)
 
 example_clouds = val_ds.take(BATCH_SIZE)
