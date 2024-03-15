@@ -133,12 +133,12 @@ print(f"Label Weights: {label_weights}")
 #label_weights[16] = 10
 #print(f"Adjusted Label Weights: {label_weights}")
 
-training_loop(pn_model, train_ds, val_ds, label_weights)
+#training_loop(pn_model, train_ds, val_ds, label_weights)
 
-pn_model.save(save_path + '_AFBM Model')
+#pn_model.save(save_path + '_AFBM Model')
 # Validation / Evaluation per Label
 
-#pn_model.load_weights('pn_weights_28.h5')
+pn_model.load_weights('MLCPNBestWeights.h5')
 
 for i in range(1,10):
     t = i / 10
@@ -154,7 +154,7 @@ for i in range(1,10):
     data=pn_model.evaluate(x=val_ds)
     metrics = data[1]
     metrics = pd.DataFrame(metrics).T
-    histfile = save_path + '_label_validation_allmets_autoweights_' + str(t) + '.csv'
+    histfile = save_path + '_label_validation_allmets_autoweightsFixed_' + str(t) + '.csv'
 
     with open(histfile, mode='w') as f:
         metrics.to_csv(f)
