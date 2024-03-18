@@ -190,19 +190,19 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     grads = tape.gradient(label_channel, lclo)
     #pooled_grads = tf.reduce_mean(grads, axis=0) # Dimensionality of this var is causing issue in line 190...
     pooled_grads = tf.reduce_mean(grads, axis=(0,1)) 
-    print(pooled_grads[..., tf.newaxis])
+    #print(pooled_grads[..., tf.newaxis])
     lclo = lclo[0]
 
     #Checking the shape of the matrices before multipication
     lclo_shape = lclo.shape
     pooled_grads = pooled_grads[..., tf.newaxis]
-    print("Shape of lclo:", lclo_shape)
-    print("Shape of pooled_grads:", pooled_grads.shape)
+    #print("Shape of lclo:", lclo_shape)
+    #print("Shape of pooled_grads:", pooled_grads.shape)
 
     # Perform matrix multiplication
     heatcloud = lclo @ pooled_grads
     #heatcloud = lclo @ pooled_grads[..., tf.newaxis] #error here.
-    print(heatcloud.shape)
+    #print(heatcloud.shape)
     heatcloud = tf.squeeze(heatcloud)
     heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
     return heatcloud.numpy()
@@ -210,22 +210,22 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
 #testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 testcloud = testcloud.uniform_down_sample(every_k_points=2)
 testcloud = testcloud.points
 testcloud = np.asarray([testcloud])[0]
 testcloud = np.reshape(testcloud, (1,5000,3))
-print(testcloud)
+#print(testcloud)
 testcloud = tf.constant(testcloud, dtype='float64')
 #print(testcloud)
 pn_model.layers[-1].activation = None
 lln = 'activation_14' #'conv1d_10'  # double check this
 labels = pn_model.predict(testcloud.numpy())
-print("Predicted Labels: ", labels)
-pn_model.summary()
+#print("Predicted Labels: ", labels)
+#pn_model.summary()
 heatcloud = gradcam_heatcloud(testcloud, pn_model, lln)
-print(heatcloud.shape) #This needs to be 5000, not 1024 long
+#print(heatcloud.shape) #This needs to be 5000, not 1024 long
 #heatcloud = np.reshape(heatcloud, (1, -1))
 #plt.matshow(heatcloud)
 #plt.show()
@@ -237,22 +237,30 @@ print(heatcloud.shape) #This needs to be 5000, not 1024 long
 def save_and_display_gradcam(path, heatcloud):
     
     # Load Original Point Cloud
-    testcloud = o3d.io.read_point_cloud(path) # use open3d to import point cloud from file
-    testcloud = testcloud.uniform_down_sample(every_k_points=2)
-    testcloud = testcloud.points
-    print(testcloud)
-    # Rescale vector to a range 0-255
-    #heatcloud = np.uint8(255 * heatcloud)
-    #print(heatcloud)
+    pc = o3d.io.read_point_cloud(path) # use open3d to import point cloud from file
+    pc = pc.uniform_down_sample(every_k_points=2)
+    pc = pc.points
+    pc = np.asarray([pc])[0]
+
+    rg = np.ones((len(heatcloud),2))
+    rg[:,0] = np.subtract(rg[:,0], heatcloud)
+    rg[:,1] = np.subtract(rg[:,1], heatcloud)
+    b = np.ones((len(heatcloud),1))
+    rgb = np.hstack((rg,b))
     
-    # Add heatcloud to the Blue brightness of the point cloud
-    newcloud = o3d.io.point
-    # Save point cloud(s) 
+    # Convert back to open3d pc
+
+    cloud = o3d.geometry.PointCloud()
+    cloud.points = o3d.utility.Vector3dVector(pc)
+    cloud.colors = o3d.utility.Vector3dVector(rgb)
+    o3d.visualization.draw_geometries([cloud])
+    o3d.io.write_point_cloud("Point_Cloud_Intensity.ply", cloud)
+
 
     
 
 
 
 
-path = 'C:/Users/Zachariah/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
+path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
 save_and_display_gradcam(path, heatcloud)
