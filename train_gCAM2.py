@@ -207,55 +207,40 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
     return heatcloud.numpy()
 
-# Test GradCAM stuff
-pn_model.load_weights('MLCPNBestWeights.h5')
-#testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
-#testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-testcloud = testcloud.uniform_down_sample(every_k_points=2)
-testcloud = testcloud.points
-testcloud = np.asarray([testcloud])[0]
-testcloud = np.reshape(testcloud, (1,5000,3))
-print(testcloud)
-testcloud = tf.constant(testcloud, dtype='float64')
-#print(testcloud)
-pn_model.layers[-1].activation = None
-lln = 'activation_14' #'conv1d_10'  # double check this
-labels = pn_model.predict(testcloud.numpy())
-#print("Predicted Labels: ", labels)
-#pn_model.summary()
-heatcloud = gradcam_heatcloud(testcloud, pn_model, lln)
-#print(heatcloud.shape) #This needs to be 5000, not 1024 long
-#heatcloud = np.reshape(heatcloud, (1, -1))
-#plt.matshow(heatcloud)
-#plt.show()
-
-#Write save_and_display_gradcam but for pointcloud
-
-# Create color scale from heat vector, then put those colors onto the original point cloud. 
-
-def save_and_display_gradcam(path, heatcloud):
+def save_and_display_gradcam(point_cloud, heatcloud):
     
-    # Load Original Point Cloud
-    pc = o3d.io.read_point_cloud(path) # use open3d to import point cloud from file
-    pc = pc.uniform_down_sample(every_k_points=2)
-    pc = pc.points
-    pc = np.asarray([pc])[0]
-
+    pc = point_cloud
     rg = np.ones((len(heatcloud),2))
     rg[:,0] = np.subtract(rg[:,0], heatcloud)
     rg[:,1] = np.subtract(rg[:,1], heatcloud)
     b = np.ones((len(heatcloud),1))
     rgb = np.hstack((rg,b))
-    print(np.shape(rgb))
-    print(rgb)
     # Convert back to open3d pc
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    #o3d.visualization.draw_geometries([cloud])
+    o3d.visualization.draw_geometries([cloud])
 
     #o3d.io.write_point_cloud("Point_Cloud_Intensity.ply", cloud)
 
-path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
-save_and_display_gradcam(path, heatcloud)
+# Test GradCAM stuff
+pn_model.load_weights('MLCPNBestWeights.h5')
+#testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+#testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
+#testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
+pc = o3d.io.read_point_cloud(pc_path)
+
+pc = pc.uniform_down_sample(every_k_points=2)
+pc= pc.points
+pc = np.asarray([pc])[0]
+testcloud = np.reshape(pc, (1,5000,3))
+testcloud = tf.constant(testcloud, dtype='float64')
+pn_model.layers[-1].activation = None
+lln = 'activation_14' 
+labels = pn_model.predict(testcloud.numpy())
+print("Predicted Labels: ", labels)
+heatcloud = gradcam_heatcloud(testcloud, pn_model, lln)
+save_and_display_gradcam(pc, heatcloud)
+
+
