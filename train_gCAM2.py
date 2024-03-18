@@ -189,7 +189,7 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
         label_channel = preds[:, label_idx]
     grads = tape.gradient(label_channel, lclo)
     #pooled_grads = tf.reduce_mean(grads, axis=0) # Dimensionality of this var is causing issue in line 190...
-    pooled_grads = tf.reduce_mean(grads, axis=(0,2)) #Fixed - Seems to output zeros... so maybe not fixed?
+    pooled_grads = tf.reduce_mean(grads, axis=(0,1)) 
     print(pooled_grads[..., tf.newaxis])
     lclo = lclo[0]
 
@@ -198,21 +198,19 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     pooled_grads = pooled_grads[..., tf.newaxis]
     print("Shape of lclo:", lclo_shape)
     print("Shape of pooled_grads:", pooled_grads.shape)
-    # Transpose lclo to have a shape of (1024, 5000)
-    lclo_transposed = tf.transpose(lclo)
-    print("Shape of transposed lclo:", lclo_transposed.shape)
+
     # Perform matrix multiplication
-    heatcloud = lclo_transposed @ pooled_grads
+    heatcloud = lclo @ pooled_grads
     #heatcloud = lclo @ pooled_grads[..., tf.newaxis] #error here.
-    print(heatcloud)
+    print(heatcloud.shape)
     heatcloud = tf.squeeze(heatcloud)
     heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
     return heatcloud.numpy()
 
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
-#testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+#testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 testcloud = testcloud.uniform_down_sample(every_k_points=2)
 testcloud = testcloud.points
 testcloud = np.asarray([testcloud])[0]
