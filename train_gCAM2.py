@@ -216,7 +216,7 @@ testcloud = testcloud.uniform_down_sample(every_k_points=2)
 testcloud = testcloud.points
 testcloud = np.asarray([testcloud])[0]
 testcloud = np.reshape(testcloud, (1,5000,3))
-#print(testcloud)
+print(testcloud)
 testcloud = tf.constant(testcloud, dtype='float64')
 #print(testcloud)
 pn_model.layers[-1].activation = None
@@ -249,11 +249,11 @@ def save_and_display_gradcam(path, heatcloud):
     rgb = np.hstack((rg,b))
     
     # Convert back to open3d pc
-
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
     o3d.visualization.draw_geometries([cloud])
+    
     o3d.io.write_point_cloud("Point_Cloud_Intensity.ply", cloud)
 
 
