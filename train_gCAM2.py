@@ -247,20 +247,15 @@ def save_and_display_gradcam(path, heatcloud):
     rg[:,1] = np.subtract(rg[:,1], heatcloud)
     b = np.ones((len(heatcloud),1))
     rgb = np.hstack((rg,b))
-    
+    print(np.shape(rgb))
+    print(rgb)
     # Convert back to open3d pc
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    o3d.visualization.draw_geometries([cloud])
-    
-    o3d.io.write_point_cloud("Point_Cloud_Intensity.ply", cloud)
+    #o3d.visualization.draw_geometries([cloud])
 
-
-    
-
-
-
+    #o3d.io.write_point_cloud("Point_Cloud_Intensity.ply", cloud)
 
 path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
 save_and_display_gradcam(path, heatcloud)
