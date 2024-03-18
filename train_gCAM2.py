@@ -209,12 +209,14 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
 
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
-testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+#testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
+testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 testcloud = testcloud.uniform_down_sample(every_k_points=2)
 testcloud = testcloud.points
 testcloud = np.asarray([testcloud])[0]
 testcloud = np.reshape(testcloud, (1,5000,3))
+print(testcloud)
 testcloud = tf.constant(testcloud, dtype='float64')
 #print(testcloud)
 pn_model.layers[-1].activation = None
@@ -232,35 +234,25 @@ print(heatcloud.shape) #This needs to be 5000, not 1024 long
 
 # Create color scale from heat vector, then put those colors onto the original point cloud. 
 
-def save_and_display_gradcam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
-    # Load the original image
-    img = keras.utils.load_img(img_path)
-    img = keras.utils.img_to_array(img)
+def save_and_display_gradcam(path, heatcloud):
+    
+    # Load Original Point Cloud
+    testcloud = o3d.io.read_point_cloud(path) # use open3d to import point cloud from file
+    testcloud = testcloud.uniform_down_sample(every_k_points=2)
+    testcloud = testcloud.points
+    print(testcloud)
+    # Rescale vector to a range 0-255
+    #heatcloud = np.uint8(255 * heatcloud)
+    #print(heatcloud)
+    
+    # Add heatcloud to the Blue brightness of the point cloud
+    newcloud = o3d.io.point
+    # Save point cloud(s) 
 
-    # Rescale heatmap to a range 0-255
-    heatmap = np.uint8(255 * heatmap)
-
-    # Use jet colormap to colorize heatmap
-    jet = mpl.colormaps["jet"]
-
-    # Use RGB values of the colormap
-    jet_colors = jet(np.arange(256))[:, :3]
-    jet_heatmap = jet_colors[heatmap]
-
-    # Create an image with RGB colorized heatmap
-    jet_heatmap = keras.utils.array_to_img(jet_heatmap)
-    jet_heatmap = jet_heatmap.resize((img.shape[1], img.shape[0]))
-    jet_heatmap = keras.utils.img_to_array(jet_heatmap)
-
-    # Superimpose the heatmap on original image
-    superimposed_img = jet_heatmap * alpha + img
-    superimposed_img = keras.utils.array_to_img(superimposed_img)
-
-    # Save the superimposed image
-    superimposed_img.save(cam_path)
-
-    # Display Grad CAM
-    display(Image(cam_path))
+    
 
 
-#save_and_display_gradcam(img_path, heatmap)
+
+
+path = 'C:/Users/Zachariah/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
+save_and_display_gradcam(path, heatcloud)
