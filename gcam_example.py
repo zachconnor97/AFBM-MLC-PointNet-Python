@@ -56,12 +56,16 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None
     # This is a vector where each entry is the mean intensity of the gradient
     # over a specific feature map channel
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
-    print(pooled_grads[..., tf.newaxis])
+    # Pooled Grads[..., tf.newaxis] Shape: 2048, 1
+    #print(pooled_grads[..., tf.newaxis])
     # We multiply each channel in the feature map array
     # by "how important this channel is" with regard to the top predicted class
     # then sum all the channels to obtain the heatmap class activation
     last_conv_layer_output = last_conv_layer_output[0]
+    # LCLO Shape: 10, 10, 2048
+    #print(f"LCLO {np.shape(last_conv_layer_output)}")
     heatmap = last_conv_layer_output @ pooled_grads[..., tf.newaxis]
+    # Shape Heatmap: 10, 10, 1
     heatmap = tf.squeeze(heatmap)
 
     # For visualization purpose, we will also normalize the heatmap between 0 & 1
@@ -83,7 +87,7 @@ preds = model.predict(img_array)
 
 # Generate class activation heatmap
 heatmap = make_gradcam_heatmap(img_array, model, last_conv_layer_name)
-#print(heatmap)
+print(np.shape(heatmap))
 # Display heatmap
 plt.matshow(heatmap)
 plt.show()
