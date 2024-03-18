@@ -210,11 +210,13 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
 def save_and_display_gradcam(point_cloud, heatcloud):
     
     pc = point_cloud
-    rg = np.ones((len(heatcloud),2))
-    rg[:,0] = np.subtract(rg[:,0], heatcloud)
-    rg[:,1] = np.subtract(rg[:,1], heatcloud)
-    b = np.ones((len(heatcloud),1))
-    rgb = np.hstack((rg,b))
+    v = np.zeros((len(heatcloud),1))
+    #rg[:,0] = np.subtract(rg[:,0], (1 + np.log(heatcloud)))
+    #rg[:,1] = np.subtract(rg[:,1], (1 + np.log(heatcloud)))
+    #b = np.ones((len(heatcloud),1))
+    g = 1 + np.log(heatcloud)
+    g = np.reshape(g, (len(heatcloud),1))
+    rgb = np.hstack((v,g,v))
     # Convert back to open3d pc
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
@@ -228,9 +230,8 @@ pn_model.load_weights('MLCPNBestWeights.h5')
 #testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
+pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
 pc = o3d.io.read_point_cloud(pc_path)
-
 pc = pc.uniform_down_sample(every_k_points=2)
 pc= pc.points
 pc = np.asarray([pc])[0]
