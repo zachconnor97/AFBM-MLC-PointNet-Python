@@ -29,6 +29,17 @@ username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
+label_names = [
+    'ConvertCEtoKE,AE,TE', 'ConvertEEtoAE', 'ConvertEEtoLE',
+    'ConvertKEtoAE', 'ConvertKEtoEE', 'ConvertLEtoCE',
+    'ConvertLEtoEE', 'ExportAE', 'ExportAEtoTE',
+    'ExportCE', 'ExportEE', 'ExportGas', 'ExportLE',
+    'ExportLiquid', 'ExportSolid', 'ImportEE',
+    'ImportGas', 'ImportHE', 'ImportKE',
+    'ImportLE', 'ImportLiquid', 'ImportSolid',
+    'StoreGas', 'StoreLiquid', 'StoreSolid'
+]
+
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 #print(pn_model.get_weights()[0])
@@ -209,7 +220,7 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
     return heatcloud.numpy()
 
-def save_and_display_gradcam(point_cloud, heatcloud):
+def save_and_display_gradcam(point_cloud, heatcloud, i=None, label_names=None):
     
     pc = point_cloud
     v = np.zeros((len(heatcloud),1))
@@ -217,7 +228,8 @@ def save_and_display_gradcam(point_cloud, heatcloud):
     #rg[:,1] = np.subtract(rg[:,1], (1 + np.log(heatcloud)))
     #b = np.ones((len(heatcloud),1))
 
-    g = 1 + np.log(heatcloud)
+    #g = 1 + np.log(heatcloud)
+    g = heatcloud
     g = np.reshape(g, (len(heatcloud),1))
     rgb = np.hstack((v,g,v))
     # Convert back to open3d pc
@@ -226,7 +238,7 @@ def save_and_display_gradcam(point_cloud, heatcloud):
     cloud.colors = o3d.utility.Vector3dVector(rgb)
     o3d.visualization.draw_geometries([cloud])
 
-    #o3d.io.write_point_cloud("Point_Cloud_Intensity.ply", cloud)
+    #o3d.io.write_point_cloud("Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
 
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
@@ -234,7 +246,8 @@ pn_model.load_weights('MLCPNBestWeights.h5')
 #testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+pc_path = 'C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+#pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
 #bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
 #lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
 pc = o3d.io.read_point_cloud(pc_path)
@@ -243,12 +256,18 @@ pc= pc.points
 pc = np.asarray([pc])[0]
 testcloud = np.reshape(pc, (1,5000,3))
 testcloud = tf.constant(testcloud, dtype='float64')
-pn_model.layers[-1].activation = None
-lln = 'activation_14' #'conv1d_10'
+
+lln = 'dot' #'activation_14'
 labels = pn_model.predict(testcloud)
 print("Predicted Labels: ", labels)
-heatcloud = gradcam_heatcloud(testcloud, pn_model, lln, label_idx=24)
-print(heatcloud)
-#save_and_display_gradcam(pc, heatcloud)
+pn_model.layers[-1].activation = None
 
+# Get idx from predicted labels with prediction > 0.5 
+labels = np.array(labels)
+label_index = np.where(labels >= 0.5)[1]
+#print(label_index)
 
+for i in label_index:
+    heatcloud = gradcam_heatcloud(testcloud, pn_model, lln, label_idx=i)
+    #print(heatcloud)
+    save_and_display_gradcam(pc, heatcloud, i, label_names)
