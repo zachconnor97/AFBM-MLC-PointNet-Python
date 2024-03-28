@@ -7,9 +7,9 @@ metrics_names = ['Accuracy','Precision', 'Recall', 'F1 Score']
 amarker = ['o', '^', 'X', '*']
 dataframes = []
 labels = [
-    'ConvertCEtotoKE,AE,TE', 'ConvertEEtoAE', 'ConvertEEtoLE',
+    'ConvertCEtoKE,AE,TE', 'ConvertEEtoAE', 'ConvertEEtoLE',
     'ConvertKEtoAE', 'ConvertKEtoEE', 'ConvertLEtoCE',
-    'ConvertLEtoEE', 'ExportAE', 'ExportAEtoTE',
+    'ConvertLEtoEE', 'ExportAE', 'ExportAE,TE',
     'ExportCE', 'ExportEE', 'ExportGas', 'ExportLE',
     'ExportLiquid', 'ExportSolid', 'ImportEE',
     'ImportGas', 'ImportHE', 'ImportKE',
@@ -17,7 +17,7 @@ labels = [
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
 df = pd.DataFrame()
-folder = str("C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_12_autoweights/")
+folder = str("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_12_autoweights/")
 path = str("MLCPN_Results_Autoweights.csv")
 file = pd.read_csv(folder+path, header = None)    
 file.reset_index(drop=True, inplace=True)
@@ -55,7 +55,7 @@ for metric in metrics_names:
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
     i += 1
-#plt.savefig(f"C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_12_autoweights/Plots/{metric}_plot.svg", transparent=True, format='svg')
+#plt.savefig(f"C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_12_autoweights/Plots/{metric}_plot2.svg", transparent=True, format='svg')
 plt.show()
 #plt.close()
 #print("Plots saved successfully.")
