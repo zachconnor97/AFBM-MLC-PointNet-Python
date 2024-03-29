@@ -16,7 +16,7 @@ NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.000025
 BATCH_SIZE = 16
-NUM_EPOCHS = 10
+NUM_EPOCHS = 1
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
@@ -24,6 +24,13 @@ save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
+
+def loss(target_y, predicted_y, label_weights=None):
+    # Update to binary cross entropy loss
+    target_y = tf.cast(target_y, dtype=tf.float32)
+    bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+    loss = bce(target_y, predicted_y) 
+    return loss
 
 def pc_loss(tt, tg):
   tt = tf.constant(tt.numpy(), dtype=tf.float64)
@@ -61,7 +68,10 @@ def pc_loss(tt, tg):
   eye = tf.linalg.eye(3,3)
   r = tf.constant(r.numpy(), dtype=tf.float32)
   pc_loss = backend.abs(r - eye)
-  pc_loss = tf.math.add(1.0, tf.math.log(backend.mean(pc_loss)))
+  pc_loss = backend.mean(pc_loss)
+  print(f"PointCloud Loss [unnormalized] = {pc_loss}")
+  pc_loss = tf.math.add(1.0, tf.math.log(pc_loss)) / 50
+  #pc_loss = 2
   return pc_loss
 
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
@@ -70,11 +80,16 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
     print(f"Step: {step}")
     with tf.GradientTape() as t:
       # Trainable variables are automatically tracked by GradientTape
-      current_loss = pc_loss(ybt, gmodel(xbt))
+      #current_loss = pc_loss(ybt, gmodel(xbt))
+      #current_loss = loss(ybt, gmodel(xbt)) # Only this one works, for no aparent reason
+      current_loss = tf.constant(0.69)
+      print(f"Current Loss: {current_loss}")
+      print(type(current_loss))
+      
       stacked_loss = stacked_loss + current_loss
     print(f"Current Loss: {current_loss}")
-    grads = t.gradient(current_loss, gmodel.trainable_weights)    
-    # Subtract the gradient scaled by the learning rate
+    grads = t.gradient(current_loss, gmodel.trainable_weights)  
+    #print(f"Gradients: {grads}")
     g_optimizer.apply_gradients(zip(grads, gmodel.trainable_weights))
   return stacked_loss/step
 
