@@ -80,17 +80,26 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
     print(f"Step: {step}")
     with tf.GradientTape() as t:
       # Trainable variables are automatically tracked by GradientTape
-      #current_loss = pc_loss(ybt, gmodel(xbt))
+      current_loss = pc_loss(ybt, gmodel(xbt)) # we want this to work
       #current_loss = loss(ybt, gmodel(xbt)) # Only this one works, for no aparent reason
-      current_loss = tf.constant(0.69)
+      #current_loss = tf.constant(0.6924108862876892) #why would this NOT work???? Even with the same value
       print(f"Current Loss: {current_loss}")
       print(type(current_loss))
       
       stacked_loss = stacked_loss + current_loss
     print(f"Current Loss: {current_loss}")
     grads = t.gradient(current_loss, gmodel.trainable_weights)  
-    #print(f"Gradients: {grads}")
-    g_optimizer.apply_gradients(zip(grads, gmodel.trainable_weights))
+    print(f"Gradients: {grads}")
+
+    if grads == None:
+      print("No Gradients")
+    else:
+      try:
+        g_optimizer.apply_gradients(zip(grads, gmodel.trainable_weights))
+      except:
+        print("Gradients Not Applied")
+    #if step > 0:
+    #  break
   return stacked_loss/step
 
 # Define a training loop
