@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
 from utils import PerLabelMetric, GarbageMan
-from dataset import generate_dataset
+from dataset_example import generate_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend_config
 epsilon = backend_config.epsilon
@@ -23,7 +23,7 @@ NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.25
-BATCH_SIZE = 16
+BATCH_SIZE = 10
 NUM_EPOCHS = 18
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
@@ -106,6 +106,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, i=None, label_names=None):
 
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
+pn_model.compile(run_eagerly=True)
 #pn_model.summary()
 #testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
@@ -121,19 +122,26 @@ pc = np.asarray([pc])[0]
 testcloud = np.reshape(pc, (1,5000,3))
 testcloud = tf.constant(testcloud, dtype='float64')
 database = "AFBMData_NoChairs_Augmented.csv"
-train_ds, val_ds, label_weights = generate_dataset(filename=database)
+train_ds, val_ds, label_weights, val_paths = generate_dataset(filename=database)
 
 lln = 'activation_14' #'dot'
 labels = pn_model.predict(testcloud)
 print("Predicted Labels: ", labels)
 pn_model.layers[-1].activation = None
 
+example_clouds = val_ds.take(BATCH_SIZE)
+example_clouds = example_clouds.batch(BATCH_SIZE)
+example_paths = val_paths.take(BATCH_SIZE)
+points, y_true = list(example_clouds)[0]
+y_pred = pn_model.predict(example_clouds, batch_size=BATCH_SIZE)
+
+
 # Get idx from predicted labels with prediction > 0.5 
-labels = np.array(labels)
-label_index = np.where(labels >= 0.5)[1]
+y_pred = np.array(y_pred)
+pred_label_index = np.where(y_pred >= 0.5)[1]
 #print(label_index)
 
-for i in label_index:
+for i in pred_label_index:
     heatcloud = gradcam_heatcloud(testcloud, pn_model, lln, label_idx=i)
     #print(heatcloud)
     save_and_display_gradcam(pc, heatcloud, i, label_names)

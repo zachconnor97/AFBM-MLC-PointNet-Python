@@ -23,6 +23,7 @@ save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
+gmodel.compile(run_eagerly=True)
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
 
 def loss(target_y, predicted_y, label_weights=None):
