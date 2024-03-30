@@ -142,7 +142,7 @@ example_paths = val_paths.take(BATCH_SIZE)
 points, y_true = list(example_clouds)[0]
 y_pred = pn_model.predict(example_clouds, batch_size=BATCH_SIZE)
 paths = list(example_paths)
-lln = 'activation_14' #'dot'
+lln = 'conv1d_10' #'activation_14' #'dot'
 pn_model.layers[-1].activation = None
 result_path = "/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/"
 
