@@ -50,9 +50,9 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     model: Point Net Model. Takes in point cloud, returns labels
     lcln: Name of the last convolutional layer in PointNet
     label_idx: Index of label to generate heatcloud for
-    Need to modify function to accept multiple labels and create multiple intensity vectors
     """
-    # from keras.io but need to modify for pcs instead
+
+    cloud = np.reshape(cloud, (1, NUM_POINTS, 3))
     gradm = tf.keras.models.Model(
         model.inputs, [model.get_layer(lcln).output, model.output]
     )
@@ -100,7 +100,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, i=None, label_names=None):
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    o3d.visualization.draw_geometries([cloud])
+    #o3d.visualization.draw_geometries([cloud])
 
     #o3d.io.write_point_cloud("Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
 
@@ -139,14 +139,29 @@ example_clouds = example_clouds.batch(BATCH_SIZE)
 example_paths = val_paths.take(BATCH_SIZE)
 points, y_true = list(example_clouds)[0]
 y_pred = pn_model.predict(example_clouds, batch_size=BATCH_SIZE)
-
+paths = list(example_paths)[0]
 #print(f"Y Predicted: {y_pred}")
 print(f"Y Predicted Size: {np.shape(y_pred)}")
-
+print(f"Y True Size: {np.shape(y_true)}")
+print(f"Cloud Size: {np.shape(points)}")
+print(f"Path Type: {type(paths)}")
 
 lln = 'activation_14' #'dot'
 pn_model.layers[-1].activation = None
 
+for j in range(len(y_pred)):
+    #print(f"Y Predicted: {type(y_pred[i])}")
+    #print(f"Y Predicted Size: {np.shape(y_pred[i])}")
+    yp = y_pred[j]
+    yt = y_true[j]
+    p = points[j]
+    pred_label_index = np.where(yp >= 0.5)[0]
+    print(pred_label_index)
+    for i in pred_label_index:
+        print(i)
+        heatcloud = gradcam_heatcloud(p, pn_model, lln, label_idx=i)
+        print(heatcloud)
+        save_and_display_gradcam(p, heatcloud, i, label_names)
 
 """
 # Get idx from predicted labels with prediction > 0.5 
