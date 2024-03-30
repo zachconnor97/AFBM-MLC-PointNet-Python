@@ -23,7 +23,7 @@ NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.25
-BATCH_SIZE = 10
+BATCH_SIZE = 3
 NUM_EPOCHS = 18
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
@@ -156,9 +156,8 @@ for j in range(len(y_pred)):
     yt = y_true[j]
     p = points[j]
     pred_label_index = np.where(yp >= 0.5)[0]
-    print(pred_label_index)
+
     for i in pred_label_index:
-        print(i)
         heatcloud = gradcam_heatcloud(p, pn_model, lln, label_idx=i)
         print(heatcloud)
         save_and_display_gradcam(p, heatcloud, i, label_names)
