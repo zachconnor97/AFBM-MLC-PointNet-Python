@@ -107,12 +107,14 @@ def save_and_display_gradcam(point_cloud, heatcloud, i=None, label_names=None):
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
 pn_model.compile(run_eagerly=True)
+
+"""
 #pn_model.summary()
 #testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-pc_path = 'C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
-#pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+#pc_path = 'C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+pc_path = '/mtn/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
 #bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
 #lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
 pc = o3d.io.read_point_cloud(pc_path)
@@ -121,21 +123,32 @@ pc= pc.points
 pc = np.asarray([pc])[0]
 testcloud = np.reshape(pc, (1,5000,3))
 testcloud = tf.constant(testcloud, dtype='float64')
+"""
 database = "AFBMData_NoChairs_Augmented.csv"
 train_ds, val_ds, label_weights, val_paths = generate_dataset(filename=database)
 
+"""
 lln = 'activation_14' #'dot'
 labels = pn_model.predict(testcloud)
 print("Predicted Labels: ", labels)
 pn_model.layers[-1].activation = None
 
+"""
 example_clouds = val_ds.take(BATCH_SIZE)
 example_clouds = example_clouds.batch(BATCH_SIZE)
 example_paths = val_paths.take(BATCH_SIZE)
 points, y_true = list(example_clouds)[0]
 y_pred = pn_model.predict(example_clouds, batch_size=BATCH_SIZE)
 
+#print(f"Y Predicted: {y_pred}")
+print(f"Y Predicted Size: {np.shape(y_pred)}")
 
+
+lln = 'activation_14' #'dot'
+pn_model.layers[-1].activation = None
+
+
+"""
 # Get idx from predicted labels with prediction > 0.5 
 y_pred = np.array(y_pred)
 pred_label_index = np.where(y_pred >= 0.5)[1]
@@ -145,3 +158,5 @@ for i in pred_label_index:
     heatcloud = gradcam_heatcloud(testcloud, pn_model, lln, label_idx=i)
     #print(heatcloud)
     save_and_display_gradcam(pc, heatcloud, i, label_names)
+
+"""
