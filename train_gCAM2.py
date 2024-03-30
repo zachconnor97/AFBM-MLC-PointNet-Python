@@ -149,6 +149,7 @@ print(f"Path Type: {type(paths)}")
 lln = 'activation_14' #'dot'
 pn_model.layers[-1].activation = None
 
+
 for j in range(len(y_pred)):
     #print(f"Y Predicted: {type(y_pred[i])}")
     #print(f"Y Predicted Size: {np.shape(y_pred[i])}")
@@ -161,6 +162,7 @@ for j in range(len(y_pred)):
         heatcloud = gradcam_heatcloud(p, pn_model, lln, label_idx=i)
         print(heatcloud)
         save_and_display_gradcam(p, heatcloud, i, label_names)
+
 
 """
 # Get idx from predicted labels with prediction > 0.5 
