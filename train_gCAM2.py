@@ -23,7 +23,7 @@ NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.25
-BATCH_SIZE = 3
+BATCH_SIZE = 100
 NUM_EPOCHS = 18
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
@@ -84,7 +84,7 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
     return heatcloud.numpy()
 
-def save_and_display_gradcam(point_cloud, heatcloud, i=None, label_names=None):
+def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None, label_names=None):
     
     pc = point_cloud
     v = np.zeros((len(heatcloud),1))
@@ -101,8 +101,10 @@ def save_and_display_gradcam(point_cloud, heatcloud, i=None, label_names=None):
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
     #o3d.visualization.draw_geometries([cloud])
-
-    #o3d.io.write_point_cloud("Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
+    try:
+        o3d.io.write_point_cloud(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
+    except:
+        print("cloud not written")
 
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
@@ -139,16 +141,10 @@ example_clouds = example_clouds.batch(BATCH_SIZE)
 example_paths = val_paths.take(BATCH_SIZE)
 points, y_true = list(example_clouds)[0]
 y_pred = pn_model.predict(example_clouds, batch_size=BATCH_SIZE)
-paths = list(example_paths)[0]
-#print(f"Y Predicted: {y_pred}")
-print(f"Y Predicted Size: {np.shape(y_pred)}")
-print(f"Y True Size: {np.shape(y_true)}")
-print(f"Cloud Size: {np.shape(points)}")
-print(f"Path Type: {type(paths)}")
-
+paths = list(example_paths)
 lln = 'activation_14' #'dot'
 pn_model.layers[-1].activation = None
-
+result_path = "/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/"
 
 for j in range(len(y_pred)):
     #print(f"Y Predicted: {type(y_pred[i])}")
@@ -156,12 +152,18 @@ for j in range(len(y_pred)):
     yp = y_pred[j]
     yt = y_true[j]
     p = points[j]
+    fileid = np.array2string(paths[j].numpy())
+    fileid = fileid.split(".")[0]
+    for character in "['":
+        fileid = fileid.replace(character, '')
+    fileid = fileid[1:]
     pred_label_index = np.where(yp >= 0.5)[0]
-
+    
     for i in pred_label_index:
         heatcloud = gradcam_heatcloud(p, pn_model, lln, label_idx=i)
-        print(heatcloud)
-        save_and_display_gradcam(p, heatcloud, i, label_names)
+        #print(heatcloud)
+        save_and_display_gradcam(p, heatcloud, result_path, fileid, i, label_names)
+        
 
 
 """
