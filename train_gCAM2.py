@@ -86,6 +86,7 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
 
 def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None, label_names=None):
     
+    # Spins the cloud animated
     def rotate_view(vis):
         ctr = vis.get_view_control()
         ctr.rotate(10.0, 0.0)
