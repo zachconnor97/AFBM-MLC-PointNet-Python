@@ -23,7 +23,7 @@ NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.25
-BATCH_SIZE = 1
+BATCH_SIZE = 100
 NUM_EPOCHS = 18
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
@@ -100,7 +100,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    o3d.visualization.draw_geometries([cloud])
+    #o3d.visualization.draw_geometries([cloud])
     try:
         o3d.io.write_point_cloud(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
     except:
@@ -112,8 +112,8 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     vis.create_window()
     vis.add_geometry(cloud)
     
-    vis.get_render_option().point_size = 2  
-    vis.get_render_option().background_color = np.asarray([0, 0, 0])  
+    vis.get_render_option().point_size = 4
+    vis.get_render_option().background_color = np.asarray([1, 1, 1])  
     
     ctr = vis.get_view_control()
     ctr.rotate(180.0, 180.0)  
@@ -163,7 +163,7 @@ example_paths = val_paths.take(BATCH_SIZE)
 points, y_true = list(example_clouds)[0]
 y_pred = pn_model.predict(example_clouds, batch_size=BATCH_SIZE)
 paths = list(example_paths)
-lln = 'conv1d_10' #'activation_14' #'dot'
+lln = 'dot_1' #'conv1d_10' #'activation_14' #'dot'
 pn_model.layers[-1].activation = None
 result_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/"
 
