@@ -86,6 +86,11 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
 
 def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None, label_names=None):
     
+    def rotate_view(vis):
+        ctr = vis.get_view_control()
+        ctr.rotate(10.0, 0.0)
+        return False
+
     pc = point_cloud
     v = np.zeros((len(heatcloud),1))
     #rg[:,0] = np.subtract(rg[:,0], (1 + np.log(heatcloud)))
@@ -100,7 +105,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    o3d.visualization.draw_geometries([cloud])
+    o3d.visualization.draw_geometries([cloud], rotate_view)
     try:
         o3d.io.write_point_cloud(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
     except:
