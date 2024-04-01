@@ -85,12 +85,6 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     return heatcloud.numpy()
 
 def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None, label_names=None):
-    
-    # Spins the cloud animated
-    def rotate_view(vis):
-        ctr = vis.get_view_control()
-        ctr.rotate(10.0, 0.0)
-        return False
 
     pc = point_cloud
     v = np.zeros((len(heatcloud),1))
@@ -113,19 +107,24 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
         print("cloud not written")
 
     
+ 
     vis = o3d.visualization.Visualizer()
     vis.create_window()
     vis.add_geometry(cloud)
     
-    # Update and render
+    vis.get_render_option().point_size = 2  
+    vis.get_render_option().background_color = np.asarray([0, 0, 0])  
+    
+    ctr = vis.get_view_control()
+    ctr.rotate(180.0, 180.0)  
+    
+
     vis.update_geometry(cloud)
     vis.poll_events()
     vis.update_renderer()
     
-    # Capture screen image
     vis.capture_screen_image(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".png")
     
-    # Destroy window
     vis.destroy_window()
 
 # Test GradCAM stuff
