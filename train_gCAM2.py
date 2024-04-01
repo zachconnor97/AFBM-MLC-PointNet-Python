@@ -100,7 +100,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    #o3d.visualization.draw_geometries([cloud])
+    o3d.visualization.draw_geometries([cloud])
     try:
         o3d.io.write_point_cloud(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
     except:
@@ -147,6 +147,7 @@ pn_model.layers[-1].activation = None
 result_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/"
 
 for j in range(len(y_pred)):
+    print(f"Getting GradCAM for Point Cloud {j}")
     #print(f"Y Predicted: {type(y_pred[i])}")
     #print(f"Y Predicted Size: {np.shape(y_pred[i])}")
     yp = y_pred[j]
