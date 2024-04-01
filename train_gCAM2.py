@@ -100,10 +100,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    o3d.visualization.draw_geometries([cloud], 
-                                      front=np.array([0.1, 0.1]),
-                                      lookat=np.array([2.0,2.0]),
-                                      up=np.array([0.1, 0.1]))
+    o3d.visualization.draw_geometries([cloud])
     try:
         o3d.io.write_point_cloud(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
     except:
