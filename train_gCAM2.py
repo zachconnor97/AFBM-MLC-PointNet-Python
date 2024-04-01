@@ -23,7 +23,7 @@ NUM_POINTS = 5000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.25
-BATCH_SIZE = 100
+BATCH_SIZE = 1
 NUM_EPOCHS = 18
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
@@ -106,7 +106,10 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    o3d.visualization.draw_geometries([cloud], rotate_view)
+    o3d.visualization.draw_geometries([cloud], 
+                                      front=np.array([0.1, 0.1]),
+                                      lookat=np.array([2.0,2.0]),
+                                      up=np.array([0.1, 0.1]))
     try:
         o3d.io.write_point_cloud(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
     except:
