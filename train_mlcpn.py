@@ -20,7 +20,7 @@ BATCH_SIZE = 16
 NUM_EPOCHS = 30
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
-save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation_MOD_WEIGHTS' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_Learning Rate_' + str(LEARN_RATE) + '_Epsilon_' + str(EPS))
+save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/MLCPN_Validation_New' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_Learning Rate_' + str(LEARN_RATE) + '_Epsilon_' + str(EPS))
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
@@ -140,6 +140,7 @@ print(f"Label Weights: {label_weights}")
 
 pn_model.load_weights('MLCPNBestWeights.h5')
 
+"""
 for i in range(1,10):
     t = i / 10
     print(f"Theshold: {t}")
@@ -158,3 +159,4 @@ for i in range(1,10):
 
     with open(histfile, mode='w') as f:
         metrics.to_csv(f)
+"""
