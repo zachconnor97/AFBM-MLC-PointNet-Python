@@ -106,6 +106,22 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     except:
         print("cloud not written")
 
+    
+    vis = o3d.visualization.Visualizer()
+    vis.create_window()
+    vis.add_geometry(cloud)
+    
+    # Update and render
+    vis.update_geometry(cloud)
+    vis.poll_events()
+    vis.update_renderer()
+    
+    # Capture screen image
+    vis.capture_screen_image(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".png")
+    
+    # Destroy window
+    vis.destroy_window()
+
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
 pn_model.compile(run_eagerly=True)
