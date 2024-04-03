@@ -8,7 +8,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from model import pointnet
-from keras import backend_config
+from keras.src import backend_config
 epsilon = backend_config.epsilon
 NUM_CLASSES = 25
 username = 'Zachariah'
@@ -23,11 +23,17 @@ label_names = [
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
 
-pc_path = "C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/green_lamp_3636649_199273d17414e77ca553fc23769e60511_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
+pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/lamp_3636649_199273d17414e77ca553fc23769e60511_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
 
+col_t = 0.078
 pc = o3d.io.read_point_cloud(pc_path)
+col = np.asarray([pc.colors])[0]
+pidx = np.where(col[:,1] < col_t)[0]
+print(pidx)
 pc = pc.points
 pc = np.asarray([pc])[0]
+pc = pc[pidx]
+col = col[pidx]
 NUM_POINTS = len(pc)
 testcloud = np.reshape(pc, (1,NUM_POINTS,3))
 testcloud = tf.constant(testcloud, dtype='float64')
@@ -45,3 +51,8 @@ for i in range(0, len(output)):
     output[i] = output[i] + ": " + str(round(y_pred1[i], 5))
     if y_pred1[i] >= 0.2:
         print(f"Label {i}: {output[i]}")
+
+cloud = o3d.geometry.PointCloud()
+cloud.points = o3d.utility.Vector3dVector(pc)
+cloud.colors = o3d.utility.Vector3dVector(col)
+o3d.visualization.draw_geometries([cloud])
