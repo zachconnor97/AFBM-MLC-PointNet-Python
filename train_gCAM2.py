@@ -100,7 +100,8 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
-    #o3d.visualization.draw_geometries([cloud])
+    o3d.visualization.draw_geometries([cloud])
+    """
     try:
         o3d.io.write_point_cloud(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
     except:
@@ -126,18 +127,18 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     vis.capture_screen_image(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".png")
     
     vis.destroy_window()
-
+    """
 # Test GradCAM stuff
 pn_model.load_weights('MLCPNBestWeights.h5')
 pn_model.compile(run_eagerly=True)
 
-"""
+
 #pn_model.summary()
 #testcloud = o3d.io.read_point_cloud('C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
-#pc_path = 'C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
-pc_path = '/mtn/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+pc_path = 'C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/vessel_watercraft_4530566_6c9020061d71b190a4755e7555b1e1a43_10000_2pc.ply'
+#pc_path = '/mtn/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
 #bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
 #lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
 pc = o3d.io.read_point_cloud(pc_path)
@@ -152,8 +153,13 @@ train_ds, val_ds, label_weights, val_paths = generate_dataset(filename=database)
 
 """
 lln = 'activation_14' #'dot'
-labels = pn_model.predict(testcloud)
-print("Predicted Labels: ", labels)
+y_pred = pn_model.predict(testcloud)
+print("Predicted Labels: ", y_pred)
+label_names = np.array(label_names)
+y_pred = y_pred.tolist()
+label_names = label_names.tolist()
+print(list(sub1 + sub2 for sub1, sub2 in zip(label_names, y_pred)))
+#label_dict = pd.concat(pd.DataFrame(label_names),pd.DataFrame(y_pred))
 pn_model.layers[-1].activation = None
 
 """
@@ -199,4 +205,3 @@ for i in pred_label_index:
     #print(heatcloud)
     save_and_display_gradcam(pc, heatcloud, i, label_names)
 
-"""
