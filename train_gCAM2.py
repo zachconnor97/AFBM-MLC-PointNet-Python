@@ -129,7 +129,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     vis.destroy_window()
     """
 # Test GradCAM stuff
-pn_model.load_weights('MLCPNBestWeights.h5')
+pn_model.load_weights('MLCPN_Validation_New2024-04-01_16_5000_30_Learning Rate_0.00025_Epsilon_1e-07pn_weights_25.h5') #'MLCPNBestWeights.h5')
 pn_model.compile(run_eagerly=True)
 
 
@@ -169,7 +169,7 @@ example_paths = val_paths.take(BATCH_SIZE)
 points, y_true = list(example_clouds)[0]
 y_pred = pn_model.predict(example_clouds, batch_size=BATCH_SIZE)
 paths = list(example_paths)
-lln = 'dot_1' #'conv1d_10' #'activation_14' #'dot'
+lln = 'conv1d_10' #'dot_1' #'activation_14' #
 pn_model.layers[-1].activation = None
 result_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/"
 

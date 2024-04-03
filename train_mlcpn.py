@@ -133,7 +133,7 @@ print(f"Label Weights: {label_weights}")
 #label_weights[16] = 10
 #print(f"Adjusted Label Weights: {label_weights}")
 
-#training_loop(pn_model, train_ds, val_ds, label_weights)
+training_loop(pn_model, train_ds, val_ds, label_weights)
 
 #pn_model.save(save_path + '_AFBM Model')
 # Validation / Evaluation per Label
