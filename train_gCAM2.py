@@ -161,7 +161,8 @@ output = label_names
 print(f"Prdicted Labels: \n")
 for i in range(0, len(output)):
     output[i] = output[i] + ": " + str(round(y_pred1[i], 5))
-    print(f"Label {i}: {output[i]}")
+    if y_pred1[i] >= 0.5:
+        print(f"Label {i}: {output[i]}")
 #label_dict = pd.concat(pd.DataFrame(label_names),pd.DataFrame(y_pred))
 pn_model.layers[-1].activation = None
 
