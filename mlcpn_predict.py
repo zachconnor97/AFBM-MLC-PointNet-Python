@@ -23,13 +23,12 @@ label_names = [
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
 
-pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/lamp_3636649_199273d17414e77ca553fc23769e60511_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
+pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/lamp_3636649_ca968e46ba74732551970742dd5663211_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
 
-col_t = 0.078
+col_t = 0.5 #0.078
 pc = o3d.io.read_point_cloud(pc_path)
 col = np.asarray([pc.colors])[0]
-pidx = np.where(col[:,1] < col_t)[0]
-print(pidx)
+pidx = np.where(col[:,1] <= col_t)[0]
 pc = pc.points
 pc = np.asarray([pc])[0]
 pc = pc[pidx]
