@@ -12,7 +12,7 @@ from IPython.display import Image, display
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
+from model import pointnet, OrthogonalRegularizer, orthogonal_regularizer_from_config
 from utils import PerLabelMetric, GarbageMan
 from dataset_example import generate_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
@@ -41,7 +41,7 @@ label_names = [
 ]
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
-pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
+
 
 def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     """
@@ -129,8 +129,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     vis.destroy_window()
     """
 # Test GradCAM stuff
-pn_model.load_weights('MLCPN_Validation_New2024-04-01_16_5000_30_Learning Rate_0.00025_Epsilon_1e-07pn_weights_25.h5') #'MLCPNBestWeights.h5')
-pn_model.compile(run_eagerly=True)
+
 
 
 #pn_model.summary()
@@ -138,21 +137,27 @@ pn_model.compile(run_eagerly=True)
 #testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #pc_path = 'C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/vessel_watercraft_4530566_6c9020061d71b190a4755e7555b1e1a43_10000_2pc.ply'
-pc_path = 'C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+#pc_path = 'C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+pc_path = "C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/green_lamp_3636649_199273d17414e77ca553fc23769e60511_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
 #bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
 #lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
 pc = o3d.io.read_point_cloud(pc_path)
-pc = pc.uniform_down_sample(every_k_points=2)
-pc= pc.points
+#pc = pc.uniform_down_sample(every_k_points=2)
+pc = pc.points
 pc = np.asarray([pc])[0]
-testcloud = np.reshape(pc, (1,5000,3))
+NUM_POINTS = len(pc)
+testcloud = np.reshape(pc, (1,NUM_POINTS,3))
 testcloud = tf.constant(testcloud, dtype='float64')
+
+pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
+pn_model.load_weights('MLCPN_Validation_New2024-04-01_16_5000_30_Learning Rate_0.00025_Epsilon_1e-07pn_weights_25.h5') #'MLCPNBestWeights.h5')
+pn_model.compile(run_eagerly=True)
 """
 database = "AFBMData_NoChairs_Augmented.csv"
 train_ds, val_ds, label_weights, val_paths = generate_dataset(filename=database)
 
 """
-lln = 'activation_14' #'dot'
+lln = 'dot_1'
 y_pred = pn_model.predict(testcloud)
 label_names = np.array(label_names)
 y_pred1 = y_pred.tolist()[0]
@@ -161,7 +166,7 @@ output = label_names
 print(f"Prdicted Labels: \n")
 for i in range(0, len(output)):
     output[i] = output[i] + ": " + str(round(y_pred1[i], 5))
-    if y_pred1[i] >= 0.5:
+    if y_pred1[i] >= 0.2:
         print(f"Label {i}: {output[i]}")
 #label_dict = pd.concat(pd.DataFrame(label_names),pd.DataFrame(y_pred))
 pn_model.layers[-1].activation = None
@@ -201,7 +206,7 @@ for j in range(len(y_pred)):
 """
 # Get idx from predicted labels with prediction > 0.5 
 y_pred = np.array(y_pred)
-pred_label_index = np.where(y_pred >= 0.5)[1]
+pred_label_index = np.where(y_pred >= 0.2)[1]
 #print(label_index)
 
 for i in pred_label_index:
