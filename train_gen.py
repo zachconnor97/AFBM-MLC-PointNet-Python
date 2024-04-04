@@ -132,7 +132,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       t.watch(xbt)
       # Trainable variables are automatically tracked by GradientTape
       pred = gmodel(xbt)
-      current_loss = pc_loss(ybt, pred) 
+      current_loss = CD_loss(ybt, pred) 
       
       stacked_loss = stacked_loss + current_loss
     grads = t.gradient(current_loss, gmodel.trainable_weights)  
@@ -159,11 +159,12 @@ train_ds, val_ds, label_weights, train_label, train_points, val_label, val_point
 # gmodel Code for the training loop
 
 print(f"Starting:")
-#training_loop(gmodel, train_ds)
+training_loop(gmodel, train_ds)
 
-gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
-gmodel.compile(run_eagerly=True)
-gmodel.load_weights("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Generator2024-04-04_16_2000_3_Learning Rate_2.5e-06_Epsilon_1e-07pn_weights_0.h5")
+
+#gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
+#gmodel.compile(run_eagerly=True)
+#gmodel.load_weights("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Generator2024-04-04_16_2000_3_Learning Rate_2.5e-06_Epsilon_1e-07pn_weights_0.h5")
 
 BATCH_SIZE = 1
 examples = val_ds.take(1)
