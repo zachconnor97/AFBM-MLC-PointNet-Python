@@ -112,6 +112,9 @@ train_ds, val_ds, label_weights, train_label, train_points, val_label, val_point
 
 print(f"Starting:")
 #training_loop(gmodel, train_ds)
+
+gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
+gmodel.compile(run_eagerly=True)
 gmodel.load_weights("/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Generator2024-04-04_16_2000_3_Learning Rate_2.5e-06_Epsilon_1e-07pn_weights_0.h5")
 
 BATCH_SIZE = 1
