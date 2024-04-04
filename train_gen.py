@@ -11,6 +11,7 @@ from utils import PerLabelMetric, GarbageMan
 from dataset import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend
+
 EPS = 1e-7
 NUM_POINTS = 2000
 NUM_CLASSES = 25
@@ -26,13 +27,6 @@ g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 gmodel.compile(run_eagerly=True)
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
-
-def loss(target_y, predicted_y, label_weights=None):
-    # Update to binary cross entropy loss
-    target_y = tf.cast(target_y, dtype=tf.float32)
-    bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-    loss = bce(target_y, predicted_y) 
-    return loss
 
 def pc_loss(tt, tg):
   tt = tf.cast(tt, dtype=tf.float64)
@@ -77,6 +71,60 @@ def pc_loss(tt, tg):
   #pc_loss = 2
   return pc_loss
 
+def CD_loss(tt, tg): # Chamfer Distance Loss Function
+
+  def distance_matrix(array1, array2):
+    """
+    arguments: 
+        array1: the array, size: (num_point, num_feature)
+        array2: the samples, size: (num_point, num_feature)
+    returns:
+        distances: each entry is the distance from a sample to array1
+            , it's size: (num_point, num_point)
+    """
+    num_point, num_features = array1.shape
+    expanded_array1 = tf.tile(array1, (num_point, 1))
+    expanded_array2 = tf.reshape(
+            tf.tile(tf.expand_dims(array2, 1), 
+                    (1, num_point, 1)),
+            (-1, num_features))
+    distances = tf.norm(expanded_array1-expanded_array2, axis=1)
+    distances = tf.reshape(distances, (num_point, num_point))
+    return distances
+
+  def av_dist(array1, array2):
+    """
+    arguments:
+        array1, array2: both size: (num_points, num_feature)
+    returns:
+        distances: size: (1,)
+    """
+    distances = distance_matrix(array1, array2)
+    distances = tf.reduce_min(distances, axis=1)
+    distances = tf.reduce_mean(distances)
+    return distances
+
+  def av_dist_sum(arrays):
+    """
+    arguments:
+        arrays: array1, array2
+    returns:
+        sum of av_dist(array1, array2) and av_dist(array2, array1)
+    """
+    tt, tg = arrays
+    av_dist1 = av_dist(tt, tg)
+    av_dist2 = av_dist(tt, tg)
+    return av_dist1+av_dist2
+
+  def chamfer_distance_tf(tt, tg):
+      batch_size, num_point, num_features = tt.shape
+      dist = tf.reduce_mean(
+        tf.map_fn(av_dist_sum, elems=(tt, tg), dtype=tf.float64)
+           )
+      
+  dist_tf = chamfer_distance_tf(tt, tg)
+  return dist_tf
+  
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
   stacked_loss = 0 
   for step, (xbt, ybt) in enumerate(train_ds):
