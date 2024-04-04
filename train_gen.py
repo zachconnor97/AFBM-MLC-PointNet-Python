@@ -121,6 +121,7 @@ def CD_loss(tt, tg): # Chamfer Distance Loss Function
       dist = tf.reduce_mean(
         tf.map_fn(av_dist_sum, elems=(tt, tg), dtype=tf.float64)
            )
+      return dist
       
   dist_tf = chamfer_distance_tf(tt, tg)
   return dist_tf
@@ -135,6 +136,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       current_loss = CD_loss(ybt, pred) 
       
       stacked_loss = stacked_loss + current_loss
+    print(f"Step: {step}, CD Loss: {current_loss}")
     grads = t.gradient(current_loss, gmodel.trainable_weights)  
     if grads == None:
       print("No Gradients")
@@ -165,7 +167,7 @@ training_loop(gmodel, train_ds)
 #gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 #gmodel.compile(run_eagerly=True)
 #gmodel.load_weights("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Generator2024-04-04_16_2000_3_Learning Rate_2.5e-06_Epsilon_1e-07pn_weights_0.h5")
-
+"""
 BATCH_SIZE = 1
 examples = val_ds.take(1)
 #print(examples)
@@ -182,3 +184,4 @@ tcloud.points = o3d.utility.Vector3dVector(points[0].numpy())
 gcloud = o3d.geometry.PointCloud()
 gcloud.points = o3d.utility.Vector3dVector(c_gen[0])
 o3d.visualization.draw_geometries([gcloud])
+"""
