@@ -10,13 +10,12 @@ from utils import PerLabelMetric, GarbageMan
 from dataset import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend
-print("boo")
 EPS = 1e-7
 NUM_POINTS = 2000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.0000025
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 NUM_EPOCHS = 1
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
@@ -26,7 +25,7 @@ g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
 gmodel.compile(run_eagerly=True)
 EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
-print("breh")
+
 def pc_loss(tt, tg):
   tt = tf.cast(tt, dtype=tf.float64)
   tg = tf.cast(tg, dtype=tf.float64)
@@ -160,7 +159,6 @@ def training_loop(gmodel, train_ds):
     print(f"Mean Loss: {e_loss}")
     gmodel.save_weights(str(save_path + 'pn_weights_' + str(epoch) + '.h5'), overwrite=True)
 
-print("beans")
 train_ds, val_ds, label_weights, train_label, train_points, val_label, val_points, val_paths = generator_dataset(filename=database)
 
 # gmodel Code for the training loop
