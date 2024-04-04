@@ -17,7 +17,7 @@ NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.0000025
 BATCH_SIZE = 16
-NUM_EPOCHS = 3
+NUM_EPOCHS = 1
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + 'Generator' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
@@ -111,19 +111,22 @@ train_ds, val_ds, label_weights, train_label, train_points, val_label, val_point
 # gmodel Code for the training loop
 
 print(f"Starting:")
-training_loop(gmodel, train_ds)
+#training_loop(gmodel, train_ds)
+gmodel.load_weights("/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Generator2024-04-04_16_2000_3_Learning Rate_2.5e-06_Epsilon_1e-07pn_weights_0.h5")
 
 BATCH_SIZE = 1
-examples = val_ds.take(BATCH_SIZE)
-examples = examples.batch(BATCH_SIZE)
-example_paths = val_paths.take(BATCH_SIZE)
+examples = val_ds.take(1)
+examples = examples.batch(1)
+#examples = examples.batch(1)
+example_paths = val_paths.take(1)
 labels, points = list(examples)[0]
-c_gen = gmodel.predict(examples, batch_size=BATCH_SIZE)
+c_gen = gmodel.predict(examples, batch_size=1)
 
 
-true_pc = o3d.io.read_point_cloud(example_paths)
 tcloud = o3d.geometry.PointCloud()
-tcloud.points = o3d.utility.Vector3dVector(true_pc)
+print(type(points[0]))
+print(points[0])
+tcloud.points = o3d.utility.Vector3dVector(points[0])
 gcloud = o3d.geometry.PointCloud()
 gcloud.points = o3d.utility.Vector3dVector(c_gen)
 o3d.visualization.draw_geometries([tcloud,gcloud])
