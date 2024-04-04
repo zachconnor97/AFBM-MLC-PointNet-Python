@@ -19,7 +19,7 @@ BATCH_SIZE = 16
 NUM_EPOCHS = 5
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
-save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
+save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + 'Generator' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
@@ -153,38 +153,3 @@ biases = []
 print(f"Starting:")
 #print("    ", report(gmodel, current_loss=1))
 training_loop(gmodel, train_ds)
-
-"""
-tist = pn.fit(x=train_ds, epochs=NUM_EPOCHS, class_weight=label_weights, validation_data=val_ds, callbacks=[GarbageMan(), model_checkpoint, EStop])
-pn.save(save_path + '_AFBM Model')
-
-## Save history file
-histdf = pd.DataFrame(tist.history)
-histfile = save_path + '_train_history_per_label_met.csv'
-with open(histfile, mode='w') as f:
-    histdf.to_csv(f)
-
-
-tf.keras.utils.get_custom_objects()['OrthogonalRegularizer'] = OrthogonalRegularizer
-pn = tf.keras.models.load_model(save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})  #save_path + '_AFBM Model', custom_objects={'OrthogonalRegularizer': orthogonal_regularizer_from_config})
-
-
-# Validation / Evaluation per Label
-data = []
-pn.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
-    metrics=[
-        PerLabelMetric(num_labels=NUM_CLASSES),
-        ],
-        run_eagerly=True,
-    )
-data=pn.evaluate(x=val_ds)
-metrics = data[1]
-metrics = pd.DataFrame(metrics).T
-#print(metrics)
-histfile = save_path + '_label_validation_allmets_2.csv'
-
-with open(histfile, mode='w') as f:
-    metrics.to_csv(f)
-
-"""
