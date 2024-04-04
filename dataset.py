@@ -179,12 +179,13 @@ def generator_dataset(filename):
     val_label = labelset.take(int(0.3*len(labelset)))
     
     val_points = val_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
+    val_paths = val_points
     train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     train_points = train_points.map(lambda x: tf.py_function(augment, [x], tf.float64))
 
     #val_ds = tf.data.Dataset.zip((val_points, val_label))
     #train_ds = tf.data.Dataset.zip((train_points, train_label))
-    val_ds = tf.data.Dataset.zip(( val_label, val_points))
+    val_ds = tf.data.Dataset.zip((val_label, val_points))
     train_ds = tf.data.Dataset.zip((train_label, train_points))
     val_ds = val_ds.batch(BATCH_SIZE)
     train_ds = train_ds.batch(BATCH_SIZE) # ADDS A lot of time .shuffle(buffer_size=20000,reshuffle_each_iteration=True)
@@ -204,4 +205,4 @@ def generator_dataset(filename):
     pcd.points = open3d.utility.Vector3dVector(points.numpy())
     open3d.visualization.draw_geometries([pcd])
     """
-    return train_ds, val_ds, label_weights, train_label, train_points, val_label, val_points
+    return train_ds, val_ds, label_weights, train_label, train_points, val_label, val_points, val_paths

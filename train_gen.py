@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import date 
 import os
 import csv
+import open3d as o3d
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
 from utils import PerLabelMetric, GarbageMan
@@ -16,7 +17,7 @@ NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.0000025
 BATCH_SIZE = 16
-NUM_EPOCHS = 5
+NUM_EPOCHS = 3
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + 'Generator' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
@@ -96,60 +97,33 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
         print("Gradients Not Applied")
   return stacked_loss/step
 
-# Define a training loop
-"""
-def report(gmodel, loss):
-  return f"W = {gmodel.get_weights()[0]:1.2f}, b = {gmodel.get_weights()[1]:1.2f}, loss={loss:2.5f}"
-"""
-
 def training_loop(gmodel, train_ds):
   for epoch in range(NUM_EPOCHS):
     print(f"Epoch {epoch}:")
     # Update the model with the single giant batch
     e_loss = train(gmodel, train_ds, LEARN_RATE=0.001)
     print(f"Mean Loss: {e_loss}")
-    # Track this before I update
-    weights.append(gmodel.get_weights()[0])
-    biases.append(gmodel.get_weights()[1])
-    #print(f"W = {gmodel.get_weights()[0]}, B = = {gmodel.get_weights()[1]}")
+    gmodel.save_weights(str(save_path + 'pn_weights_' + str(epoch) + '.h5'), overwrite=True)
 
-#Callback for saving best model
-model_checkpoint = ModelCheckpoint(
-    filepath=save_path,
-    monitor='val_loss',  # Monitor validation loss
-    save_best_only=True,  # Save only the best model
-    mode='min',  # Save when validation loss is minimized
-    verbose=1  # Show information about saving
-)
 
-train_ds, val_ds, label_weights, train_label, train_points, val_label, val_points = generator_dataset(filename=database)
-
-"""with open("Label_Weights.csv", mode='w') as f:
-    writer = csv.writer(f)
-    for key, value in label_weights.items():
-        writer.writerow([key, value])
-
-pn = pointnet(num_classes=NUM_CLASSES,num_points=NUM_POINTS,train=TRAINING)
-pn.compile(
-    loss=tf.keras.losses.BinaryCrossentropy(),
-    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
-    metrics=[
-            #PerLabelMetric(num_labels=NUM_CLASSES),
-            tf.keras.metrics.BinaryAccuracy(threshold=0.5),
-            tf.keras.metrics.Precision(thresholds=[0.5,1]),
-            tf.keras.metrics.Recall(thresholds=[0.5,1]),
-            ],      
-    run_eagerly=True,
-)
-"""
+train_ds, val_ds, label_weights, train_label, train_points, val_label, val_points, val_paths = generator_dataset(filename=database)
 
 # gmodel Code for the training loop
-weights = []
-biases = []
-
-
-#current_loss = loss(y = train_points, gmodel(train_label))
 
 print(f"Starting:")
-#print("    ", report(gmodel, current_loss=1))
 training_loop(gmodel, train_ds)
+
+BATCH_SIZE = 1
+examples = val_ds.take(BATCH_SIZE)
+examples = examples.batch(BATCH_SIZE)
+example_paths = val_paths.take(BATCH_SIZE)
+labels, points = list(examples)[0]
+c_gen = gmodel.predict(examples, batch_size=BATCH_SIZE)
+
+
+true_pc = o3d.io.read_point_cloud(example_paths)
+tcloud = o3d.geometry.PointCloud()
+tcloud.points = o3d.utility.Vector3dVector(true_pc)
+gcloud = o3d.geometry.PointCloud()
+gcloud.points = o3d.utility.Vector3dVector(c_gen)
+o3d.visualization.draw_geometries([tcloud,gcloud])
