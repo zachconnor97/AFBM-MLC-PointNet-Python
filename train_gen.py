@@ -163,11 +163,12 @@ print(f"Starting:")
 
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 gmodel.compile(run_eagerly=True)
-gmodel.load_weights("/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Generator2024-04-04_16_2000_3_Learning Rate_2.5e-06_Epsilon_1e-07pn_weights_0.h5")
+gmodel.load_weights("C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/Generator2024-04-04_16_2000_3_Learning Rate_2.5e-06_Epsilon_1e-07pn_weights_0.h5")
 
 BATCH_SIZE = 1
 examples = val_ds.take(1)
-examples = examples.batch(1)
+#print(examples)
+#examples = examples.batch(1)
 #examples = examples.batch(1)
 example_paths = val_paths.take(1)
 labels, points = list(examples)[0]
@@ -175,9 +176,8 @@ c_gen = gmodel.predict(examples, batch_size=1)
 
 
 tcloud = o3d.geometry.PointCloud()
-print(type(points[0]))
-print(points[0])
-tcloud.points = o3d.utility.Vector3dVector(points[0])
+tcloud.points = o3d.utility.Vector3dVector(points[0].numpy())
+
 gcloud = o3d.geometry.PointCloud()
-gcloud.points = o3d.utility.Vector3dVector(c_gen)
-o3d.visualization.draw_geometries([tcloud,gcloud])
+gcloud.points = o3d.utility.Vector3dVector(c_gen[0])
+o3d.visualization.draw_geometries([gcloud])
