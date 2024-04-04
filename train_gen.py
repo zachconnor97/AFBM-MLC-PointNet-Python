@@ -1,5 +1,5 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import numpy as np
 import pandas as pd
@@ -89,7 +89,7 @@ def CD_loss(tt, tg): # Chamfer Distance Loss Function
                 (-1, num_features))
         distances = tf.norm(expanded_array1-expanded_array2, axis=1)
         distances = tf.reshape(distances, (num_point, num_point))
-        print(distances)
+        #print(distances)
         return distances
 
     def av_dist(array1, array2):
@@ -102,7 +102,7 @@ def CD_loss(tt, tg): # Chamfer Distance Loss Function
         distances = distance_matrix(array1, array2)
         distances = tf.reduce_min(distances, axis=1)
         distances = tf.reduce_mean(distances)
-        print(distances)
+        #print(distances)
         return distances
 
     def av_dist_sum(arrays):
@@ -116,7 +116,7 @@ def CD_loss(tt, tg): # Chamfer Distance Loss Function
         av_dist1 = av_dist(tt, tg)
         av_dist2 = av_dist(tt, tg)
         avds = av_dist1+av_dist2
-        print(avds)
+        #print(avds)
         return avds
 
     def chamfer_distance_tf(tt, tg):
@@ -126,6 +126,8 @@ def CD_loss(tt, tg): # Chamfer Distance Loss Function
             )
         return dist
     print("Loss Time")
+    tt = tf.cast(tt, dtype=tf.float64)
+    tg = tf.cast(tg, dtype=tf.float64)
     dist_tf = chamfer_distance_tf(tt, tg)
     return dist_tf
   
