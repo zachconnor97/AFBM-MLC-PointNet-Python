@@ -1,5 +1,5 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ NUM_POINTS = 2000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.0000025
-BATCH_SIZE = 16
+BATCH_SIZE = 2
 NUM_EPOCHS = 15
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
@@ -124,7 +124,7 @@ def CD_loss(tt, tg): # Chamfer Distance Loss Function
         tf.map_fn(av_dist_sum, elems=(tt, tg), dtype=tf.float64)
             )
         return dist
-    print("Loss Time")
+    
     tt = tf.cast(tt, dtype=tf.float64)
     tg = tf.cast(tg, dtype=tf.float64)
     dist_tf = chamfer_distance_tf(tt, tg)
@@ -140,7 +140,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       current_loss = CD_loss(ybt, pred) 
       
       stacked_loss = stacked_loss + current_loss
-    print(f"Step: {step}, CD Loss: {current_loss}")
+    #print(f"Step: {step}, CD Loss: {current_loss}")
     grads = t.gradient(current_loss, gmodel.trainable_weights)  
     if grads == None:
       print("No Gradients")
@@ -151,11 +151,11 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
         print("Gradients Not Applied")
   return stacked_loss/step
 
-def training_loop(gmodel, train_ds):
+def training_loop(gmodel, train_ds, learn_rate=0.001):
   for epoch in range(NUM_EPOCHS):
     print(f"Epoch {epoch}:")
     # Update the model with the single giant batch
-    e_loss = train(gmodel, train_ds, LEARN_RATE=0.001)
+    e_loss = train(gmodel, train_ds, LEARN_RATE=learn_rate)
     print(f"Mean Loss: {e_loss}")
     gmodel.save_weights(str(save_path + 'gen_weights_' + str(epoch) + '.h5'), overwrite=True)
 
@@ -164,7 +164,7 @@ train_ds, val_ds, label_weights, train_label, train_points, val_label, val_point
 # gmodel Code for the training loop
 
 print(f"Starting:")
-training_loop(gmodel, train_ds)
+training_loop(gmodel, train_ds, learn_rate=LEARN_RATE)
 
 
 #gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
