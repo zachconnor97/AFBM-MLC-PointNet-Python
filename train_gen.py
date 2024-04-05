@@ -15,8 +15,8 @@ NUM_POINTS = 2000
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.0000025
-BATCH_SIZE = 8
-NUM_EPOCHS = 1
+BATCH_SIZE = 16
+NUM_EPOCHS = 15
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
 save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + 'Generator' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
@@ -133,7 +133,7 @@ def CD_loss(tt, tg): # Chamfer Distance Loss Function
 def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
   stacked_loss = 0 
   for step, (xbt, ybt) in enumerate(train_ds):
-    with tf.GradientTape(persistent=True) as t:
+    with tf.GradientTape() as t: #persistent=True
       t.watch(xbt)
       # Trainable variables are automatically tracked by GradientTape
       pred = gmodel(xbt)
@@ -157,7 +157,7 @@ def training_loop(gmodel, train_ds):
     # Update the model with the single giant batch
     e_loss = train(gmodel, train_ds, LEARN_RATE=0.001)
     print(f"Mean Loss: {e_loss}")
-    gmodel.save_weights(str(save_path + 'pn_weights_' + str(epoch) + '.h5'), overwrite=True)
+    gmodel.save_weights(str(save_path + 'gen_weights_' + str(epoch) + '.h5'), overwrite=True)
 
 train_ds, val_ds, label_weights, train_label, train_points, val_label, val_points, val_paths = generator_dataset(filename=database)
 
