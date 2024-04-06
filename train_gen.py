@@ -11,15 +11,15 @@ from dataset import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend
 EPS = 1e-7
-NUM_POINTS = 2000
+NUM_POINTS = 200
 NUM_CLASSES = 25
 TRAINING = True
 LEARN_RATE = 0.0000025
-BATCH_SIZE = 2
+BATCH_SIZE = 8
 NUM_EPOCHS = 15
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
-save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + 'Generator' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
+save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + 'Generator_CDLoss' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 gmodel = generator(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
@@ -64,7 +64,7 @@ def pc_loss(tt, tg):
   pc_loss = backend.abs(r - eye)
   pc_loss = backend.mean(pc_loss)
   #print(f"PointCloud Loss [unnormalized] = {pc_loss}")
-  pc_loss = tf.math.add(1.0, tf.math.log(pc_loss)) 
+  #pc_loss = tf.math.add(1.0, tf.math.log(pc_loss)) 
   pc_loss = tf.math.abs(pc_loss)
   #pc_loss = 2
   return pc_loss
@@ -119,7 +119,7 @@ def CD_loss(tt, tg): # Chamfer Distance Loss Function
         return avds
 
     def chamfer_distance_tf(tt, tg):
-        batch_size, num_point, num_features = tt.shape
+        #batch_size, num_point, num_features = tt.shape
         dist = tf.reduce_mean(
         tf.map_fn(av_dist_sum, elems=(tt, tg), dtype=tf.float64)
             )
@@ -137,7 +137,7 @@ def train(gmodel, train_ds, LEARN_RATE): # X is labels and Y is train_ds
       t.watch(xbt)
       # Trainable variables are automatically tracked by GradientTape
       pred = gmodel(xbt)
-      current_loss = CD_loss(ybt, pred) 
+      current_loss = CD_loss(ybt, pred) #CD_loss(ybt, pred) 
       
       stacked_loss = stacked_loss + current_loss
     #print(f"Step: {step}, CD Loss: {current_loss}")
