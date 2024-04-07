@@ -87,7 +87,8 @@ distribution.
 
 ## Setup
 """
-
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -101,7 +102,7 @@ import tensorflow_datasets as tfds
 """## Hyperparameters"""
 
 batch_size = 32
-num_epochs = 1  # Just for the sake of demonstration
+num_epochs = 800  # Just for the sake of demonstration
 total_timesteps = 1000
 norm_groups = 8  # Number of groups used in GroupNormalization layer
 learning_rate = 2e-4
@@ -764,14 +765,14 @@ and each epoch took almost 8 seconds to finish. We load those weights
 here, and we generate a few samples starting from pure noise.
 """
 
-!curl -LO https://github.com/AakashKumarNain/ddpms/releases/download/v3.0.0/checkpoints.zip
-!unzip -qq checkpoints.zip
+#!curl -LO https://github.com/AakashKumarNain/ddpms/releases/download/v3.0.0/checkpoints.zip
+#!unzip -qq checkpoints.zip
 
 # Load the model weights
-model.ema_network.load_weights("checkpoints/diffusion_model_checkpoint")
+#model.ema_network.load_weights("checkpoints/diffusion_model_checkpoint")
 
 # Generate and plot some samples
-model.plot_images(num_rows=4, num_cols=8)
+#model.plot_images(num_rows=4, num_cols=8)
 
 """## Conclusion
 
