@@ -66,18 +66,19 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     grads = tape.gradient(label_channel, lclo)
     #print(grads)
     #pooled_grads = tf.reduce_mean(grads, axis=0) # Dimensionality of this var is causing issue in line 190...
-    pooled_grads = tf.reduce_mean(grads, axis=(0,1)) 
+    #pooled_grads = tf.reduce_mean(grads, axis=(0,1)) 
     #print(pooled_grads[..., tf.newaxis])
     lclo = lclo[0]
-
+    grads = grads[0]
     #Checking the shape of the matrices before multipication
     lclo_shape = lclo.shape
-    pooled_grads = pooled_grads[..., tf.newaxis]
+    #pooled_grads = pooled_grads[..., tf.newaxis]
     #print("Shape of lclo:", lclo_shape)
-    #print("Shape of pooled_grads:", pooled_grads.shape)
+    #print("Shape of grads:", grads.shape)
 
     # Perform matrix multiplication
-    heatcloud = lclo @ pooled_grads
+    heatcloud = tf.multiply(lclo, grads)
+    #heatcloud = lclo @ grads #pooled_grads
     #heatcloud = lclo @ pooled_grads[..., tf.newaxis] #error here.
     #print(heatcloud.shape)
     heatcloud = tf.squeeze(heatcloud)
@@ -87,20 +88,29 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
 def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None, label_names=None):
 
     pc = point_cloud
-    v = np.zeros((len(heatcloud),1))
+    #print(f"Point Cloud Length {len(pc)}")
     #rg[:,0] = np.subtract(rg[:,0], (1 + np.log(heatcloud)))
     #rg[:,1] = np.subtract(rg[:,1], (1 + np.log(heatcloud)))
     #b = np.ones((len(heatcloud),1))
-
+    print(i)
+    repeat_factor = int(len(pc) / len(heatcloud)) + 1
+    #print(repeat_factor)
+    heatcloud = np.repeat(heatcloud, repeat_factor)
+    pc_length = len(pc)
+    heatcloud = heatcloud[0:pc_length]
+    #print(f"Repeated Heatcloud Length: {len(heatcloud)}")
     #g = 1 + np.log(heatcloud)
     g = heatcloud
     g = np.reshape(g, (len(heatcloud),1))
+    v = np.zeros((len(heatcloud),1))
     rgb = np.hstack((v,g,v))
     # Convert back to open3d pc
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
     cloud.colors = o3d.utility.Vector3dVector(rgb)
     o3d.visualization.draw_geometries([cloud])
+
+
     """
     try:
         o3d.io.write_point_cloud(result_path + fileid + "Point_Cloud_Intensity" + label_names[i] + ".ply", cloud)
@@ -137,9 +147,10 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
 #testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #pc_path = 'C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/vessel_watercraft_4530566_6c9020061d71b190a4755e7555b1e1a43_10000_2pc.ply'
-#pc_path = 'C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
-pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/green_lamp_3636649_199273d17414e77ca553fc23769e60511_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
-#bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
+#pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+#pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/green_lamp_3636649_199273d17414e77ca553fc23769e60511_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
+#pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
+pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/jar_3593526_9e8595c3bbb0a5d0ba5342d638d0c2671_10000_2pc.ply" #mug_3797390_3a7439cfaa9af51faf1af397e14a566d3_10000_2pc.ply"
 #lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
 pc = o3d.io.read_point_cloud(pc_path)
 #pc = pc.uniform_down_sample(every_k_points=2)
@@ -207,10 +218,10 @@ for j in range(len(y_pred)):
 # Get idx from predicted labels with prediction > 0.5 
 y_pred = np.array(y_pred)
 pred_label_index = np.where(y_pred >= 0.2)[1]
-#print(label_index)
+print(pred_label_index)
 
 for i in pred_label_index:
     heatcloud = gradcam_heatcloud(testcloud, pn_model, lln, label_idx=i)
     #print(heatcloud)
-    save_and_display_gradcam(pc, heatcloud, i, label_names)
+    save_and_display_gradcam(pc, heatcloud, result_path=None, fileid='3797390_3a7439cfaa9af51faf1af397e14a566d3', i=i, label_names=label_names)
 
