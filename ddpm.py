@@ -132,7 +132,7 @@ augmenting training data, we randomly flip the images left/right.
 """
 
 # Load the dataset
-(ds,) = tfds.load(dataset_name, split=splits, with_info=False, shuffle_files=True)
+#(ds,) = tfds.load(dataset_name, split=splits, with_info=False, shuffle_files=True)
 
 
 def augment(img):
@@ -180,12 +180,12 @@ def train_preprocessing(x):
     return img
 
 
-train_ds = (
-    ds.map(train_preprocessing, num_parallel_calls=tf.data.AUTOTUNE)
-    .batch(batch_size, drop_remainder=True)
-    .shuffle(batch_size * 2)
-    .prefetch(tf.data.AUTOTUNE)
-)
+#train_ds = (
+#    ds.map(train_preprocessing, num_parallel_calls=tf.data.AUTOTUNE)
+#    .batch(batch_size, drop_remainder=True)
+#    .shuffle(batch_size * 2)
+#    .prefetch(tf.data.AUTOTUNE)
+#)
 
 """## Gaussian diffusion utilities
 
@@ -749,14 +749,14 @@ model.compile(
     loss=keras.losses.MeanSquaredError(),
     optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
 )
-
+network.summary()
 # Train the model
-model.fit(
-    train_ds,
-    epochs=num_epochs,
-    batch_size=batch_size,
-    callbacks=[keras.callbacks.LambdaCallback(on_epoch_end=model.plot_images)],
-)
+#model.fit(
+#    train_ds,
+#    epochs=num_epochs,
+#    batch_size=batch_size,
+#    callbacks=[keras.callbacks.LambdaCallback(on_epoch_end=model.plot_images)],
+#)
 
 """## Results
 
