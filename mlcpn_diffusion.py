@@ -1,6 +1,7 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 import pandas as pd
 from datetime import date 
@@ -11,6 +12,8 @@ from dataset import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend
 from dataset import generate_dataset
+from tensorflow.keras import layers
+
 
 EPS = 1e-7
 NUM_POINTS = 200
