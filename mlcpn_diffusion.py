@@ -12,23 +12,41 @@ from dataset import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend
 from dataset import generate_dataset
-from tensorflow.keras import layers
+from keras import layers
+import tensorflow_datasets as tfds
+import matplotlib as plt
+import math
 
-
-EPS = 1e-7
-NUM_POINTS = 200
-NUM_CLASSES = 25
-TRAINING = True
-LEARN_RATE = 0.0000025
-BATCH_SIZE = 8
-NUM_EPOCHS = 15
 username = 'Zachariah'
 database = "AFBMData_NoChairs_Augmented.csv"
-save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + 'Generator_CDLoss' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
-train_ds, val_ds, label_weights= generate_dataset(filename=database)
+#save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/' + 'Generator_CDLoss' + str(date.today()) + '_' + str(BATCH_SIZE) + '_' + str(NUM_POINTS) + '_' + str(NUM_EPOCHS) + '_' + 'Learning Rate_' + str(LEARN_RATE) + '_' + 'Epsilon: ' + str(EPS))
+ds, val_ds, label_weights= generate_dataset(filename=database)
 
-g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
-EStop = EarlyStopping(monitor='val_loss',patience=3, mode='min')
+
+batch_size = 32
+num_epochs = 800  # Just for the sake of demonstration
+total_timesteps = 1000
+norm_groups = 8  # Number of groups used in GroupNormalization layer
+learning_rate = 2e-4
+
+img_size = 5000
+img_channels = 3
+clip_min = -1.0
+clip_max = 1.0
+
+first_conv_channels = 64
+channel_multiplier = [1, 2, 4, 8]
+widths = [first_conv_channels * mult for mult in channel_multiplier]
+has_attention = [False, False, True, True]
+num_res_blocks = 2  # Number of residual blocks
+
+
+dataset_name = "oxford_flowers102"
+splits = ["train"]
+
+#(ds,) = tfds.load(dataset_name, split=splits, with_info=False, shuffle_files=True)
+
+print(ds.take(1))
 
 class GaussianDiffusion:
     """Gaussian diffusion utility.
@@ -384,8 +402,8 @@ def build_model(
     interpolation="nearest",
     activation_fn=keras.activations.swish,
 ):
-    image_input = layers.Input(
-        shape=(img_size, img_size, img_channels), name="image_input"
+    pointcloud_input = layers.Input(
+        shape=(None, img_size, img_channels), name="pointcloud_input"
     )
     time_input = keras.Input(shape=(), dtype=tf.int64, name="time_input")
 
@@ -394,7 +412,7 @@ def build_model(
         kernel_size=(3, 3),
         padding="same",
         kernel_initializer=kernel_init(1.0),
-    )(image_input)
+    )(pointcloud_input)
 
     temb = TimeEmbedding(dim=first_conv_channels * 4)(time_input)
     temb = TimeMLP(units=first_conv_channels * 4, activation_fn=activation_fn)(temb)
@@ -441,7 +459,7 @@ def build_model(
     x = layers.GroupNormalization(groups=norm_groups)(x)
     x = activation_fn(x)
     x = layers.Conv2D(3, (3, 3), padding="same", kernel_initializer=kernel_init(0.0))(x)
-    return keras.Model([image_input, time_input], x, name="unet")
+    return keras.Model([pointcloud_input, time_input], x, name="unet")
 
 """## Training
 
