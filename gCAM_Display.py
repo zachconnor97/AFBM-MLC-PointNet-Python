@@ -1,8 +1,9 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 import numpy as np
 import pandas as pd
 from datetime import date 
-import os
 import csv
 import open3d as o3d
 import matplotlib as mpl
@@ -11,7 +12,6 @@ from tensorflow import keras
 from IPython.display import Image, display
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from model import pointnet, OrthogonalRegularizer, orthogonal_regularizer_from_config
 from utils import PerLabelMetric, GarbageMan
 from dataset_example import generate_dataset
