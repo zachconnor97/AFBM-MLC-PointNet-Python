@@ -8,10 +8,10 @@ from datetime import date
 import open3d as o3d
 from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
 from utils import PerLabelMetric, GarbageMan
-from dataset import generator_dataset
+from dataset_diffusion import generator_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend
-from dataset import generate_dataset
+from dataset_diffusion import generate_dataset
 from keras import layers
 import tensorflow_datasets as tfds
 import matplotlib as plt
@@ -44,9 +44,9 @@ num_res_blocks = 2  # Number of residual blocks
 dataset_name = "oxford_flowers102"
 splits = ["train"]
 
-(ds,) = tfds.load(dataset_name, split=splits, with_info=False, shuffle_files=True)
-
-print(ds.take(1))
+#(ds,) = tfds.load(dataset_name, split=splits, with_info=False, shuffle_files=True)
+# Data format of tensor: Filename (str), Photo Data(int), Photo Label(int)
+#print(ds.take(1))
 
 class GaussianDiffusion:
     """Gaussian diffusion utility.
@@ -256,7 +256,6 @@ compared to the default value of `groups=32`. Dropout is optional and should be
 used where chances of over fitting is high. In the paper, the authors used dropout
 only when training on CIFAR10.
 
-Point-Net Modification 4/12/24
 """
 
 # Kernel initializer to use
