@@ -19,9 +19,9 @@ decode_predictions = keras.applications.xception.decode_predictions
 last_conv_layer_name = "block14_sepconv2_act"
 
 # The local path to our target image
-img_path = "Bvro0YD.png"
+img_path = "Benson.png"
 
-#display(Image(img_path))
+display(Image(img_path))
 
 def get_img_array(img_path, size):
     # `img` is a PIL image of size 299x299
@@ -79,11 +79,18 @@ img_array = preprocess_input(get_img_array(img_path, size=img_size))
 model = model_builder(weights="imagenet")
 
 # Remove last layer's softmax
+#model.layers[-1].activation = None
+#model.summary()
+# Print what the top predicted class is
+preds = model.predict(img_array)
+print(preds)
+print("Predicted:", decode_predictions(preds, top=1)[0])
+
+# Remove last layer's softmax
 model.layers[-1].activation = None
 #model.summary()
 # Print what the top predicted class is
 preds = model.predict(img_array)
-#print("Predicted:", decode_predictions(preds, top=1)[0])
 
 # Generate class activation heatmap
 heatmap = make_gradcam_heatmap(img_array, model, last_conv_layer_name)

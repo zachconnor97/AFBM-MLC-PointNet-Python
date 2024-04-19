@@ -44,7 +44,7 @@ num_res_blocks = 2  # Number of residual blocks
 dataset_name = "oxford_flowers102"
 splits = ["train"]
 
-#(ds,) = tfds.load(dataset_name, split=splits, with_info=False, shuffle_files=True)
+(ds,) = tfds.load(dataset_name, split=splits, with_info=False, shuffle_files=True)
 
 print(ds.take(1))
 
