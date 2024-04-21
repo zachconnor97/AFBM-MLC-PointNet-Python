@@ -51,35 +51,22 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     lcln: Name of the last convolutional layer in PointNet
     label_idx: Index of label to generate heatcloud for
     """
-
     cloud = np.reshape(cloud, (1, NUM_POINTS, 3))
     gradm = tf.keras.models.Model(
         model.inputs, [model.get_layer(lcln).output, model.output]
     )
     with tf.GradientTape() as tape:
         lclo, preds = gradm(cloud)
-        #print(preds)
         if label_idx is None:
             label_idx = tf.argmax(preds[0])
         label_channel = preds[:, label_idx]
-    #print(label_idx)
     grads = tape.gradient(label_channel, lclo)
-    #print(grads)
-    #pooled_grads = tf.reduce_mean(grads, axis=0) # Dimensionality of this var is causing issue in line 190...
-    pooled_grads = tf.reduce_mean(grads, axis=(0,1)) 
-    #print(pooled_grads[..., tf.newaxis])
-    lclo = lclo[0]
-
-    #Checking the shape of the matrices before multipication
-    lclo_shape = lclo.shape
-    pooled_grads = pooled_grads[..., tf.newaxis]
-    #print("Shape of lclo:", lclo_shape)
-    #print("Shape of pooled_grads:", pooled_grads.shape)
-
-    # Perform matrix multiplication
-    heatcloud = lclo @ pooled_grads
-    #heatcloud = lclo @ pooled_grads[..., tf.newaxis] #error here.
-    #print(heatcloud.shape)
+    pooled_grads = tf.reduce_mean(grads, axis=(0,1))
+    lclo_shape = lclo[0].shape
+    tile = tf.constant([1,lclo_shape[0]],tf.int32)
+    grads = tf.tile(pooled_grads[...,tf.newaxis], tile)
+    heatcloud = tf.matmul(lclo[0], grads)
+    heatcloud = tf.linalg.diag_part(heatcloud)
     heatcloud = tf.squeeze(heatcloud)
     heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
     return heatcloud.numpy()
@@ -93,9 +80,13 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     #b = np.ones((len(heatcloud),1))
 
     #g = 1 + np.log(heatcloud)
-    g = heatcloud
-    g = np.reshape(g, (len(heatcloud),1))
-    rgb = np.hstack((v,g,v))
+    h = heatcloud
+    h = np.reshape(h, (len(heatcloud),1))
+    ratio = 2 * h
+    blue = np.maximum(v, (1-ratio))
+    red = np.maximum(v, (ratio-1))
+    green = 1.0 - blue - red
+    rgb = np.hstack((red, green, blue))
     # Convert back to open3d pc
     cloud = o3d.geometry.PointCloud()
     cloud.points = o3d.utility.Vector3dVector(pc)
@@ -137,8 +128,10 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
 #testcloud = o3d.io.read_point_cloud('C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply') # use open3d to import point cloud from file
 #testcloud = o3d.io.read_point_cloud('/mnt/c/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply') # use open3d to import point cloud from file
 #pc_path = 'C:/Users/gabri/OneDrive - Oregon State University/AllClouds10k/AllClouds10k/vessel_watercraft_4530566_6c9020061d71b190a4755e7555b1e1a43_10000_2pc.ply'
-#pc_path = 'C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
-pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/green_lamp_3636649_199273d17414e77ca553fc23769e60511_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
+pc_path = 'C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply' #sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+#mug_3797390_3a7439cfaa9af51faf1af397e14a566d3_10000_2pc.ply' 
+#lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply' #'sofa_couch_lounge_4256520_3e3ad2629c9ab938c2eaaa1f79e71ec1_10000_2pc.ply'
+#pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/green_lamp_3636649_199273d17414e77ca553fc23769e60511_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
 #bottle_2876657_2618100a5821a4d847df6165146d5bbd1_10000_2pc.ply'
 #lamp_3636649_be13324c84d2a9d72b151d8b52c53b901_10000_2pc.ply'
 pc = o3d.io.read_point_cloud(pc_path)
@@ -157,7 +150,7 @@ database = "AFBMData_NoChairs_Augmented.csv"
 train_ds, val_ds, label_weights, val_paths = generate_dataset(filename=database)
 
 """
-lln = 'dense_7' #'dot_1'
+lln = 'conv1d_10' #'dense_7' #'dot_1'
 y_pred = pn_model.predict(testcloud)
 label_names = np.array(label_names)
 y_pred1 = y_pred.tolist()[0]
