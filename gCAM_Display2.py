@@ -105,6 +105,8 @@ train_ds, val_ds, label_weights, val_paths = generate_dataset(filename=database)
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 pn_model.load_weights('MLCPNBestWeights.h5') #'MLCPN_Validation_New2024-04-01_16_5000_30_Learning Rate_0.00025_Epsilon_1e-07pn_weights_25.h5') #
 pn_model.compile(run_eagerly=True)
+val_ds = val_ds.skip(500)
+val_paths = val_paths.skip(500)
 example_clouds = val_ds.take(BATCH_SIZE)
 example_clouds = example_clouds.batch(BATCH_SIZE)
 example_paths = val_paths.take(BATCH_SIZE)

@@ -56,6 +56,7 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     gradm = tf.keras.models.Model(
         model.inputs, [model.get_layer(lcln).output, model.output]
     )
+    gradm.summary()
     with tf.GradientTape() as tape:
         lclo, preds = gradm(cloud)
         if label_idx is None:
@@ -67,6 +68,7 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     tile = tf.constant([1,lclo_shape[0]],tf.int32)
     grads = tf.tile(pooled_grads[...,tf.newaxis], tile)
     heatcloud = tf.matmul(lclo[0], grads)
+    print(heatcloud.shape)
     heatcloud = tf.linalg.diag_part(heatcloud)
     heatcloud = tf.squeeze(heatcloud)
     heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
@@ -76,7 +78,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
 
     pc = point_cloud
     o = np.ones((len(heatcloud),1))
-    h = (2/3) * (1 - heatcloud)
+    h = (2/3) * (1 - heatcloud) 
     h = np.reshape(h, (len(heatcloud),1))
     hsv = np.hstack((h,o,o))
     rgb = mpl.colors.hsv_to_rgb(hsv)

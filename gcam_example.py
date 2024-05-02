@@ -99,7 +99,7 @@ print(np.shape(heatmap))
 plt.matshow(heatmap)
 plt.show()
 
-def save_and_display_gradcam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
+def save_and_display_gradcam(img_path, heatmap, cam_path="cropbensoncam2.jpg", alpha=0.4):
     # Load the original image
     img = keras.utils.load_img(img_path)
     img = keras.utils.img_to_array(img)

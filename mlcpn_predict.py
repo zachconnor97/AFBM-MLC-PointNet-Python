@@ -23,12 +23,16 @@ label_names = [
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
 
-pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/lamp_3636649_ca968e46ba74732551970742dd5663211_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
+pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 first 500/bathtub_bathing tub_bath_tub_2808440_200c5297948bf57f6b448b8aaebb705c1_10000_2pcPoint_Cloud_IntensityStoreLiquid.ply"
+#lamp_3636649_107b8c870eade2481735ea0e092a805a1_10000_2pcPoint_Cloud_IntensityImportEE.ply"
+#"C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/lamp_3636649_ca968e46ba74732551970742dd5663211_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
 
-col_t = 0.25 #0.75 #
+col_t = 0.8 #0.75 #
 pc = o3d.io.read_point_cloud(pc_path)
+o3d.visualization.draw_geometries([pc])
 col = np.asarray([pc.colors])[0]
-pidx = np.where(col[:,1] > col_t)[0]
+hsv = mpl.colors.rgb_to_hsv(col)
+pidx = np.where(hsv[:,0] < ((2/3) * col_t))[0]
 pc = pc.points
 pc = np.asarray([pc])[0]
 pc = pc[pidx]
