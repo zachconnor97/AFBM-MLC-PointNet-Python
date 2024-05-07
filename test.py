@@ -37,29 +37,6 @@ labels = [
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
 
-# Load mlc-PointNet model
-pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
-
-"""
-# Move to utils.py
-def wbce_loss(target_y, predicted_y, label_weights=None):
-    from keras.src import backend, backend_config
-    epsilon = backend_config.epsilon
-    target = tf.convert_to_tensor(target_y, dtype='float32')
-    output = tf.convert_to_tensor(predicted_y, dtype='float32')
-    epsilon_ = tf.constant(epsilon(), output.dtype.base_dtype)
-    output = tf.clip_by_value(output, epsilon_, 1.0 - epsilon_)
-    bceloss = target * tf.math.log(output + epsilon())
-    bceloss += (1-target) * tf.math.log(1 - output + epsilon())
-    if label_weights != None:
-        lw=np.array(list(label_weights.items()))
-        lw = lw[:,1]
-        wbceloss = backend.mean(-bceloss * lw) 
-    else:
-        wbceloss = backend.mean(-bceloss) 
-    return wbceloss
-"""
-    
 def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
     stacked_loss = 0 
     for step, (xbt, ybt) in enumerate(val_ds):
@@ -71,9 +48,14 @@ def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
         #print(f"Current Loss: {current_loss}")
     return stacked_loss/step
 
+
+# Load mlc-PointNet model
+pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
+
 # Load dataset
 train_ds, val_ds, label_weights = generate_dataset(filename=database)
 print(f"Label Weights: {label_weights}")
+
 
 """
 # Manually adjust weights of each label using the following code
@@ -103,19 +85,18 @@ histfile = save_path + '_label_validation_' + str(t) + '.csv'
 with open(histfile, mode='w') as f:
     metrics.to_csv(f)
 
-df = metrics
+file = metrics
 
 # Rename the columns for easier access
 for i, metrics in enumerate(metrics_names):
     file = file.rename(columns={i+7: metrics })
 # Also rename the rows
 #file = file.rename(index=dict(zip(file.index, labels)))
-file = file.drop(file.index[0])
+#file = file.drop(file.index[0])
 df = file
 
 # Add plotting for the bar charts (accuracy, precision, recall, F1)
 label_dict_data = df
-
 
 i = 0
 width = 1
@@ -136,5 +117,4 @@ for metric in metrics_names:
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
     i += 1
-#plt.savefig(f"C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/3_12_autoweights/Plots/{metric}_plot2.svg", transparent=True, format='svg')
 plt.show()

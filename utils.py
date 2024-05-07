@@ -75,3 +75,10 @@ def wbce_loss(target_y, predicted_y, label_weights=None):
     else:
         wbceloss = backend.mean(-bceloss) 
     return wbceloss
+
+def loss(target_y, predicted_y, label_weights=None):
+    # Update to binary cross entropy loss
+    target_y = tf.cast(target_y, dtype=tf.float32)
+    bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+    loss = bce(target_y, predicted_y) 
+    return loss

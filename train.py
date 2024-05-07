@@ -6,7 +6,7 @@ import os
 import csv
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from model import pointnet, generator, OrthogonalRegularizer, orthogonal_regularizer_from_config
-from utils import PerLabelMetric, GarbageMan
+from utils import PerLabelMetric, GarbageMan, wbce_loss
 from dataset import generate_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.src import backend_config
@@ -24,37 +24,11 @@ save_path = str('/mnt/c/Users/' + username +'/OneDrive - Oregon State University
 
 g_optimizer = tf.keras.optimizers.Adam(learning_rate=LEARN_RATE)
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
-#print(pn_model.get_weights()[0])
-#print(pn_model.get_weights()[1])
 patience = 5
 echeck = 0
 ediff = 0.0025
 cur_loss = 0.0
 prev_loss = 0.0
-
-def loss(target_y, predicted_y, label_weights=None):
-    # Update to binary cross entropy loss
-    target_y = tf.cast(target_y, dtype=tf.float32)
-    bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-    loss = bce(target_y, predicted_y) 
-    return loss
-
-def wbce_loss(target_y, predicted_y, label_weights=None):
-    from keras.src import backend, backend_config
-    epsilon = backend_config.epsilon
-    target = tf.convert_to_tensor(target_y, dtype='float32')
-    output = tf.convert_to_tensor(predicted_y, dtype='float32')
-    epsilon_ = tf.constant(epsilon(), output.dtype.base_dtype)
-    output = tf.clip_by_value(output, epsilon_, 1.0 - epsilon_)
-    bceloss = target * tf.math.log(output + epsilon())
-    bceloss += (1-target) * tf.math.log(1 - output + epsilon())
-    if label_weights != None:
-        lw=np.array(list(label_weights.items()))
-        lw = lw[:,1]
-        wbceloss = backend.mean(-bceloss * lw) 
-    else:
-        wbceloss = backend.mean(-bceloss) 
-    return wbceloss
 
 def train(pn_model, train_ds, label_weights=None): # X is points and Y is labels
     stacked_loss = 0 
@@ -62,7 +36,6 @@ def train(pn_model, train_ds, label_weights=None): # X is points and Y is labels
         #print(f"Step: {step}")
         with tf.GradientTape() as t:
             # Trainable variables are automatically tracked by GradientTape
-            #current_loss = loss(ybt, pn_model(xbt))
             current_loss = wbce_loss(ybt, pn_model(xbt), label_weights)
             stacked_loss = stacked_loss + current_loss
         #print(f"Current Loss: {current_loss}")
@@ -85,11 +58,6 @@ def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
     return stacked_loss/step
 
 # Define a training loop
-"""
-def report(pn_model, loss):
-  return f"W = {pn_model.get_weights()[0]:1.2f}, b = {pn_model.get_weights()[1]:1.2f}, loss={loss:2.5f}"
-"""
-
 def training_loop(pn_model, train_ds, val_ds, label_weights):
     prev_loss = 0
     echeck = 0
@@ -134,29 +102,3 @@ print(f"Label Weights: {label_weights}")
 #print(f"Adjusted Label Weights: {label_weights}")
 
 training_loop(pn_model, train_ds, val_ds, label_weights)
-
-#pn_model.save(save_path + '_AFBM Model')
-# Validation / Evaluation per Label
-
-pn_model.load_weights('MLCPNBestWeights.h5')
-
-"""
-for i in range(1,10):
-    t = i / 10
-    print(f"Theshold: {t}")
-    data = []
-    pn_model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE, epsilon=EPS),
-        metrics=[
-            PerLabelMetric(num_labels=NUM_CLASSES,threshold=t),
-            ],
-            run_eagerly=True,
-        )
-    data=pn_model.evaluate(x=val_ds)
-    metrics = data[1]
-    metrics = pd.DataFrame(metrics).T
-    histfile = save_path + '_label_validation_allmets_autoweightsFixed_' + str(t) + '.csv'
-
-    with open(histfile, mode='w') as f:
-        metrics.to_csv(f)
-"""
