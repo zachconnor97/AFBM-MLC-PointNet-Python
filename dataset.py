@@ -84,23 +84,20 @@ def generate_dataset(filename):
     
     # Seperates cloud paths to pandas series 
     file_paths = df.pop('cloudpath')
-    #print(file_paths)
+
     # Removes non-necessary dataframe columns to leave just FBM labels
     df.pop('SysetID')
     df.pop('Name')
     df.pop('.obj paths')
     df.pop('fileid')
     df.pop('status')
+    
     num_files = float(len(df))
     sparse_matrix = Sparse_Matrix_Encoding(df) 
     df = []
     label_counts = sparse_matrix.sum(axis=0)
     label_weights = (num_files / (25 * label_counts))
     label_weights = {k: v for k, v in enumerate(label_weights)}
-    #print(type(label_weights))
-    #print(label_weights)
-
-    # Slice file paths and labels to tf.data.Dataset
     file_paths = np.asmatrix(file_paths)
     nfile_paths = file_paths.reshape((np.size(file_paths),1)) 
     nfile_paths = np.asarray(nfile_paths)
@@ -108,33 +105,15 @@ def generate_dataset(filename):
     tsparse = tf.constant(sparse_matrix.tolist())
     fileset = tf.data.Dataset.from_tensor_slices((tfile_paths))
     labelset = tf.data.Dataset.from_tensor_slices((tsparse))
-    
     train_points = fileset.skip(int(0.3*len(fileset)))
     train_label = labelset.skip(int(0.3*len(labelset)))
-    
     val_points = fileset.take(int(0.3*len(fileset)))
     val_label = labelset.take(int(0.3*len(labelset)))
-    
     val_points = val_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     train_points = train_points.map(lambda x: tf.py_function(pc_read, [x], tf.float64))
     train_points = train_points.map(lambda x: tf.py_function(augment, [x], tf.float64))
-
-    #val_ds = tf.data.Dataset.zip((val_points, val_label))
-    #train_ds = tf.data.Dataset.zip((train_points, train_label))
     val_ds = tf.data.Dataset.zip((val_points, val_label))
     train_ds = tf.data.Dataset.zip((train_points, train_label))
     val_ds = val_ds.batch(BATCH_SIZE)
-    train_ds = train_ds.batch(BATCH_SIZE) # ADDS A lot of time .shuffle(buffer_size=20000,reshuffle_each_iteration=True)
-
-    #Testing stuff
-    """
-    data = afbm_dataset.take(1)
-    points, labels = list(data)[0]
-    #print(labels)
-    print(points.numpy())
-    print(type(points.numpy()))
-    pcd = open3d.geometry.PointCloud()
-    pcd.points = open3d.utility.Vector3dVector(points.numpy())
-    open3d.visualization.draw_geometries([pcd])
-    """
+    train_ds = train_ds.batch(BATCH_SIZE) 
     return train_ds, val_ds, label_weights
