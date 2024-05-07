@@ -67,14 +67,15 @@ def gradcam_heatcloud(cloud, model, lcln, label_idx=None):
     heatcloud = tf.matmul(lclo[0], grads)
     heatcloud = tf.linalg.diag_part(heatcloud)
     heatcloud = tf.squeeze(heatcloud)
-    heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
+    #heatcloud = tf.maximum(heatcloud, 0) / tf.math.reduce_max(heatcloud)
+    heatcloud = heatcloud / (tf.maximum(tf.math.reduce_max(tf.math.abs(heatcloud)), 0))
     return heatcloud.numpy()
 
 def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None, label_names=None):
 
     pc = point_cloud
     o = np.ones((len(heatcloud),1))
-    h = (2/3) * (1 - heatcloud)
+    h = (2/3) * (1 - np.abs(heatcloud))
     h = np.reshape(h, (len(heatcloud),1))
     hsv = np.hstack((h,o,o))
     rgb = mpl.colors.hsv_to_rgb(hsv)
@@ -105,8 +106,8 @@ train_ds, val_ds, label_weights, val_paths = generate_dataset(filename=database)
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 pn_model.load_weights('MLCPNBestWeights.h5') #'MLCPN_Validation_New2024-04-01_16_5000_30_Learning Rate_0.00025_Epsilon_1e-07pn_weights_25.h5') #
 pn_model.compile(run_eagerly=True)
-val_ds = val_ds.skip(500)
-val_paths = val_paths.skip(500)
+#val_ds = val_ds.skip(500)
+#val_paths = val_paths.skip(500)
 example_clouds = val_ds.take(BATCH_SIZE)
 example_clouds = example_clouds.batch(BATCH_SIZE)
 example_paths = val_paths.take(BATCH_SIZE)
@@ -115,7 +116,7 @@ y_pred = pn_model.predict(example_clouds, batch_size=BATCH_SIZE)
 paths = list(example_paths)
 lln = 'conv1d_10' #'dot_1' #'activation_14' #
 pn_model.layers[-1].activation = None
-result_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/"
+result_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/NoReLU/"
 for j in range(len(y_pred)):
     print(f"Getting GradCAM for Point Cloud {j}")
     yp = y_pred[j]

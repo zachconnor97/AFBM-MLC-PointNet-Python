@@ -18,7 +18,7 @@ from model import pointnet, OrthogonalRegularizer, orthogonal_regularizer_from_c
 from utils import PerLabelMetric, GarbageMan
 from dataset_example import generate_dataset
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-from keras import backend_config
+from keras.src import backend_config
 epsilon = backend_config.epsilon
 EPS = 1e-7
 NUM_POINTS = 5000
@@ -86,7 +86,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     cloud.colors = o3d.utility.Vector3dVector(rgb)
     o3d.visualization.draw_geometries([cloud])
 
-pc_path = "C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/bathtub_bathing tub_bath_tub_2808440_d0df653cb5c1ca016b6c87c9f47318a1_10000_2pcPoint_Cloud_IntensityStoreLiquid.PLY" 
+pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/bathtub_bathing tub_bath_tub_2808440_d0df653cb5c1ca016b6c87c9f47318a1_10000_2pcPoint_Cloud_IntensityStoreLiquid.PLY" 
 #"C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/bench_2828884_459f90aa2162b1f1d46c340938e2ff1c1_10000_2pcPoint_Cloud_IntensityImportSolid.ply"
 #"C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/guitar_3467517_950b02a2db950424c4a359bec2c174271_10000_2pcPoint_Cloud_IntensityConvertKEtoEE.ply"
 #'C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/ashcan_trash can_garbage can_wastebin_ash bin_ash-bin_ashbin_dustbin_trash barrel_trash bin_2747177_3c03342f421e5eb2ad5067eac75a07f71_10000_2pcPoint_Cloud_IntensityImportLiquid.PLY' 

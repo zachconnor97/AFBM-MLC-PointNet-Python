@@ -63,10 +63,7 @@ def pc_loss(tt, tg):
   r = tf.cast(r, dtype=tf.float32)
   pc_loss = backend.abs(r - eye)
   pc_loss = backend.mean(pc_loss)
-  #print(f"PointCloud Loss [unnormalized] = {pc_loss}")
-  #pc_loss = tf.math.add(1.0, tf.math.log(pc_loss)) 
   pc_loss = tf.math.abs(pc_loss)
-  #pc_loss = 2
   return pc_loss
 
 def CD_loss(tt, tg): # Chamfer Distance Loss Function
