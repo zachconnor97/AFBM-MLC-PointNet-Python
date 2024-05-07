@@ -7,7 +7,7 @@ import csv
 import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from model import pointnet, OrthogonalRegularizer, orthogonal_regularizer_from_config
-from utils import PerLabelMetric
+from utils import PerLabelMetric, wbce_loss
 from dataset import generate_dataset
 from keras.src import backend_config
 epsilon = backend_config.epsilon
@@ -40,6 +40,7 @@ labels = [
 # Load mlc-PointNet model
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 
+"""
 # Move to utils.py
 def wbce_loss(target_y, predicted_y, label_weights=None):
     from keras.src import backend, backend_config
@@ -57,7 +58,8 @@ def wbce_loss(target_y, predicted_y, label_weights=None):
     else:
         wbceloss = backend.mean(-bceloss) 
     return wbceloss
-
+"""
+    
 def validate(pn_model, val_ds, label_weights): # X is points and Y is labels
     stacked_loss = 0 
     for step, (xbt, ybt) in enumerate(val_ds):

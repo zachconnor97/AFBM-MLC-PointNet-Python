@@ -4,6 +4,7 @@ from tensorflow import keras
 from keras.metrics import Metric
 from keras import backend as B
 import os
+import numpy as np
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from keras.callbacks import ModelCheckpoint
 
