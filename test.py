@@ -85,11 +85,12 @@ histfile = save_path + '_label_validation_' + str(t) + '.csv'
 with open(histfile, mode='w') as f:
     metrics.to_csv(f)
 
+print(metrics)
 file = metrics
 
 # Rename the columns for easier access
 for i, metrics in enumerate(metrics_names):
-    file = file.rename(columns={i+7: metrics })
+    file = file.rename(columns={i+3: metrics })
 # Also rename the rows
 #file = file.rename(index=dict(zip(file.index, labels)))
 #file = file.drop(file.index[0])

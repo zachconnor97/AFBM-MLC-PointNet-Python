@@ -23,28 +23,17 @@ label_names = [
     'StoreGas', 'StoreLiquid', 'StoreSolid'
 ]
 
-pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/Thesis/PCTests/bathtub_bathing tub_bath_tub_2808440_200c5297948bf57f6b448b8aaebb705c1_10000_2pcPoint_Cloud_IntensityExportLiquid.ply" 
-#"C:/Users/Zachariah/OneDrive - Oregon State University/Research/Thesis/lamp_3636649_107b8c870eade2481735ea0e092a805a1_10000_2pcPoint_Cloud_IntensityImportEE.ply" 
-#"C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 first 500/bathtub_bathing tub_bath_tub_2808440_200c5297948bf57f6b448b8aaebb705c1_10000_2pcPoint_Cloud_IntensityStoreLiquid.ply"
-#lamp_3636649_107b8c870eade2481735ea0e092a805a1_10000_2pcPoint_Cloud_IntensityImportEE.ply"
-#"C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/slicing study/lamp_3636649_ca968e46ba74732551970742dd5663211_10000_2pcPoint_Cloud_IntensityConvertEEtoLE.ply"
-
-col_t = 0.8 #0.75 #
+# File path of point cloud to predict
+pc_path = 'bottle_2876657_225d046d8f798afacba9caf4d254cef01_10000_2pc.ply'
 pc = o3d.io.read_point_cloud(pc_path)
-#o3d.visualization.draw_geometries([pc])
-col = np.asarray([pc.colors])[0]
-hsv = mpl.colors.rgb_to_hsv(col)
-pidx = np.where(hsv[:,0] < ((2/3) * col_t))[0]
+o3d.visualization.draw_geometries([pc])
 pc = pc.points
 pc = np.asarray([pc])[0]
-#pc = pc[pidx]
-#col = col[pidx]
 NUM_POINTS = len(pc)
 testcloud = np.reshape(pc, (1,NUM_POINTS,3))
 testcloud = tf.constant(testcloud, dtype='float64')
-
 pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
-pn_model.load_weights('MLCPNBestWeights.h5') #'MLCPN_Validation_New2024-04-01_16_5000_30_Learning Rate_0.00025_Epsilon_1e-07pn_weights_25.h5') #
+pn_model.load_weights('MLCPNBestWeights.h5')
 pn_model.compile(run_eagerly=True)
 y_pred = pn_model.predict(testcloud)
 label_names = np.array(label_names)
@@ -56,8 +45,3 @@ for i in range(0, len(output)):
     output[i] = output[i] + ": " + str(round(y_pred1[i], 5))
     if y_pred1[i] >= 0.0:
         print(f"Label {i}: {output[i]}")
-
-cloud = o3d.geometry.PointCloud()
-cloud.points = o3d.utility.Vector3dVector(pc)
-cloud.colors = o3d.utility.Vector3dVector(col)
-o3d.visualization.draw_geometries([cloud])
