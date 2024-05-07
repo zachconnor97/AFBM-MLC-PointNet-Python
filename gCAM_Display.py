@@ -86,7 +86,7 @@ def save_and_display_gradcam(point_cloud, heatcloud, result_path, fileid, i=None
     cloud.colors = o3d.utility.Vector3dVector(rgb)
     o3d.visualization.draw_geometries([cloud])
 
-pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/bathtub_bathing tub_bath_tub_2808440_d0df653cb5c1ca016b6c87c9f47318a1_10000_2pcPoint_Cloud_IntensityStoreLiquid.PLY" 
+pc_path = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AllClouds10k/bottle_2876657_225d046d8f798afacba9caf4d254cef01_10000_2pc.ply" 
 #"C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/bench_2828884_459f90aa2162b1f1d46c340938e2ff1c1_10000_2pcPoint_Cloud_IntensityImportSolid.ply"
 #"C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/guitar_3467517_950b02a2db950424c4a359bec2c174271_10000_2pcPoint_Cloud_IntensityConvertKEtoEE.ply"
 #'C:/Users/Zachariah Connor/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AFBMGit/AFBM_TF_DATASET/gcam_results/RGB conv1d_10 e28 2nd 500/ashcan_trash can_garbage can_wastebin_ash bin_ash-bin_ashbin_dustbin_trash barrel_trash bin_2747177_3c03342f421e5eb2ad5067eac75a07f71_10000_2pcPoint_Cloud_IntensityImportLiquid.PLY' 
@@ -99,7 +99,7 @@ NUM_POINTS = len(pc)
 testcloud = np.reshape(pc, (1,NUM_POINTS,3))
 testcloud = tf.constant(testcloud, dtype='float64')
 
-pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=True)
+pn_model = pointnet(num_points=NUM_POINTS, num_classes=NUM_CLASSES, train=False)
 pn_model.load_weights('MLCPNBestWeights.h5') #'MLCPN_Validation_New2024-04-01_16_5000_30_Learning Rate_0.00025_Epsilon_1e-07pn_weights_25.h5') #
 pn_model.compile(run_eagerly=True)
 lln = 'activation_14'#'conv1d_10' #'dense_7' #'dot_1'
@@ -119,11 +119,9 @@ pn_model.layers[-1].activation = None
 # Get idx from predicted labels with prediction > 0.5 
 y_pred = np.array(y_pred)
 pred_label_index = np.where(y_pred >= 0.5)[1]
-#print(label_index)
+print(pred_label_index)
 
 for i in pred_label_index:
     heatcloud = gradcam_heatcloud(testcloud, pn_model, lln, label_idx=i)
-    #print(heatcloud)
-    print(f"Label {i}: {label_names[i]}")
     save_and_display_gradcam(pc, heatcloud, i, label_names)
 
