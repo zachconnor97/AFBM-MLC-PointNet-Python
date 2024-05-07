@@ -82,27 +82,3 @@ def pointnet(num_points, num_classes, train=True):
     outputs = layers.Dense(num_classes, activation="sigmoid")(x)
     model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
     return model
-
-def generator(num_points, num_classes, train=True):
-    """
-    Returns Keras C-GAN
-    Args:
-        training (boolean): Training or not
-        num_points (integer): Number of points in the point cloud
-        num_classes (integer): Number of classes         
-    """    
-    input = keras.Input(shape=(num_classes,1))
-    x = conv_bn(input, 1028, train=train)
-    x = conv_bn(x, 512, train=train)
-    x = conv_bn(x, 256, train=train)
-    x = conv_bn(x, 128, train=train)
-    x = conv_bn(x, 1, stride=num_classes, train=train)
-    x = dconv_bn(x, 1, stride=num_points, train=train)
-    x = dconv_bn(x, num_points/8, train=train)
-    x = dconv_bn(x, num_points/4, train=train)
-    x = dconv_bn(x, num_points/2, train=train)
-    x = dconv_bn(x, num_points, train=train)
-    #x = layers.Reshape((5000,3))(x)
-    x = layers.Dense(3, activation="sigmoid")(x)
-    model = keras.Model(inputs=input, outputs=x, name="c_gan")
-    return model
