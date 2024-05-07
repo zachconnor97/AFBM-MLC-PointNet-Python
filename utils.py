@@ -56,3 +56,21 @@ class PerLabelMetric(Metric):
     def reset_state(self):
         # Reset the state of the metric
         B.batch_set_value([(v, 0) for v in self.variables])
+
+# Custom Weighted Loss Function
+def wbce_loss(target_y, predicted_y, label_weights=None):
+    from keras.src import backend, backend_config
+    epsilon = backend_config.epsilon
+    target = tf.convert_to_tensor(target_y, dtype='float32')
+    output = tf.convert_to_tensor(predicted_y, dtype='float32')
+    epsilon_ = tf.constant(epsilon(), output.dtype.base_dtype)
+    output = tf.clip_by_value(output, epsilon_, 1.0 - epsilon_)
+    bceloss = target * tf.math.log(output + epsilon())
+    bceloss += (1-target) * tf.math.log(1 - output + epsilon())
+    if label_weights != None:
+        lw=np.array(list(label_weights.items()))
+        lw = lw[:,1]
+        wbceloss = backend.mean(-bceloss * lw) 
+    else:
+        wbceloss = backend.mean(-bceloss) 
+    return wbceloss
