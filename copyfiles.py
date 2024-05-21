@@ -3,13 +3,13 @@ import pandas as pd
 import os
 import csv
 
-filename = "C:/Users/gabri/OneDrive - Oregon State University/Z Research/test.csv"
+filename = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/output-obj_cloud_out10k1_test.csv"
 
 df = pd.read_csv(filename)
 print(df)
 
 # Destination directory
-destination_dir = 'C:/Users/gabri/OneDrive - Oregon State University/Z Research/CopyTests'
+destination_dir = "C:/Users/Zachariah/OneDrive - Oregon State University/Research/AFBM/AFBM Code/AllClouds10k/AFBMClouds/"
 
 
 os.makedirs(destination_dir, exist_ok=True)
